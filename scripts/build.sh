@@ -13,7 +13,7 @@ set -o pipefail
 
 function __log_info () {
 	local log_msg="${1}"
-	echo -e "$(date -u +"%Y-%m-%d %H:%M:%S UTC") ::: ${log_msg}" 1>&2
+	echo -e "$(date -u +"%Y-%m-%dT%H:%M:%S") ::: ${log_msg}" 1>&2
 }
 
 __log_info "HELLCHICKEN!"
