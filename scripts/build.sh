@@ -18,3 +18,5 @@ function __log_info () {
 
 __log_info "HELLCHICKEN!"
 __log_info cheese
+
+ls -lha
