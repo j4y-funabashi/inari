@@ -1,7 +1,21 @@
 package main
 
-import "fmt"
+import "os"
 
 func main() {
-	fmt.Println("vim-go")
+
+	replay := newReplay()
+
+	err := replay()
+	if err != nil {
+		os.Exit(1)
+	}
+}
+
+type replayer func() error
+
+func newReplay() replayer {
+	return func() error {
+		return nil
+	}
 }

@@ -16,8 +16,8 @@ function __log_info () {
 	echo -e "$(date -u +"%Y-%m-%dT%H:%M:%S") ::: ${log_msg}" 1>&2
 }
 
-__log_info "HELLCHICKEN"
+__log_info "TESTING"
 
-ls -lhA
+go test -v ./...
 
-go test ./...
+__log_info "END"
