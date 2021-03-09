@@ -8,3 +8,17 @@ services:
                 working_dir: /app
                 volumes:
                         - ./apps/api:/app:rw
+
+        ui:
+                build:
+                        dockerfile: Dockerfile
+                        context: apps/ui
+                working_dir: /app
+                volumes:
+                        - ./apps/ui:/app:rw
+
+
+        acceptance:
+                image: testcafe/testcafe
+                volumes:
+                        - ./apps/acceptance-tests/tests:/tests:rw
