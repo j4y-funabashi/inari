@@ -16,7 +16,12 @@ function __log_info () {
 	echo -e "$(date -u +"%Y-%m-%dT%H:%M:%S") ::: ${log_msg}" 1>&2
 }
 
-__log_info "TESTING"
+
+__log_info "Installing deps"
+
+yarn install
+
+__log_info "Testing"
 
 yarn test
 
