@@ -1,4 +1,4 @@
-test: test-ui test-api test-acceptance
+test: test-ui test-api
 
 test-api:
 	docker-compose run --rm api ./test.sh
