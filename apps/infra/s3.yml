@@ -1,0 +1,49 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: S3 UI Buckets
+
+Parameters:
+  EnvironmentName:
+    Description: The environment name
+    Type: String
+    Default: dev
+    AllowedPattern: ^(dev|prod)$
+
+Resources:
+  S3InariUIBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "inari-ui-${EnvironmentName}"
+      AccessControl: PublicRead
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: error.html
+
+  S3InariUIBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: S3InariUIBucket
+      PolicyDocument:
+        Statement:
+          - Action:
+              - s3:GetObject
+            Effect: Allow
+            Principal: "*"
+            Resource: !Sub "arn:aws:s3:::${S3InariUIBucket}/*"
+            Sid: AllowPublicRead
+
+Outputs:
+  S3InariUIBucket:
+    Value: !GetAtt S3InariUIBucket.DomainName
+    Export:
+      Name: !Sub "${AWS::StackName}-S3InariUIBucket"
+
+  S3InariUIBucketName:
+    Value: !Ref S3InariUIBucket
+    Export:
+      Name: !Sub "${AWS::StackName}-S3InariUIBucketName"
+
+  S3InariUIBucketDomain:
+    Value: !Sub "inari-ui-${EnvironmentName}.s3-website.${AWS::Region}.amazonaws.com"
+    Export:
+      Name: !Sub "${AWS::StackName}-S3InariUIBucketDomain"

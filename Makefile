@@ -8,3 +8,6 @@ test-ui:
 
 test-acceptance:
 	docker-compose run --rm acceptance firefox:headless
+
+deploy:
+	docker-compose run --rm deployer ./apps/deployer/deploy.sh
