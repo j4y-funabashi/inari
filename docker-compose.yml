@@ -7,7 +7,7 @@ services:
                         context: apps/deployer
                 working_dir: /app
                 volumes:
-                        - ./apps:/app/apps:ro
+                        - ./apps:/app/apps:rw
                 environment:
                         PROJECT_NAME: inari
                         CURRENT_ENV: dev

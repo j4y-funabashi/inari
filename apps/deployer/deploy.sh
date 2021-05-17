@@ -8,10 +8,10 @@ set -o pipefail
 
 __dir="$(cd "$(dirname "${BASH_SOURCE[${1:-0}]}")" && pwd)"
 
-ls -lhA apps
 
 S3_STACK_NAME="${PROJECT_NAME}-s3-ui-${CURRENT_ENV}"
 
 . "$__dir/functions.sh"
 
 deploy_infra
+deploy_apps
