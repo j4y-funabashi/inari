@@ -22,7 +22,7 @@ func main() {
 	// conf
 	bucket := "backup.funabashi"
 	mediaStoreBucket := "inari-mediastore-dev"
-	mediaStoreTableName := ""
+	mediaStoreTableName := "inari-dynamodb-dev-InariDatastore-1VAD7YFUNHWKE"
 	region := "eu-central-1"
 
 	// deps
