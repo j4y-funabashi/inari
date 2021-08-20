@@ -9,6 +9,13 @@ Parameters:
     AllowedPattern: ^(dev|prod)$
 
 Resources:
+  S3InariMediaStoreBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "inari-mediastore-${EnvironmentName}"
+      VersioningConfiguration:
+        Status: Enabled
+
   S3InariUIBucket:
     Type: AWS::S3::Bucket
     Properties:

@@ -11,6 +11,7 @@ function __log_info () {
 deploy_infra() {
     __log_info "${PROJECT_NAME} DEPLOYING INFRA from ${CF_TEMPLATES_DIR} to ${CURRENT_ENV}"
     deploy_ui_s3
+    deploy_dynamodb
 }
 
 deploy_apps() {
@@ -23,6 +24,16 @@ deploy_ui_s3() {
     aws cloudformation deploy \
         --template-file "${CF_TEMPLATES_DIR}/s3.yml" \
         --stack-name "${S3_STACK_NAME}" \
+        --no-fail-on-empty-changeset \
+        --parameter-overrides \
+        "EnvironmentName=${CURRENT_ENV}"
+}
+
+deploy_dynamodb() {
+    __log_info "Deploying ${DYNAMODB_STACK_NAME}"
+    aws cloudformation deploy \
+        --template-file "${CF_TEMPLATES_DIR}/dynamodb.yml" \
+        --stack-name "${DYNAMODB_STACK_NAME}" \
         --no-fail-on-empty-changeset \
         --parameter-overrides \
         "EnvironmentName=${CURRENT_ENV}"

@@ -10,6 +10,7 @@ __dir="$(cd "$(dirname "${BASH_SOURCE[${1:-0}]}")" && pwd)"
 
 
 S3_STACK_NAME="${PROJECT_NAME}-s3-ui-${CURRENT_ENV}"
+DYNAMODB_STACK_NAME="${PROJECT_NAME}-dynamodb-${CURRENT_ENV}"
 
 . "$__dir/functions.sh"
 
