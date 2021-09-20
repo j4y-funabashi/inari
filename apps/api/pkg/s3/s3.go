@@ -47,6 +47,16 @@ func NewUploader(bucket, region string) app.Uploader {
 			Region: aws.String(region)},
 		)
 		uploader := s3manager.NewUploader(sess)
+		s3Client := s3.New(sess)
+
+		// check object exists
+		headRes, err := s3Client.HeadObject(&s3.HeadObjectInput{
+			Bucket: aws.String(bucket),
+			Key:    aws.String(mediaStoreFilename),
+		})
+		if headRes.ETag != nil {
+			return nil
+		}
 
 		_, err = uploader.Upload(
 			&s3manager.UploadInput{
