@@ -1,0 +1,26 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: S3 Mediastore Buckets
+
+Parameters:
+  EnvironmentName:
+    Description: The environment name
+    Type: String
+    Default: dev
+    AllowedPattern: ^(dev|prod)$
+
+Resources:
+  S3InariMediaStoreBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "inari-mediastore-${EnvironmentName}"
+
+Outputs:
+  S3InariMediaStoreBucketDomainName:
+    Value: !GetAtt S3InariMediaStoreBucket.DomainName
+    Export:
+      Name: !Sub "${AWS::StackName}-S3InariMediaStoreBucketDomainName"
+
+  S3InariMediaStoreBucketName:
+    Value: !Ref S3InariMediaStoreBucket
+    Export:
+      Name: !Sub "${AWS::StackName}-S3InariMediaStoreBucketName"

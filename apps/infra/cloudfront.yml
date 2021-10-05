@@ -1,0 +1,80 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Cloudfront distro for UI
+
+Parameters:
+  EnvironmentName:
+    Description: The environment name
+    Type: String
+    Default: dev
+    AllowedPattern: ^(dev|prod)$
+
+Resources:
+  cloudfrontoriginaccessidentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: cloudfront ID
+
+  S3InariUIBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "inari-ui-${EnvironmentName}"
+
+  UIBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: S3InariUIBucket
+      PolicyDocument:
+        Statement:
+          - Action:
+              - s3:GetObject
+            Effect: Allow
+            Resource: !Sub "arn:aws:s3:::${S3InariUIBucket}/*"
+            Principal:
+              CanonicalUser: !GetAtt cloudfrontoriginaccessidentity.S3CanonicalUserId
+
+  cloudfrontdistribution:
+    Type: "AWS::CloudFront::Distribution"
+    Properties:
+      DistributionConfig:
+        Enabled: 'true'
+        DefaultRootObject: index.html
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: 'true'
+        Origins:
+          - DomainName: inari-ui-dev.s3.amazonaws.com
+            Id: UIOrigin
+            S3OriginConfig:
+              OriginAccessIdentity:
+                Fn::Join:
+                  - "/"
+                  - - "origin-access-identity/cloudfront"
+                    - !Ref cloudfrontoriginaccessidentity
+        DefaultCacheBehavior:
+          TargetOriginId: UIOrigin
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          ViewerProtocolPolicy: redirect-to-https
+          ForwardedValues:
+            QueryString: 'false'
+            Cookies:
+              Forward: none
+
+Outputs:
+  CloudFrontDistributionID:
+    Value: !Ref cloudfrontdistribution
+    Export:
+      Name: !Sub "${AWS::StackName}-CloudFrontDistributionID"
+
+  S3InariUIBucketName:
+    Value: !Ref S3InariUIBucket
+    Export:
+      Name: !Sub "${AWS::StackName}-S3InariUIBucketName"
+
+  S3InariUIBucketDomainName:
+    Value: !GetAtt S3InariUIBucket.DomainName
+    Export:
+      Name: !Sub "${AWS::StackName}-S3InariUIDomainName"

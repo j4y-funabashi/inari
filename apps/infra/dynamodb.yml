@@ -36,3 +36,10 @@ Resources:
               KeyType: "HASH"
             - AttributeName: "gsi1sk"
               KeyType: "RANGE"
+
+Outputs:
+  InariDatastoreTablename:
+    Value: !Ref InariDatastore
+    Export:
+      Name: !Sub "${AWS::StackName}-InariDatastoreTablename"
+
