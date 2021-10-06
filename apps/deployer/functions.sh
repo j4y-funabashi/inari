@@ -2,6 +2,7 @@
 
 CF_TEMPLATES_DIR="$(cd "${__dir}/../infra" && pwd)"
 APPS_DIR="$(cd "${__dir}/.." && pwd)"
+BASE_DOMAIN="funabashi.co.uk"
 
 function __log_info () {
 	local log_msg="${1}"
@@ -41,13 +42,29 @@ deploy_dynamodb() {
 }
 
 deploy_cloudfront() {
+    CERTIFICATE_ARN=`aws --region us-east-1 acm list-certificates \
+        --query "CertificateSummaryList[?DomainName=='*.${BASE_DOMAIN}'].CertificateArn" \
+        --output text`
+
+    if [[ "${CURRENT_ENV}" == "prod" ]]; then
+        CF_BASE_DOMAIN="photos.${BASE_DOMAIN}"
+    else
+        CF_BASE_DOMAIN="photos-dev.${BASE_DOMAIN}"
+    fi
+
     __log_info "Deploying ${CLOUDFRONT_STACK_NAME}"
+    __log_info "BASE_DOMAIN: ${BASE_DOMAIN}"
+    __log_info "CF_BASE_DOMAIN: ${CF_BASE_DOMAIN}"
+    __log_info "CERTIFICATE_ARN ${CERTIFICATE_ARN}"
+
     aws cloudformation deploy \
         --template-file "${CF_TEMPLATES_DIR}/cloudfront.yml" \
         --stack-name "${CLOUDFRONT_STACK_NAME}" \
         --no-fail-on-empty-changeset \
         --parameter-overrides \
-        "EnvironmentName=${CURRENT_ENV}"
+        "EnvironmentName=${CURRENT_ENV}" \
+        "CloudFrontCertificate=${CERTIFICATE_ARN}" \
+        "CloudFrontBaseDomain=${CF_BASE_DOMAIN}"
 }
 
 

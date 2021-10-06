@@ -8,6 +8,14 @@ Parameters:
     Default: dev
     AllowedPattern: ^(dev|prod)$
 
+  CloudFrontBaseDomain:
+    Type: String
+    Description: CloudFront base domain
+
+  CloudFrontCertificate:
+    Type: String
+    Description: Public Certificate ARN
+
 Resources:
   cloudfrontoriginaccessidentity:
     Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
@@ -40,8 +48,16 @@ Resources:
       DistributionConfig:
         Enabled: 'true'
         DefaultRootObject: index.html
+        CustomErrorResponses:
+          - ErrorCode: "403"
+            ResponsePagePath: "/index.html"
+            ResponseCode: "200"
+        Aliases:
+          - !Ref CloudFrontBaseDomain
         ViewerCertificate:
-          CloudFrontDefaultCertificate: 'true'
+          AcmCertificateArn: !Ref CloudFrontCertificate
+          SslSupportMethod: sni-only
+          MinimumProtocolVersion: TLSv1.2_2018
         Origins:
           - DomainName: inari-ui-dev.s3.amazonaws.com
             Id: UIOrigin
