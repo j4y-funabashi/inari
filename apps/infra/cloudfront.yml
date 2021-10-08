@@ -17,6 +17,19 @@ Parameters:
     Description: Public Certificate ARN
 
 Resources:
+  PhotosApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: !Sub "inari-photos-api-${EnvironmentName}"
+      ProtocolType: HTTP
+
+  ApiStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref PhotosApi
+      StageName: !Sub "${EnvironmentName}"
+      AutoDeploy: 'true'
+
   cloudfrontoriginaccessidentity:
     Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
     Properties:
@@ -79,6 +92,14 @@ Resources:
           SslSupportMethod: sni-only
           MinimumProtocolVersion: TLSv1.2_2018
         Origins:
+          - DomainName: !Join ["", !Split ["https://", !GetAtt PhotosApi.ApiEndpoint]]
+            Id: PhotosApiOrigin
+            OriginPath: !Sub "/${EnvironmentName}"
+            CustomOriginConfig:
+              OriginProtocolPolicy: https-only
+              OriginSSLProtocols:
+                - TLSv1.2
+
           - DomainName: !GetAtt S3InariUIBucket.DomainName
             Id: UIOrigin
             S3OriginConfig:
@@ -120,6 +141,28 @@ Resources:
               QueryString: 'false'
               Cookies:
                 Forward: none
+          - PathPattern: /api/*
+            AllowedMethods:
+              - DELETE
+              - GET
+              - HEAD
+              - OPTIONS
+              - PATCH
+              - POST
+              - PUT
+            Compress: true
+            ForwardedValues:
+              Headers:
+                - Accept
+                - Authorization
+              Cookies:
+                Forward: "all"
+              QueryString: true
+            MinTTL: 0
+            MaxTTL: 3600
+            DefaultTTL: 300
+            ViewerProtocolPolicy: redirect-to-https
+            TargetOriginId: PhotosApiOrigin
 
 Outputs:
   CloudFrontDistributionID:
@@ -136,3 +179,13 @@ Outputs:
     Value: !GetAtt S3InariUIBucket.DomainName
     Export:
       Name: !Sub "${AWS::StackName}-S3InariUIDomainName"
+
+  PhotosAPIGatewayID:
+    Value: !Ref PhotosApi
+    Export:
+      Name: !Sub "${AWS::StackName}-PhotosAPIGatewayID"
+
+  PhotosAPIGatewayEndpoint:
+    Value: !GetAtt PhotosApi.ApiEndpoint
+    Export:
+      Name: !Sub "${AWS::StackName}-PhotosAPIGatewayEndpoint"
