@@ -17,7 +17,7 @@ func NewResizer() app.Resizer {
 	return func(originalImgFilename string) ([]string, error) {
 		resizedFiles := []string{}
 
-		src, err := imaging.Open(originalImgFilename)
+		src, err := imaging.Open(originalImgFilename, imaging.AutoOrientation(true))
 		if err != nil {
 			return resizedFiles, err
 		}
