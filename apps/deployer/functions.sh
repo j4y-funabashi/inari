@@ -19,6 +19,7 @@ deploy_infra() {
 deploy_apps() {
     __log_info "${PROJECT_NAME} DEPLOYING APPS from ${APPS_DIR} to ${CURRENT_ENV}"
     deploy_ui
+    deploy_api
 }
 
 deploy_s3_mediastore() {
@@ -85,4 +86,14 @@ deploy_ui() {
 
     aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID \
         --paths /index.html /error.html
+}
+
+deploy_api() {
+    __log_info "Deploying API"
+    APIGATEWAYID=`aws apigatewayv2 get-apis \
+        --query "Items[?Name=='inari-photos-api-${CURRENT_ENV}'].ApiId" --output text`
+
+    __log_info "GATEWAY_ID: ${APIGATEWAYID}"
+    cd "${APPS_DIR}/api/lambda_functions"
+    APIGATEWAYID=${APIGATEWAYID} ./node_modules/serverless/bin/serverless.js deploy
 }
