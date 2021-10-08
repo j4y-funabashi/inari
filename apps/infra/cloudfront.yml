@@ -96,6 +96,7 @@ Resources:
                   - - "origin-access-identity/cloudfront"
                     - !Ref cloudfrontoriginaccessidentity
         DefaultCacheBehavior:
+          Compress: 'true'
           TargetOriginId: UIOrigin
           AllowedMethods:
             - GET
@@ -112,6 +113,7 @@ Resources:
             - HEAD
             - OPTIONS
             TargetOriginId: ThumbnailOrigin
+            Compress: 'true'
             PathPattern: thmnb/*
             ViewerProtocolPolicy: redirect-to-https
             ForwardedValues:
