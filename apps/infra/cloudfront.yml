@@ -23,6 +23,25 @@ Resources:
       CloudFrontOriginAccessIdentityConfig:
         Comment: cloudfront ID
 
+  S3InariThumbnailStoreBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "inari-thumbnailstore-${EnvironmentName}"
+
+  ThumbnailBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: S3InariThumbnailStoreBucket
+      PolicyDocument:
+        Statement:
+          - Action:
+              - s3:GetObject
+            Effect: Allow
+            Resource: !Sub "arn:aws:s3:::${S3InariThumbnailStoreBucket}/*"
+            Principal:
+              CanonicalUser: !GetAtt cloudfrontoriginaccessidentity.S3CanonicalUserId
+
   S3InariUIBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -47,6 +66,7 @@ Resources:
     Properties:
       DistributionConfig:
         Enabled: 'true'
+        PriceClass: PriceClass_100
         DefaultRootObject: index.html
         CustomErrorResponses:
           - ErrorCode: "403"
@@ -59,8 +79,16 @@ Resources:
           SslSupportMethod: sni-only
           MinimumProtocolVersion: TLSv1.2_2018
         Origins:
-          - DomainName: inari-ui-dev.s3.amazonaws.com
+          - DomainName: !GetAtt S3InariUIBucket.DomainName
             Id: UIOrigin
+            S3OriginConfig:
+              OriginAccessIdentity:
+                Fn::Join:
+                  - "/"
+                  - - "origin-access-identity/cloudfront"
+                    - !Ref cloudfrontoriginaccessidentity
+          - DomainName: !GetAtt S3InariThumbnailStoreBucket.DomainName
+            Id: ThumbnailOrigin
             S3OriginConfig:
               OriginAccessIdentity:
                 Fn::Join:
@@ -78,6 +106,18 @@ Resources:
             QueryString: 'false'
             Cookies:
               Forward: none
+        CacheBehaviors:
+          - AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+            TargetOriginId: ThumbnailOrigin
+            PathPattern: thmnb/*
+            ViewerProtocolPolicy: redirect-to-https
+            ForwardedValues:
+              QueryString: 'false'
+              Cookies:
+                Forward: none
 
 Outputs:
   CloudFrontDistributionID:

@@ -1,8 +1,8 @@
 package s3
 
 import (
-	"io/ioutil"
 	"os"
+	"path/filepath"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -13,7 +13,8 @@ import (
 
 func NewDownloader(bucket, region string) app.Downloader {
 	return func(backupFilename string) (string, error) {
-		file, err := ioutil.TempFile("", "inari-tmp-")
+		tmpFilename := filepath.Join(os.TempDir(), filepath.Base(backupFilename))
+		file, err := os.Create(tmpFilename)
 		if err != nil {
 			return "", err
 		}

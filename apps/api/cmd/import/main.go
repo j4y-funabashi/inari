@@ -32,7 +32,7 @@ func main() {
 	extractMetadata := exiftool.NewExtractor()
 	importMedia := app.NewImporter(downloader, extractMetadata, uploader, indexer)
 
-	result, err := importMedia(mediaFilename)
+	err := importMedia(mediaFilename)
 	if err != nil {
 		logger.
 			WithError(err).
@@ -40,5 +40,4 @@ func main() {
 			Error("failed to import")
 		os.Exit(1)
 	}
-	logger.WithField("res", result.NewFilename())
 }

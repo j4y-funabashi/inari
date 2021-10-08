@@ -2,16 +2,19 @@ package app
 
 import (
 	"fmt"
+	"path/filepath"
 	"time"
 
 	"github.com/sirupsen/logrus"
 )
 
-type importer = func(backupFilename string) (MediaMetadata, error)
+type importer = func(backupFilename string) error
+type Resizer = func(imgFilename string) ([]string, error)
 type Downloader = func(backupFilename string) (string, error)
 type Uploader = func(localFilename, mediaStoreFilename string) error
 type Indexer = func(mediaMeta MediaMetadata) error
 type MetadataExtractor = func(mediaFile string) (MediaMetadata, error)
+type thumbnailer = func(mediastoreKey string) error
 
 type Coordinates struct {
 	Lat float64
@@ -42,12 +45,12 @@ func (mm MediaMetadata) NewFilename() string {
 }
 
 func NewImporter(downloadFromBackup Downloader, extractMetadata MetadataExtractor, uploadToMediaStore Uploader, indexMedia Indexer) importer {
-	return func(backupFilename string) (MediaMetadata, error) {
+	return func(backupFilename string) error {
 
 		// download file from backup storage
 		downloadedFilename, err := downloadFromBackup(backupFilename)
 		if err != nil {
-			return MediaMetadata{}, err
+			return err
 		}
 		logrus.
 			WithField("backupFilename", backupFilename).
@@ -57,7 +60,7 @@ func NewImporter(downloadFromBackup Downloader, extractMetadata MetadataExtracto
 		// extract metadata
 		mediaMeta, err := extractMetadata(downloadedFilename)
 		if err != nil {
-			return MediaMetadata{}, err
+			return err
 		}
 		logrus.
 			WithField("meta", mediaMeta).
@@ -67,7 +70,7 @@ func NewImporter(downloadFromBackup Downloader, extractMetadata MetadataExtracto
 		// upload renamed file to media storage
 		err = uploadToMediaStore(downloadedFilename, mediaMeta.NewFilename())
 		if err != nil {
-			return MediaMetadata{}, err
+			return err
 		}
 		logrus.
 			WithField("newFilename", mediaMeta.NewFilename()).
@@ -76,8 +79,41 @@ func NewImporter(downloadFromBackup Downloader, extractMetadata MetadataExtracto
 		// index metadata in datastore
 		err = indexMedia(mediaMeta)
 		if err != nil {
-			return MediaMetadata{}, err
+			return err
 		}
-		return mediaMeta, nil
+		return nil
+	}
+}
+
+func NewThumbnailer(downloadFromMediaStore Downloader, resizeImage Resizer, uploadToThumbnailStore Uploader) thumbnailer {
+	return func(mediastoreKey string) error {
+		// download file from media store
+		downloadedFilename, err := downloadFromMediaStore(mediastoreKey)
+		if err != nil {
+			return err
+		}
+		logrus.
+			WithField("mediastoreKey", mediastoreKey).
+			WithField("filename", downloadedFilename).
+			Info("downloaded media file from media store")
+
+		thumbnailFiles, err := resizeImage(downloadedFilename)
+		if err != nil {
+			return err
+		}
+		logrus.
+			WithField("mediastoreKey", mediastoreKey).
+			WithField("filename", downloadedFilename).
+			WithField("thumbnailFiles", thumbnailFiles).
+			Info("resized image")
+
+		for _, thumbnailFile := range thumbnailFiles {
+			err := uploadToThumbnailStore(thumbnailFile, "thmnb/"+filepath.Base(thumbnailFile))
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
 	}
 }
