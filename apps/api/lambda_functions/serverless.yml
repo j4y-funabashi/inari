@@ -55,17 +55,11 @@ package:
     - ./bin/**
 
 functions:
-  hello:
-    handler: bin/hello
+  timeline:
+    handler: bin/timeline
     events:
       - httpApi:
-          path: /api/hello
-          method: get
-  world:
-    handler: bin/world
-    events:
-      - httpApi:
-          path: /api/world
+          path: /api/protected/timeline
           method: get
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events

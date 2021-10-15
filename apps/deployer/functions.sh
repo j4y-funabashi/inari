@@ -95,5 +95,5 @@ deploy_api() {
 
     __log_info "GATEWAY_ID: ${APIGATEWAYID}"
     cd "${APPS_DIR}/api/lambda_functions"
-    APIGATEWAYID=${APIGATEWAYID} ./node_modules/serverless/bin/serverless.js deploy
+    APIGATEWAYID=${APIGATEWAYID} make deploy
 }

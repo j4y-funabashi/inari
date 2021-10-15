@@ -5,6 +5,8 @@ RUN apk update && \
 	bash \
 	python3 \
 	py3-pip \
+	make \
+	go \
 	&& pip3 install --upgrade pip \
 	&& pip3 install \
 	awscli \
