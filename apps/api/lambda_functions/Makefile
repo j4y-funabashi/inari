@@ -1,6 +1,6 @@
 .PHONY: build clean deploy gomodgen
 
-build: gomodgen
+build:
 	./build_lambda.sh
 
 clean:
@@ -8,7 +8,3 @@ clean:
 
 deploy: clean build
 	./node_modules/serverless/bin/serverless.js deploy --verbose
-
-gomodgen:
-	chmod u+x gomod.sh
-	./gomod.sh

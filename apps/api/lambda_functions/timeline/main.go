@@ -9,18 +9,14 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
-// Response is of type APIGatewayProxyResponse since we're leveraging the
-// AWS Lambda Proxy Request functionality (default behavior)
-//
-// https://serverless.com/framework/docs/providers/aws/events/apigateway/#lambda-proxy-integration
 type Response events.APIGatewayProxyResponse
 
-// Handler is our lambda handler invoked by the `lambda.Start` function call
-func Handler(ctx context.Context) (Response, error) {
+func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (Response, error) {
+
 	var buf bytes.Buffer
 
 	body, err := json.Marshal(map[string]interface{}{
-		"message": "HELLCHICKEN!",
+		"message": "HELLCHICKEN!" + req.PathParameters["date"],
 	})
 	if err != nil {
 		return Response{StatusCode: 404}, err
@@ -32,8 +28,7 @@ func Handler(ctx context.Context) (Response, error) {
 		IsBase64Encoded: false,
 		Body:            buf.String(),
 		Headers: map[string]string{
-			"Content-Type":           "application/json",
-			"X-MyCompany-Func-Reply": "hello-handler",
+			"Content-Type": "application/json",
 		},
 	}
 

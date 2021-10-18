@@ -11,7 +11,7 @@
 #
 # Happy Coding!
 
-service: funabashi-photos-api
+service: funabashi-photos
 # app and org for use with dashboard.serverless.com
 #app: your-app-name
 #org: your-org-name
@@ -59,8 +59,9 @@ functions:
     handler: bin/timeline
     events:
       - httpApi:
-          path: /api/protected/timeline
-          method: get
+          method: GET
+          path: /api/timeline/{date+}
+
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
