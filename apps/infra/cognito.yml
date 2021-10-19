@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Cognito user db
+
+Parameters:
+  EnvironmentName:
+    Description: The environment name
+    Type: String
+    Default: dev
+    AllowedPattern: ^(dev|prod)$
+
+  CallbackURL:
+    Type: String
+    Description: callback URL
+
+Resources:
+  Userpool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub "inari-userpool-${EnvironmentName}"
+      UsernameConfiguration:
+        CaseSensitive: false
+      AutoVerifiedAttributes:
+        - email
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireUppercase: true
+          RequireSymbols: true
+          RequireNumbers: true
+          TemporaryPasswordValidityDays: 14
+
+  CognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: inariclient
+      RefreshTokenValidity: 1
+      UserPoolId: !Ref Userpool
+      AllowedOAuthFlowsUserPoolClient: true
+      CallbackURLs:
+        - !Ref CallbackURL
+      AllowedOAuthFlows:
+        - code
+        - implicit
+      AllowedOAuthScopes:
+        - email
+        - phone
+        - openid
+        - profile
+      SupportedIdentityProviders:
+        - COGNITO
+
+  UserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      UserPoolId: !Ref Userpool
+      Domain: !Sub "inari-userpool-${EnvironmentName}"

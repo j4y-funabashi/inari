@@ -3,6 +3,12 @@
 CF_TEMPLATES_DIR="$(cd "${__dir}/../infra" && pwd)"
 APPS_DIR="$(cd "${__dir}/.." && pwd)"
 BASE_DOMAIN="funabashi.co.uk"
+if [[ "${CURRENT_ENV}" == "prod" ]]; then
+    CF_BASE_DOMAIN="photos.${BASE_DOMAIN}"
+else
+    CF_BASE_DOMAIN="photos-dev.${BASE_DOMAIN}"
+fi
+
 
 function __log_info () {
 	local log_msg="${1}"
@@ -14,6 +20,7 @@ deploy_infra() {
     deploy_s3_mediastore
     deploy_dynamodb
     deploy_cloudfront
+    deploy_cognito
 }
 
 deploy_apps() {
@@ -47,12 +54,6 @@ deploy_cloudfront() {
         --query "CertificateSummaryList[?DomainName=='*.${BASE_DOMAIN}'].CertificateArn" \
         --output text`
 
-    if [[ "${CURRENT_ENV}" == "prod" ]]; then
-        CF_BASE_DOMAIN="photos.${BASE_DOMAIN}"
-    else
-        CF_BASE_DOMAIN="photos-dev.${BASE_DOMAIN}"
-    fi
-
     __log_info "Deploying ${CLOUDFRONT_STACK_NAME}"
     __log_info "BASE_DOMAIN: ${BASE_DOMAIN}"
     __log_info "CF_BASE_DOMAIN: ${CF_BASE_DOMAIN}"
@@ -68,6 +69,16 @@ deploy_cloudfront() {
         "CloudFrontBaseDomain=${CF_BASE_DOMAIN}"
 }
 
+deploy_cognito() {
+    __log_info "Deploying ${COGNITO_STACK_NAME}"
+    aws cloudformation deploy \
+        --template-file "${CF_TEMPLATES_DIR}/cognito.yml" \
+        --stack-name "${COGNITO_STACK_NAME}" \
+        --no-fail-on-empty-changeset \
+        --parameter-overrides \
+        "EnvironmentName=${CURRENT_ENV}" \
+        "CallbackURL=https://${CF_BASE_DOMAIN}"
+}
 
 deploy_ui() {
     __log_info "Deploying UI"
