@@ -19,14 +19,14 @@ deploy_infra() {
     __log_info "${PROJECT_NAME} DEPLOYING INFRA from ${CF_TEMPLATES_DIR} to ${CURRENT_ENV}"
     deploy_s3_mediastore
     deploy_dynamodb
-    deploy_cloudfront
     deploy_cognito
+    deploy_cloudfront
 }
 
 deploy_apps() {
     __log_info "${PROJECT_NAME} DEPLOYING APPS from ${APPS_DIR} to ${CURRENT_ENV}"
-    deploy_ui
     deploy_api
+    deploy_ui
 }
 
 deploy_s3_mediastore() {
@@ -53,11 +53,15 @@ deploy_cloudfront() {
     CERTIFICATE_ARN=`aws --region us-east-1 acm list-certificates \
         --query "CertificateSummaryList[?DomainName=='*.${BASE_DOMAIN}'].CertificateArn" \
         --output text`
+    USER_POOL_ID=`aws cognito-idp list-user-pools --max-results 20 --query "UserPools[?Name=='inari-userpool-${CURRENT_ENV}'].Id" --output=text`
+    API_CLIENT_ID=`aws cognito-idp list-user-pool-clients --user-pool-id ${USER_POOL_ID} --query "UserPoolClients[?ClientName=='inariclient'].ClientId" --output=text`
 
     __log_info "Deploying ${CLOUDFRONT_STACK_NAME}"
     __log_info "BASE_DOMAIN: ${BASE_DOMAIN}"
     __log_info "CF_BASE_DOMAIN: ${CF_BASE_DOMAIN}"
     __log_info "CERTIFICATE_ARN ${CERTIFICATE_ARN}"
+    __log_info "USER_POOL_ID ${USER_POOL_ID}"
+    __log_info "API_CLIENT_ID ${API_CLIENT_ID}"
 
     aws cloudformation deploy \
         --template-file "${CF_TEMPLATES_DIR}/cloudfront.yml" \
@@ -66,7 +70,9 @@ deploy_cloudfront() {
         --parameter-overrides \
         "EnvironmentName=${CURRENT_ENV}" \
         "CloudFrontCertificate=${CERTIFICATE_ARN}" \
-        "CloudFrontBaseDomain=${CF_BASE_DOMAIN}"
+        "CloudFrontBaseDomain=${CF_BASE_DOMAIN}" \
+        "UserPoolID=${USER_POOL_ID}" \
+        "ApiClientID=${API_CLIENT_ID}"
 }
 
 deploy_cognito() {
@@ -96,7 +102,7 @@ deploy_ui() {
     aws s3 cp "${APPS_DIR}/ui/build" s3://$S3_UI_BUCKET_NAME --recursive
 
     aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID \
-        --paths /index.html /error.html
+        --paths /index.html
 }
 
 deploy_api() {

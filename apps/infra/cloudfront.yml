@@ -16,6 +16,14 @@ Parameters:
     Type: String
     Description: Public Certificate ARN
 
+  UserPoolID:
+    Type: String
+    Description: Cognito user pool id
+
+  ApiClientID:
+    Type: String
+    Description: Cognito app client id
+
 Resources:
   PhotosApi:
     Type: AWS::ApiGatewayV2::Api
@@ -29,6 +37,19 @@ Resources:
       ApiId: !Ref PhotosApi
       StageName: !Sub "${EnvironmentName}"
       AutoDeploy: 'true'
+
+  JWTAuthorizer:
+    Type: AWS::ApiGatewayV2::Authorizer
+    Properties:
+      ApiId: !Ref PhotosApi
+      AuthorizerType: JWT
+      IdentitySource:
+        - '$request.header.Authorization'
+      JwtConfiguration:
+        Audience:
+        - !Ref ApiClientID
+        Issuer: !Sub "https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPoolID}"
+      Name: jwt-authorizer
 
   cloudfrontoriginaccessidentity:
     Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
