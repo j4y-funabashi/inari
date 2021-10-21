@@ -109,8 +109,11 @@ deploy_api() {
     __log_info "Deploying API"
     APIGATEWAYID=`aws apigatewayv2 get-apis \
         --query "Items[?Name=='inari-photos-api-${CURRENT_ENV}'].ApiId" --output text`
+    AUTHORIZERID=`aws apigatewayv2 get-authorizers --api-id ${APIGATEWAYID} --query="Items[?Name=='jwt-authorizer'].AuthorizerId" --output=text`
 
     __log_info "GATEWAY_ID: ${APIGATEWAYID}"
+    __log_info "AUTHORIZER_ID: ${AUTHORIZERID}"
+
     cd "${APPS_DIR}/api/lambda_functions"
-    APIGATEWAYID=${APIGATEWAYID} make deploy
+    APIGATEWAYID=${APIGATEWAYID} AUTHORIZERID=${AUTHORIZERID} make deploy
 }
