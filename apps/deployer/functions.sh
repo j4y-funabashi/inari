@@ -94,11 +94,21 @@ deploy_ui() {
     CLOUDFRONT_DISTRIBUTION_ID=`aws cloudformation describe-stacks \
         --query "Stacks[0].Outputs[?OutputKey=='CloudFrontDistributionID'].OutputValue" --output text \
         --stack-name ${CLOUDFRONT_STACK_NAME}`
+    USER_POOL_ID=`aws cognito-idp list-user-pools --max-results 20 --query "UserPools[?Name=='inari-userpool-${CURRENT_ENV}'].Id" --output=text`
+    API_CLIENT_ID=`aws cognito-idp list-user-pool-clients --user-pool-id ${USER_POOL_ID} --query "UserPoolClients[?ClientName=='inariclient'].ClientId" --output=text`
 
     __log_info "Bucket name: ${S3_UI_BUCKET_NAME}"
     __log_info "Distribution ID: ${CLOUDFRONT_DISTRIBUTION_ID}"
+    __log_info "USER_POOL_ID: ${USER_POOL_ID}"
+    __log_info "API_CLIENT_ID: ${API_CLIENT_ID}"
+    __log_info "AWS_REGION: ${AWS_REGION}"
 
-    yarn --cwd "${APPS_DIR}/ui" build
+    REACT_APP_AWS_REGION="${AWS_REGION}" \
+        REACT_APP_API_CLIENT_ID="${API_CLIENT_ID}" \
+        REACT_APP_USER_POOL_ID="${USER_POOL_ID}" \
+        REACT_APP_BASE_DOMAIN="${CF_BASE_DOMAIN}" \
+        yarn --cwd "${APPS_DIR}/ui" build
+
     aws s3 cp "${APPS_DIR}/ui/build" s3://$S3_UI_BUCKET_NAME --recursive
 
     aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID \

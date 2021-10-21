@@ -1,15 +1,30 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import Amplify,{Auth} from 'aws-amplify'
 import App from "./App";
-import { Auth0Provider } from "@auth0/auth0-react";
+
+const awsconfig =  {
+  Auth: {
+    region: process.env.REACT_APP_AWS_REGION,
+    userPoolId: process.env.REACT_APP_USER_POOL_ID,
+    userPoolWebClientId: process.env.REACT_APP_API_CLIENT_ID
+  },
+  API: {
+    endpoints: [
+      {
+        name: "photosAPIdev",
+        endpoint: "https://" + process.env.REACT_APP_BASE_DOMAIN + "/api",
+        custom_header: async () => {
+          return { Authorization: `Bearer ${(await Auth.currentSession()).getIdToken().getJwtToken()}` }
+        }
+      }
+    ]
+  }
+};
+
+Amplify.configure(awsconfig);
 
 ReactDOM.render(
-  <Auth0Provider
-    domain="dev-3f75e1so.us.auth0.com"
-    clientId="Y4LvRhn8f15Zja6jLr7WfzubTAQWblCT"
-    redirectUri={window.location.origin}
-  >
-    <App />
-  </Auth0Provider>,
+  <App />,
   document.getElementById("root")
 );

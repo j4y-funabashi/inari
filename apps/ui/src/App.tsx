@@ -1,49 +1,31 @@
 import React from 'react';
-import { useAuth0 } from "@auth0/auth0-react";
+import { AmplifyAuthenticator, AmplifySignOut } from '@aws-amplify/ui-react';
+import { AuthState, onAuthUIStateChange } from '@aws-amplify/ui-components';
 
-function App() {
-  return (
-    <div>
-      <Profile />
-    </div>
-  );
+interface User {
+  username: string
 }
 
+const App: React.FunctionComponent = () => {
+    const [authState, setAuthState] = React.useState<AuthState>();
+    const [user, setUser] = React.useState<User | undefined>();
 
-const LoginButton = () => {
-  const { loginWithRedirect } = useAuth0();
-  return <button onClick={() => loginWithRedirect()}>Log In</button>;
-};
+    React.useEffect(() => {
+        return onAuthUIStateChange((nextAuthState, authData) => {
+            setAuthState(nextAuthState);
+            setUser(authData as User)
+            console.log(authData)
+        });
+    }, []);
 
-const LogoutButton = () => {
-  const { logout } = useAuth0();
-
-  return (
-    <button onClick={() => logout({ returnTo: window.location.origin })}>
-      Log Out
-    </button>
+  return authState === AuthState.SignedIn && user ? (
+      <div className="App">
+          <div>Hello, {user.username}</div>
+          <AmplifySignOut />
+      </div>
+  ) : (
+      <AmplifyAuthenticator />
   );
-};
-
-const Profile = () => {
-  const { user, isAuthenticated, isLoading } = useAuth0();
-
-  if (isLoading) {
-    return <div>Loading ...</div>;
-  }
-
-    if (isAuthenticated && user) {
-      return (
-        <div>
-          <img src={user.picture} alt={user.name} />
-          <h2>{user.name}</h2>
-          <p>{user.email}</p>
-          <LogoutButton />
-        </div>
-      )
-    }
-
-    return <LoginButton />
-};
+}
 
 export default App;
