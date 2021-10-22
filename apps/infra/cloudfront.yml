@@ -180,8 +180,8 @@ Resources:
                 Forward: "all"
               QueryString: true
             MinTTL: 0
-            MaxTTL: 3600
-            DefaultTTL: 300
+            MaxTTL: 10
+            DefaultTTL: 0
             ViewerProtocolPolicy: redirect-to-https
             TargetOriginId: PhotosApiOrigin
 
