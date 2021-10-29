@@ -1,4 +1,5 @@
 import React from 'react';
+import {Link} from 'react-router-dom';
 import {timelineResponse} from '../apiClient';
 
 export interface MediaTimelineProps {
@@ -13,7 +14,7 @@ const MediaTimeline: React.FunctionComponent<MediaTimelineProps> = (props: Media
       const srcString = "/thmnb/sqsm_"+mediaItem.media_src
       const linkString = "/media/"+mediaItem.id
       return (
-        <a href={linkString}><img src={srcString} alt="" /></a>
+        <Link to={linkString}><img src={srcString} alt="" /></Link>
       )
     })
     return (
