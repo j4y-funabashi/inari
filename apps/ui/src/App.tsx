@@ -1,30 +1,33 @@
+import {AuthState, onAuthUIStateChange} from '@aws-amplify/ui-components';
+import {AmplifyAuthenticator, AmplifySignOut} from '@aws-amplify/ui-react';
 import React from 'react';
-import { AmplifyAuthenticator, AmplifySignOut } from '@aws-amplify/ui-react';
-import { AuthState, onAuthUIStateChange } from '@aws-amplify/ui-components';
+import MediaTimelinePage from './components/MediaTimelinePage'
 
 interface User {
   username: string
 }
 
 const App: React.FunctionComponent = () => {
-    const [authState, setAuthState] = React.useState<AuthState>();
-    const [user, setUser] = React.useState<User | undefined>();
+  const [authState, setAuthState] = React.useState<AuthState>();
+  const [user, setUser] = React.useState<User | undefined>();
 
-    React.useEffect(() => {
-        return onAuthUIStateChange((nextAuthState, authData) => {
-            setAuthState(nextAuthState);
-            setUser(authData as User)
-            console.log(authData)
-        });
-    }, []);
+  React.useEffect(() => {
+    return onAuthUIStateChange((nextAuthState, authData) => {
+      setAuthState(nextAuthState);
+      setUser(authData as User)
+    });
+  }, []);
 
   return authState === AuthState.SignedIn && user ? (
-      <div className="App">
-          <div>Hello, {user.username}</div>
-          <AmplifySignOut />
-      </div>
+    <div>
+      <nav>
+        <div>Hello, {user.username}</div>
+        <AmplifySignOut />
+      </nav>
+      <MediaTimelinePage />
+    </div>
   ) : (
-      <AmplifyAuthenticator />
+    <AmplifyAuthenticator />
   );
 }
 
