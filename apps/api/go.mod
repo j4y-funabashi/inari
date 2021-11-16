@@ -5,6 +5,7 @@ go 1.13
 require (
 	github.com/aws/aws-lambda-go v1.27.0
 	github.com/aws/aws-sdk-go v1.38.54
+	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.5.2
 	github.com/awslabs/aws-lambda-go-api-proxy v0.11.0
 	github.com/barasher/go-exiftool v1.5.0
 	github.com/disintegration/imaging v1.6.2

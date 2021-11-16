@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"time"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/j4y_funabashi/inari/apps/api/pkg/app"
+	"github.com/j4y_funabashi/inari/apps/api/pkg/dynamo"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -15,7 +16,7 @@ type Response events.APIGatewayProxyResponse
 
 func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (Response, error) {
 
-	var buf bytes.Buffer
+	buf := new(bytes.Buffer)
 
 	// parse user claims
 	userName := req.RequestContext.Authorizer["jwt"].(map[string]interface{})["claims"].(map[string]interface{})["cognito:username"].(string)
@@ -27,14 +28,32 @@ func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (Response, 
 		WithField("userEmail", userEmail).
 		Info("timeline!")
 
-	now := time.Now()
-	body, err := json.Marshal(map[string]interface{}{
-		"message": "HELLCHICKEN!" + req.PathParameters["date"] + " :: " + userName + " :: " + userEmail + " :: " + now.String(),
-	})
+	// ----
+
+	mediaStoreTableName := "inari-dynamodb-dev-InariDatastore-1VAD7YFUNHWKE"
+	region := "eu-central-1"
+
+	// deps
+	timelineQuery := dynamo.NewTimelineQuery(mediaStoreTableName, region)
+	viewTimeline := app.NewTimelineView(timelineQuery)
+
+	timelineView, err := viewTimeline()
 	if err != nil {
-		return Response{StatusCode: 404}, err
+		logger.WithError(err).Error("failed to fetch timeline")
+		return Response{
+			StatusCode:      500,
+			IsBase64Encoded: false,
+		}, err
 	}
-	json.HTMLEscape(&buf, body)
+
+	err = json.NewEncoder(buf).Encode(timelineView)
+	if err != nil {
+		logger.WithError(err).Error("failed to encode to json")
+		return Response{
+			StatusCode:      500,
+			IsBase64Encoded: false,
+		}, err
+	}
 
 	resp := Response{
 		StatusCode:      200,
