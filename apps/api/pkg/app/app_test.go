@@ -130,6 +130,7 @@ func TestImporter(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		t.Skip("move these to exiftool pkg")
 		t.Run(test.name, func(t *testing.T) {
 			// arrange
 			bucket := "backup.funabashi"
