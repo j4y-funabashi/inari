@@ -11,6 +11,9 @@ jobs:
 
     - name: test
       run: make test
+        
+    - name: deploy
+      run: make deploy
       env:
         AWS_REGION: ${{ secrets.AWS_REGION }}
         AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
