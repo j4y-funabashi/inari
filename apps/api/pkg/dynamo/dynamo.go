@@ -34,6 +34,8 @@ type mediaRecord struct {
 	LocationLat float64 `json:"location_lat"`
 	LocationLng float64 `json:"location_lng"`
 	Ext         string  `json:"ext"`
+	Keywords    string  `json:"keywords"`
+	Title       string  `json:"title"`
 	baseMediaRecordMeta
 }
 
@@ -73,6 +75,8 @@ func newMediaRecord(mediaMeta app.MediaMetadata) mediaRecord {
 	mr.MimeType = mediaMeta.MimeType
 	mr.Hash = mediaMeta.Hash
 	mr.Ext = mediaMeta.Ext
+	mr.Keywords = mediaMeta.Keywords
+	mr.Title = mediaMeta.Title
 
 	return mr
 }

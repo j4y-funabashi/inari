@@ -49,6 +49,8 @@ type MediaMetadata struct {
 	Height      string
 	CameraMake  string
 	CameraModel string
+	Keywords    string
+	Title       string
 }
 
 func (mm MediaMetadata) NewFilename() string {
