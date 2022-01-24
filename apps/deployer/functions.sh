@@ -103,6 +103,8 @@ deploy_ui() {
     __log_info "API_CLIENT_ID: ${API_CLIENT_ID}"
     __log_info "AWS_REGION: ${AWS_REGION}"
 
+    yarn install
+
     REACT_APP_AWS_REGION="${AWS_REGION}" \
         REACT_APP_API_CLIENT_ID="${API_CLIENT_ID}" \
         REACT_APP_USER_POOL_ID="${USER_POOL_ID}" \
