@@ -30,7 +30,7 @@ func NewExtractor() app.MetadataExtractor {
 		if err != nil {
 			return mediaMetadata, err
 		}
-		//listKeys(fileInfo)
+		// listKeys(fileInfo)
 		coordinates := parseGPS(fileInfo)
 		ext := parseExt(fileInfo)
 		mimeType := parseMimeType(fileInfo)
@@ -38,6 +38,8 @@ func NewExtractor() app.MetadataExtractor {
 		cameraMake := parseCameraMake(fileInfo)
 		width := parseImageWidth(fileInfo)
 		height := parseImageHeight(fileInfo)
+		keywords := parseKeywords(fileInfo)
+		title := parseTitle(fileInfo)
 
 		hash, err := parseHash(mediaFile)
 		if err != nil {
@@ -53,6 +55,8 @@ func NewExtractor() app.MetadataExtractor {
 		mediaMetadata.CameraMake = cameraMake
 		mediaMetadata.Width = width
 		mediaMetadata.Height = height
+		mediaMetadata.Keywords = keywords
+		mediaMetadata.Title = title
 
 		return mediaMetadata, nil
 	}
@@ -125,6 +129,22 @@ func parseGPS(fileInfo exiftoolz.FileMetadata) app.Coordinates {
 
 func parseExt(fileInfo exiftoolz.FileMetadata) string {
 	extVal, err := fileInfo.GetString("FileTypeExtension")
+	if err != nil {
+		return ""
+	}
+	return extVal
+}
+
+func parseKeywords(fileInfo exiftoolz.FileMetadata) string {
+	extVal, err := fileInfo.GetString("Keywords")
+	if err != nil {
+		return ""
+	}
+	return extVal
+}
+
+func parseTitle(fileInfo exiftoolz.FileMetadata) string {
+	extVal, err := fileInfo.GetString("Title")
 	if err != nil {
 		return ""
 	}

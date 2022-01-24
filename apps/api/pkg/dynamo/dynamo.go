@@ -1,6 +1,8 @@
 package dynamo
 
 import (
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -32,6 +34,8 @@ type mediaRecord struct {
 	LocationLat float64 `json:"location_lat"`
 	LocationLng float64 `json:"location_lng"`
 	Ext         string  `json:"ext"`
+	Keywords    string  `json:"keywords"`
+	Title       string  `json:"title"`
 	baseMediaRecordMeta
 }
 
@@ -71,6 +75,8 @@ func newMediaRecord(mediaMeta app.MediaMetadata) mediaRecord {
 	mr.MimeType = mediaMeta.MimeType
 	mr.Hash = mediaMeta.Hash
 	mr.Ext = mediaMeta.Ext
+	mr.Keywords = mediaMeta.Keywords
+	mr.Title = mediaMeta.Title
 
 	return mr
 }
@@ -109,7 +115,7 @@ func newMediaDateCollectionRecord(mediaMeta app.MediaMetadata) mediaDateCollecti
 	mdr.Pk = collectionMediaDayRecordName
 	mdr.Sk = newMediaDateCollectionRecordSK(mediaMeta)
 	mdr.Date = mediaMeta.Date.Format("2006-01-02")
-	mdr.MediaList = append(mdr.MediaList, mediaMeta.NewFilename())
+	mdr.MediaList = append(mdr.MediaList, newCollectionMediaListItem(mediaMeta))
 
 	return mdr
 }
@@ -117,10 +123,32 @@ func newMediaDateCollectionRecord(mediaMeta app.MediaMetadata) mediaDateCollecti
 func newMediaDateCollectionUpdate(mediaMeta app.MediaMetadata) mediaDateCollectionUpdate {
 	mdr := mediaDateCollectionUpdate{}
 
-	mdr.MediaKey = mediaMeta.NewFilename()
-	mdr.MediaList = append(mdr.MediaList, mediaMeta.NewFilename())
+	mdr.MediaKey = newCollectionMediaListItem(mediaMeta)
+	mdr.MediaList = append(mdr.MediaList, newCollectionMediaListItem(mediaMeta))
 
 	return mdr
+}
+
+func newCollectionMediaListItem(mediaMeta app.MediaMetadata) string {
+	return fmt.Sprintf(
+		"%s##%s##%s##%s",
+		mediaMeta.Hash,
+		mediaMeta.MimeType,
+		mediaMeta.Date.Format(time.RFC3339),
+		mediaMeta.ThumbnailKey(),
+	)
+}
+
+func convertMediaListItemToMediaCollectionItem(mediaListItem string) app.MediaCollectionItem {
+	split := strings.Split(mediaListItem, "##")
+	item := app.MediaCollectionItem{
+		ID:       split[0],
+		MimeType: split[1],
+		Date:     split[2],
+		MediaSrc: split[3],
+	}
+
+	return item
 }
 
 func newMediaDateCollectionRecordSK(mediaMeta app.MediaMetadata) string {
@@ -216,5 +244,58 @@ func NewIndexer(tableName, region string) app.Indexer {
 		}
 
 		return nil
+	}
+}
+
+func NewTimelineQuery(tableName, region string) app.TimelineQuery {
+	return func() (app.TimelineView, error) {
+
+		// -- create client
+		sess, _ := session.NewSession(&aws.Config{
+			Region: aws.String(region)},
+		)
+		client := dynamodb.New(sess)
+
+		timelineView := app.TimelineView{}
+
+		// -- query dynamo
+		keyValues := map[string]string{
+			":pk": "collectionMediaDay",
+		}
+		eavalues, err := dynamodbattribute.MarshalMap(keyValues)
+		if err != nil {
+			return timelineView, err
+		}
+		res, err := client.Query(&dynamodb.QueryInput{
+			TableName:                 aws.String(tableName),
+			KeyConditionExpression:    aws.String("pk = :pk"),
+			ExpressionAttributeValues: eavalues,
+			ScanIndexForward:          aws.Bool(false),
+		})
+		if err != nil {
+			return timelineView, err
+		}
+
+		for _, item := range res.Items {
+			mdr := mediaDateCollectionRecord{}
+			err = dynamodbattribute.UnmarshalMap(item, &mdr)
+			if err != nil {
+				return timelineView, err
+			}
+
+			// build media list
+			mediaList := []app.MediaCollectionItem{}
+			for _, mli := range mdr.MediaList {
+				mediaList = append(mediaList, convertMediaListItemToMediaCollectionItem(mli))
+			}
+			// -- convert media record to media day
+			mediaDay := app.MediaDay{
+				Date:  mdr.Date,
+				Media: mediaList,
+			}
+			timelineView.Days = append(timelineView.Days, mediaDay)
+		}
+
+		return timelineView, nil
 	}
 }

@@ -9,12 +9,28 @@ import (
 )
 
 type importer = func(backupFilename string) error
+type thumbnailer = func(mediastoreKey string) error
+type viewTimeline = func() (TimelineView, error)
 type Resizer = func(imgFilename string) ([]string, error)
 type Downloader = func(backupFilename string) (string, error)
 type Uploader = func(localFilename, mediaStoreFilename string) error
 type Indexer = func(mediaMeta MediaMetadata) error
 type MetadataExtractor = func(mediaFile string) (MediaMetadata, error)
-type thumbnailer = func(mediastoreKey string) error
+type TimelineQuery = func() (TimelineView, error)
+
+type MediaDay struct {
+	Date  string                `json:"date"`
+	Media []MediaCollectionItem `json:"media"`
+}
+type TimelineView struct {
+	Days []MediaDay `json:"days"`
+}
+type MediaCollectionItem struct {
+	ID       string `json:"id"`
+	MimeType string `json:"mime_type"`
+	Date     string `json:"date"`
+	MediaSrc string `json:"media_src"`
+}
 
 type Coordinates struct {
 	Lat float64
@@ -33,12 +49,23 @@ type MediaMetadata struct {
 	Height      string
 	CameraMake  string
 	CameraModel string
+	Keywords    string
+	Title       string
 }
 
 func (mm MediaMetadata) NewFilename() string {
 	return fmt.Sprintf(
 		"%s_%s.%s",
 		mm.Date.Format("2006/20060102_150405"),
+		mm.Hash,
+		mm.Ext,
+	)
+}
+
+func (mm MediaMetadata) ThumbnailKey() string {
+	return fmt.Sprintf(
+		"%s_%s.%s",
+		mm.Date.Format("20060102_150405"),
 		mm.Hash,
 		mm.Ext,
 	)
@@ -115,5 +142,15 @@ func NewThumbnailer(downloadFromMediaStore Downloader, resizeImage Resizer, uplo
 		}
 
 		return nil
+	}
+}
+
+func NewTimelineView(timelineQuery TimelineQuery) viewTimeline {
+	return func() (TimelineView, error) {
+		timelineView, err := timelineQuery()
+		if err != nil {
+			return TimelineView{}, err
+		}
+		return timelineView, nil
 	}
 }
