@@ -1,7 +1,7 @@
 name: build test deploy
 on:
   push:
-    braches:
+    branches:
       - main
       - master
 
