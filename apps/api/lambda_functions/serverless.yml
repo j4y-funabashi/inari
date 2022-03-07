@@ -32,6 +32,12 @@ functions:
             type: jwt
             id: ${env:AUTHORIZERID, ''}
 
+  import_from_queue:
+    handler: bin/import_from_queue
+    events:
+      - sqs:
+          arn: !GetAtt ImportMediaQueue.Arn
+
 resources:
   Resources:
     ImportMediaQueue:

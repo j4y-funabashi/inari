@@ -10,3 +10,4 @@ build_func() {
 }
 
 build_func timeline
+build_func import_from_queue

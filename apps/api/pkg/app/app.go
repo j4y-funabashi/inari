@@ -8,7 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type importer = func(backupFilename string) error
+type Importer = func(backupFilename string) error
 type thumbnailer = func(mediastoreKey string) error
 type viewTimeline = func() (TimelineView, error)
 type Resizer = func(imgFilename string) ([]string, error)
@@ -71,7 +71,7 @@ func (mm MediaMetadata) ThumbnailKey() string {
 	)
 }
 
-func NewImporter(downloadFromBackup Downloader, extractMetadata MetadataExtractor, uploadToMediaStore Uploader, indexMedia Indexer) importer {
+func NewImporter(downloadFromBackup Downloader, extractMetadata MetadataExtractor, uploadToMediaStore Uploader, indexMedia Indexer) Importer {
 	return func(backupFilename string) error {
 
 		// download file from backup storage
