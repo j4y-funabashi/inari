@@ -9,25 +9,24 @@ import (
 	"github.com/j4y_funabashi/inari/apps/api/pkg/dynamo"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/exiftool"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/s3"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 )
 
-func NewHandler(importMedia app.Importer) func(ctx context.Context, req events.SQSEvent) error {
+func NewHandler(logger *zap.SugaredLogger, importMedia app.Importer) func(ctx context.Context, req events.SQSEvent) error {
 	return func(ctx context.Context, req events.SQSEvent) error {
-		logger := logrus.StandardLogger()
 
 		for _, record := range req.Records {
 			mediaFilename := record.Body
 			logger.
-				WithField("mediaFilename", mediaFilename).
-				Info("importing")
+				Infow("importing",
+					"mediaFilename", mediaFilename)
 
 			err := importMedia(mediaFilename)
 			if err != nil {
 				logger.
-					WithError(err).
-					WithField("mediaFilename", mediaFilename).
-					Error("failed to import")
+					Errorw("failed to import",
+						"err", err,
+						"mediaFilename", mediaFilename)
 				return err
 			}
 
@@ -46,11 +45,15 @@ func main() {
 	region := "eu-central-1"
 
 	// deps
+	zlogger, _ := zap.NewProduction()
+	logger := zlogger.Sugar()
+	defer logger.Sync()
+
 	downloader := s3.NewDownloader(bucket, region)
 	uploader := s3.NewUploader(mediaStoreBucket, region)
 	indexer := dynamo.NewIndexer(mediaStoreTableName, region)
 	extractMetadata := exiftool.NewExtractor()
-	importMedia := app.NewImporter(downloader, extractMetadata, uploader, indexer)
+	importMedia := app.NewImporter(logger, downloader, extractMetadata, uploader, indexer)
 
-	lambda.Start(NewHandler(importMedia))
+	lambda.Start(NewHandler(logger, importMedia))
 }

@@ -7,17 +7,18 @@ import (
 	"github.com/j4y_funabashi/inari/apps/api/pkg/dynamo"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/exiftool"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/s3"
-	log "github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 )
 
 func main() {
-	logger := log.StandardLogger()
+	zlogger, _ := zap.NewProduction()
+	logger := zlogger.Sugar()
 
 	mediaFilename := os.Args[1]
-	logger.
-		WithField("arg", os.Args).
-		WithField("mediaFilename", mediaFilename).
-		Info("importing")
+	logger.Infow("importing",
+		"arg", os.Args,
+		"mediaFilename", mediaFilename,
+	)
 
 	// conf
 	bucket := "backup.funabashi"
@@ -30,14 +31,13 @@ func main() {
 	uploader := s3.NewUploader(mediaStoreBucket, region)
 	indexer := dynamo.NewIndexer(mediaStoreTableName, region)
 	extractMetadata := exiftool.NewExtractor()
-	importMedia := app.NewImporter(downloader, extractMetadata, uploader, indexer)
+	importMedia := app.NewImporter(logger, downloader, extractMetadata, uploader, indexer)
 
 	err := importMedia(mediaFilename)
 	if err != nil {
-		logger.
-			WithError(err).
-			WithField("mediaFilename", mediaFilename).
-			Error("failed to import")
+		logger.Errorw("failed to import",
+			"error", err,
+			"mediaFilename", mediaFilename)
 		os.Exit(1)
 	}
 }

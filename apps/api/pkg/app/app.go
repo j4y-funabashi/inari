@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 )
 
 type Importer = func(backupFilename string) error
@@ -71,7 +72,7 @@ func (mm MediaMetadata) ThumbnailKey() string {
 	)
 }
 
-func NewImporter(downloadFromBackup Downloader, extractMetadata MetadataExtractor, uploadToMediaStore Uploader, indexMedia Indexer) Importer {
+func NewImporter(logger *zap.SugaredLogger, downloadFromBackup Downloader, extractMetadata MetadataExtractor, uploadToMediaStore Uploader, indexMedia Indexer) Importer {
 	return func(backupFilename string) error {
 
 		// download file from backup storage
@@ -79,10 +80,9 @@ func NewImporter(downloadFromBackup Downloader, extractMetadata MetadataExtracto
 		if err != nil {
 			return err
 		}
-		logrus.
-			WithField("backupFilename", backupFilename).
-			WithField("filename", downloadedFilename).
-			Info("downloaded media file from backup")
+		logger.Infow("downloaded media from backup",
+			"backupFilename", backupFilename,
+			"filename", downloadedFilename)
 
 		// extract metadata
 		mediaMeta, err := extractMetadata(downloadedFilename)
