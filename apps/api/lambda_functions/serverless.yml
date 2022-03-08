@@ -33,6 +33,11 @@ package:
     - '!./**'
     - ./bin/**
 
+layers:
+  exiftool:
+    package:
+      artifact: layers/exiftool.zip
+
 functions:
   timeline:
     handler: bin/timeline
