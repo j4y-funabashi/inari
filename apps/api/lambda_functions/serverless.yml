@@ -51,6 +51,8 @@ functions:
 
   import_from_queue:
     handler: bin/import_from_queue
+    layers:
+      - !Ref ExiftoolLambdaLayer
     events:
       - sqs:
           arn: !GetAtt ImportMediaQueue.Arn

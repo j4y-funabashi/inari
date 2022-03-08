@@ -43,6 +43,7 @@ func main() {
 	mediaStoreBucket := "inari-mediastore-dev"
 	mediaStoreTableName := "inari-dynamodb-dev-InariDatastore-1VAD7YFUNHWKE"
 	region := "eu-central-1"
+	exiftoolPath := "/opt/bin/exiftool"
 
 	// deps
 	zlogger, _ := zap.NewProduction()
@@ -52,7 +53,7 @@ func main() {
 	downloader := s3.NewDownloader(bucket, region)
 	uploader := s3.NewUploader(mediaStoreBucket, region)
 	indexer := dynamo.NewIndexer(mediaStoreTableName, region)
-	extractMetadata := exiftool.NewExtractor()
+	extractMetadata := exiftool.NewExtractor(exiftoolPath)
 	importMedia := app.NewImporter(logger, downloader, extractMetadata, uploader, indexer)
 
 	lambda.Start(NewHandler(logger, importMedia))

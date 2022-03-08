@@ -12,10 +12,10 @@ import (
 	"github.com/j4y_funabashi/inari/apps/api/pkg/app"
 )
 
-func NewExtractor() app.MetadataExtractor {
+func NewExtractor(exiftoolPath string) app.MetadataExtractor {
 	return func(mediaFile string) (app.MediaMetadata, error) {
 		mediaMetadata := app.MediaMetadata{}
-		et, err := exiftoolz.NewExiftool(exiftoolz.NoPrintConversion())
+		et, err := exiftoolz.NewExiftool(exiftoolz.NoPrintConversion(), exiftoolz.SetExiftoolBinaryPath(exiftoolPath))
 		if err != nil {
 			return mediaMetadata, err
 		}

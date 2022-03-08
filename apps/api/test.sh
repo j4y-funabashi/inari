@@ -18,6 +18,8 @@ function __log_info () {
 
 __log_info "TESTING"
 
+which exiftool
+
 go test -v ./...
 
 __log_info "END"

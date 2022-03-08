@@ -30,7 +30,7 @@ func main() {
 	downloader := s3.NewDownloader(bucket, region)
 	uploader := s3.NewUploader(mediaStoreBucket, region)
 	indexer := dynamo.NewIndexer(mediaStoreTableName, region)
-	extractMetadata := exiftool.NewExtractor()
+	extractMetadata := exiftool.NewExtractor("/usr/bin/exiftool")
 	importMedia := app.NewImporter(logger, downloader, extractMetadata, uploader, indexer)
 
 	err := importMedia(mediaFilename)
