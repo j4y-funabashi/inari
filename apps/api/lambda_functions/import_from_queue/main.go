@@ -2,6 +2,9 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -36,6 +39,20 @@ func NewHandler(logger *zap.SugaredLogger, importMedia app.Importer) func(ctx co
 	}
 }
 
+func listOptDir(dir string) {
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+		fmt.Printf("dir: %v: name: %s\n", info.IsDir(), path)
+		return nil
+	})
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
 func main() {
 
 	// conf
@@ -44,6 +61,7 @@ func main() {
 	mediaStoreTableName := "inari-dynamodb-dev-InariDatastore-1VAD7YFUNHWKE"
 	region := "eu-central-1"
 	exiftoolPath := "/opt/bin/perl /opt/bin/exiftool"
+	listOptDir("/opt/")
 
 	// deps
 	zlogger, _ := zap.NewProduction()
