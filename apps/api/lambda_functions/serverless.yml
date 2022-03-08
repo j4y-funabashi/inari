@@ -20,7 +20,9 @@ provider:
           Action:
             - "s3:GetObject"
             - "s3:ListBucket"
-          Resource: "arn:aws:s3:::backup.funabashi"
+          Resource:
+            - "arn:aws:s3:::backup.funabashi"
+            - "arn:aws:s3:::backup.funabashi/*"
         - Effect: "Allow"
           Action:
             - "s3:PutObject"

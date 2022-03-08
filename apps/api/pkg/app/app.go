@@ -78,7 +78,7 @@ func NewImporter(logger *zap.SugaredLogger, downloadFromBackup Downloader, extra
 		// download file from backup storage
 		downloadedFilename, err := downloadFromBackup(backupFilename)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to download media from backup: %w", err)
 		}
 		logger.Infow("downloaded media from backup",
 			"backupFilename", backupFilename,
@@ -87,26 +87,24 @@ func NewImporter(logger *zap.SugaredLogger, downloadFromBackup Downloader, extra
 		// extract metadata
 		mediaMeta, err := extractMetadata(downloadedFilename)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to extract media metadata: %w", err)
 		}
-		logrus.
-			WithField("meta", mediaMeta).
-			WithField("newFilename", mediaMeta.NewFilename()).
-			Info("extracted metadata")
+		logger.Infow("extracted metadata",
+			"meta", mediaMeta,
+			"newFilename", mediaMeta.NewFilename())
 
 		// upload renamed file to media storage
 		err = uploadToMediaStore(downloadedFilename, mediaMeta.NewFilename())
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to upload to media store: %w", err)
 		}
-		logrus.
-			WithField("newFilename", mediaMeta.NewFilename()).
-			Info("uploaded to mediastore")
+		logger.Infow("uploaded to media store",
+			"newFilename", mediaMeta.NewFilename())
 
 		// index metadata in datastore
 		err = indexMedia(mediaMeta)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to index media metadata: %w", err)
 		}
 		return nil
 	}
