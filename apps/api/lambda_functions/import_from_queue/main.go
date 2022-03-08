@@ -43,7 +43,7 @@ func main() {
 	mediaStoreBucket := "inari-mediastore-dev"
 	mediaStoreTableName := "inari-dynamodb-dev-InariDatastore-1VAD7YFUNHWKE"
 	region := "eu-central-1"
-	exiftoolPath := "/opt/bin/exiftool"
+	exiftoolPath := "/opt/bin/perl /opt/bin/exiftool"
 
 	// deps
 	zlogger, _ := zap.NewProduction()
