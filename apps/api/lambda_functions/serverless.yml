@@ -52,6 +52,7 @@ functions:
   import_from_queue:
     handler: bin/import_from_queue
     layers:
+      - arn:aws:lambda:eu-central-1:445285296882:layer:perl-5-34-runtime-al2-x86_64:3
       - !Ref ExiftoolLambdaLayer
     events:
       - sqs:

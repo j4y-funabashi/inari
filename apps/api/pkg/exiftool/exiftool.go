@@ -15,8 +15,8 @@ import (
 func NewExtractor(exiftoolPath string) app.MetadataExtractor {
 	return func(mediaFile string) (app.MediaMetadata, error) {
 		mediaMetadata := app.MediaMetadata{}
-		// et, err := exiftoolz.NewExiftool(exiftoolz.NoPrintConversion(), exiftoolz.SetExiftoolBinaryPath(exiftoolPath))
-		et, err := exiftoolz.NewExiftool(exiftoolz.NoPrintConversion())
+		et, err := exiftoolz.NewExiftool(exiftoolz.NoPrintConversion(), exiftoolz.SetExiftoolBinaryPath(exiftoolPath))
+		// et, err := exiftoolz.NewExiftool(exiftoolz.NoPrintConversion())
 		if err != nil {
 			return mediaMetadata, err
 		}
