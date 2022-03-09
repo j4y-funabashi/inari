@@ -8,7 +8,9 @@ rm -rf Image-ExifTool-${EXIFTOOL_VERSION}.tar.gz
 mkdir -p layer/bin
 cp Image-ExifTool-${EXIFTOOL_VERSION}/exiftool layer/bin/.
 sed -i "1 s/^.*$/#\!\/opt\/bin\/perl -w/" ./layer/bin/exiftool
+cp run_exiftool.sh ./layer/bin/
 chmod a+x ./layer/bin/exiftool
+chmod a+x ./layer/bin/run_exiftool.sh
 cp -r Image-ExifTool-${EXIFTOOL_VERSION}/lib layer/bin/.
 rm -rf Image-ExifTool-${EXIFTOOL_VERSION}
 cd layer
