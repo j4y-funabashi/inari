@@ -35,8 +35,11 @@ package:
 
 layers:
   exiftool:
-    package:
-      artifact: layers/exiftool.zip
+    path: layers/exiftool/layer
+    description: exiftool with go1.x
+    compatibleRuntimes:
+      - go1.x
+    licenseInfo: MIT License
 
 functions:
   timeline:
@@ -52,7 +55,6 @@ functions:
   import_from_queue:
     handler: bin/import_from_queue
     layers:
-      - arn:aws:lambda:eu-central-1:445285296882:layer:perl-5-34-runtime-al2-x86_64:3
       - !Ref ExiftoolLambdaLayer
     events:
       - sqs:
