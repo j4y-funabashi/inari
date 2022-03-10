@@ -19,12 +19,11 @@ type Indexer = func(mediaMeta MediaMetadata) error
 type MetadataExtractor = func(mediaFile string) (MediaMetadata, error)
 type TimelineQuery = func() (TimelineView, error)
 
-type MediaDay struct {
-	Date  string                `json:"date"`
-	Media []MediaCollectionItem `json:"media"`
+type MediaMonth struct {
+	Date string `json:"date"`
 }
 type TimelineView struct {
-	Days []MediaDay `json:"days"`
+	Months []MediaMonth `json:"months"`
 }
 type MediaCollectionItem struct {
 	ID       string `json:"id"`

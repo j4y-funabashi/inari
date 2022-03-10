@@ -1,8 +1,6 @@
 package dynamo
 
 import (
-	"fmt"
-	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -167,7 +165,7 @@ func NewTimelineQuery(tableName, region string) app.TimelineQuery {
 
 		// -- query dynamo
 		keyValues := map[string]string{
-			":pk": "collectionMediaDay",
+			":pk": "monthCollection",
 		}
 		eavalues, err := dynamodbattribute.MarshalMap(keyValues)
 		if err != nil {
@@ -175,9 +173,10 @@ func NewTimelineQuery(tableName, region string) app.TimelineQuery {
 		}
 		res, err := client.Query(&dynamodb.QueryInput{
 			TableName:                 aws.String(tableName),
-			KeyConditionExpression:    aws.String("pk = :pk"),
+			KeyConditionExpression:    aws.String("gsi1pk = :pk"),
 			ExpressionAttributeValues: eavalues,
 			ScanIndexForward:          aws.Bool(false),
+			IndexName:                 aws.String("GSI1"),
 		})
 		if err != nil {
 			return timelineView, err
@@ -191,10 +190,10 @@ func NewTimelineQuery(tableName, region string) app.TimelineQuery {
 			}
 
 			// -- convert media record to media day
-			mediaDay := app.MediaDay{
+			mediaMonth := app.MediaMonth{
 				Date: mdr.Date,
 			}
-			timelineView.Days = append(timelineView.Days, mediaDay)
+			timelineView.Months = append(timelineView.Months, mediaMonth)
 		}
 
 		return timelineView, nil
