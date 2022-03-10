@@ -16,6 +16,7 @@ import (
 var mediaRecordName = "media"
 var mediaDateRecordName = "mediaDate"
 var collectionMediaDayRecordName = "collectionMediaDay"
+var collectionMonthPrefix = "month"
 
 type baseMediaRecordMeta struct {
 	MediaKey string `json:"media_key"`
@@ -48,10 +49,11 @@ type mediaDateRecord struct {
 }
 
 type mediaDateCollectionRecord struct {
-	Pk        string   `json:"pk"`
-	Sk        string   `json:"sk"`
-	Date      string   `json:"date"`
-	MediaList []string `json:"media_list"`
+	Pk     string `json:"pk"`
+	Sk     string `json:"sk"`
+	Date   string `json:"date"`
+	Gsi1pk string `json:"gsi1pk"`
+	Gsi1sk string `json:"gsi1sk"`
 }
 
 type mediaDateCollectionUpdate struct {
@@ -82,11 +84,11 @@ func newMediaRecord(mediaMeta app.MediaMetadata) mediaRecord {
 }
 
 func newMediaRecordPK(mediaMeta app.MediaMetadata) string {
-	return mediaRecordName + "#" + mediaMeta.Hash
+	return collectionMonthPrefix + "#" + mediaMeta.Date.Format("2006-01")
 }
 
 func newMediaRecordSK(mediaMeta app.MediaMetadata) string {
-	return mediaRecordName
+	return mediaRecordName + "#" + mediaMeta.NewFilename()
 }
 
 func newMediaDateRecord(mediaMeta app.MediaMetadata) mediaDateRecord {
@@ -112,10 +114,11 @@ func newMediaDateRecordSK(mediaMeta app.MediaMetadata) string {
 func newMediaDateCollectionRecord(mediaMeta app.MediaMetadata) mediaDateCollectionRecord {
 	mdr := mediaDateCollectionRecord{}
 
-	mdr.Pk = collectionMediaDayRecordName
+	mdr.Pk = newMediaRecordPK(mediaMeta)
 	mdr.Sk = newMediaDateCollectionRecordSK(mediaMeta)
-	mdr.Date = mediaMeta.Date.Format("2006-01-02")
-	mdr.MediaList = append(mdr.MediaList, newCollectionMediaListItem(mediaMeta))
+	mdr.Date = mediaMeta.Date.Format("2006-01")
+	mdr.Gsi1pk = "monthCollection"
+	mdr.Gsi1sk = newMediaDateCollectionRecordSK(mediaMeta)
 
 	return mdr
 }
@@ -152,7 +155,7 @@ func convertMediaListItemToMediaCollectionItem(mediaListItem string) app.MediaCo
 }
 
 func newMediaDateCollectionRecordSK(mediaMeta app.MediaMetadata) string {
-	return collectionMediaDayRecordName + "#" + mediaMeta.Date.Format("2006-01-02")
+	return "META#" + mediaMeta.Date.Format("2006-01")
 }
 
 func NewIndexer(tableName, region string) app.Indexer {
@@ -177,20 +180,6 @@ func NewIndexer(tableName, region string) app.Indexer {
 			return err
 		}
 
-		// -- save media date record
-		mdr := newMediaDateRecord(mediaMeta)
-		mdrItem, err := dynamodbattribute.MarshalMap(mdr)
-		if err != nil {
-			return err
-		}
-		_, err = client.PutItem(&dynamodb.PutItemInput{
-			TableName: aws.String(tableName),
-			Item:      mdrItem,
-		})
-		if err != nil {
-			return err
-		}
-
 		// -- save media date collection if it does not exist
 		mdrcoll := newMediaDateCollectionRecord(mediaMeta)
 		mdrcollItem, err := dynamodbattribute.MarshalMap(mdrcoll)
@@ -201,37 +190,6 @@ func NewIndexer(tableName, region string) app.Indexer {
 			TableName:           aws.String(tableName),
 			Item:                mdrcollItem,
 			ConditionExpression: aws.String("attribute_not_exists(pk)"),
-		})
-		if err != nil {
-			if awsErr, ok := err.(awserr.Error); ok {
-				if awsErr.Code() != "ConditionalCheckFailedException" {
-					return err
-				}
-			} else {
-				return err
-			}
-		}
-
-		// -- update media date collection mediaList
-		mdrcollUpdate, err := dynamodbattribute.MarshalMap(newMediaDateCollectionUpdate(mediaMeta))
-		mdrcollUpdateKey, err := dynamodbattribute.MarshalMap(
-			struct {
-				Pk string `json:"pk"`
-				Sk string `json:"sk"`
-			}{
-				Pk: collectionMediaDayRecordName,
-				Sk: newMediaDateCollectionRecordSK(mediaMeta),
-			},
-		)
-		if err != nil {
-			return err
-		}
-		_, err = client.UpdateItem(&dynamodb.UpdateItemInput{
-			ExpressionAttributeValues: mdrcollUpdate,
-			TableName:                 aws.String(tableName),
-			UpdateExpression:          aws.String("SET media_list = list_append(media_list, :mkl)"),
-			ConditionExpression:       aws.String("not contains(media_list, :mk)"),
-			Key:                       mdrcollUpdateKey,
 		})
 		if err != nil {
 			if awsErr, ok := err.(awserr.Error); ok {
@@ -283,15 +241,9 @@ func NewTimelineQuery(tableName, region string) app.TimelineQuery {
 				return timelineView, err
 			}
 
-			// build media list
-			mediaList := []app.MediaCollectionItem{}
-			for _, mli := range mdr.MediaList {
-				mediaList = append(mediaList, convertMediaListItemToMediaCollectionItem(mli))
-			}
 			// -- convert media record to media day
 			mediaDay := app.MediaDay{
-				Date:  mdr.Date,
-				Media: mediaList,
+				Date: mdr.Date,
 			}
 			timelineView.Days = append(timelineView.Days, mediaDay)
 		}

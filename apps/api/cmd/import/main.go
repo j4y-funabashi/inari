@@ -13,6 +13,7 @@ import (
 func main() {
 	zlogger, _ := zap.NewProduction()
 	logger := zlogger.Sugar()
+	defer logger.Sync()
 
 	mediaFilename := os.Args[1]
 	logger.Infow("importing",
