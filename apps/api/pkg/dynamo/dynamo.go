@@ -91,26 +91,6 @@ func newMediaRecordSK(mediaMeta app.MediaMetadata) string {
 	return mediaRecordName + "#" + mediaMeta.NewFilename()
 }
 
-func newMediaDateRecord(mediaMeta app.MediaMetadata) mediaDateRecord {
-	mdr := mediaDateRecord{}
-
-	mdr.Pk = newMediaRecordPK(mediaMeta)
-	mdr.Sk = mediaDateRecordName
-	mdr.Gsi1pk = mediaDateRecordName + "#" + mediaMeta.Date.Format("2006")
-	mdr.Gsi1sk = newMediaDateRecordSK(mediaMeta)
-	mdr.MediaKey = mediaMeta.NewFilename()
-	mdr.MimeType = mediaMeta.MimeType
-	mdr.Width = mediaMeta.Width
-	mdr.Height = mediaMeta.Height
-	mdr.Date = mediaMeta.Date.Format(time.RFC3339)
-
-	return mdr
-}
-
-func newMediaDateRecordSK(mediaMeta app.MediaMetadata) string {
-	return mediaDateRecordName + "#" + mediaMeta.Date.Format(time.RFC3339) + "#" + mediaMeta.Hash
-}
-
 func newMediaDateCollectionRecord(mediaMeta app.MediaMetadata) mediaDateCollectionRecord {
 	mdr := mediaDateCollectionRecord{}
 
@@ -121,37 +101,6 @@ func newMediaDateCollectionRecord(mediaMeta app.MediaMetadata) mediaDateCollecti
 	mdr.Gsi1sk = newMediaDateCollectionRecordSK(mediaMeta)
 
 	return mdr
-}
-
-func newMediaDateCollectionUpdate(mediaMeta app.MediaMetadata) mediaDateCollectionUpdate {
-	mdr := mediaDateCollectionUpdate{}
-
-	mdr.MediaKey = newCollectionMediaListItem(mediaMeta)
-	mdr.MediaList = append(mdr.MediaList, newCollectionMediaListItem(mediaMeta))
-
-	return mdr
-}
-
-func newCollectionMediaListItem(mediaMeta app.MediaMetadata) string {
-	return fmt.Sprintf(
-		"%s##%s##%s##%s",
-		mediaMeta.Hash,
-		mediaMeta.MimeType,
-		mediaMeta.Date.Format(time.RFC3339),
-		mediaMeta.ThumbnailKey(),
-	)
-}
-
-func convertMediaListItemToMediaCollectionItem(mediaListItem string) app.MediaCollectionItem {
-	split := strings.Split(mediaListItem, "##")
-	item := app.MediaCollectionItem{
-		ID:       split[0],
-		MimeType: split[1],
-		Date:     split[2],
-		MediaSrc: split[3],
-	}
-
-	return item
 }
 
 func newMediaDateCollectionRecordSK(mediaMeta app.MediaMetadata) string {
