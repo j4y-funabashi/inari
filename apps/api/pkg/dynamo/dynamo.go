@@ -190,8 +190,13 @@ func NewTimelineQuery(tableName, region string) app.TimelineQuery {
 			}
 
 			// -- convert media record to media day
+			dat, err := time.Parse("2006-01", mdr.Date)
+			if err != nil {
+				return timelineView, err
+			}
 			mediaMonth := app.MediaMonth{
-				Date: mdr.Date,
+				ID:   mdr.Date,
+				Date: dat.Format("2006 Jan"),
 			}
 			timelineView.Months = append(timelineView.Months, mediaMonth)
 		}

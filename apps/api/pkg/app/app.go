@@ -20,6 +20,7 @@ type MetadataExtractor = func(mediaFile string) (MediaMetadata, error)
 type TimelineQuery = func() (TimelineView, error)
 
 type MediaMonth struct {
+	ID   string
 	Date string `json:"date"`
 }
 type TimelineView struct {
