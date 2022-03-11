@@ -16,6 +16,7 @@ type Resizer = func(imgFilename string) ([]string, error)
 type Downloader = func(backupFilename string) (string, error)
 type Uploader = func(localFilename, mediaStoreFilename string) error
 type Indexer = func(mediaMeta MediaMetadata) error
+type FileLister = func() ([]string, error)
 type MetadataExtractor = func(mediaFile string) (MediaMetadata, error)
 type TimelineQuery = func() (TimelineView, error)
 

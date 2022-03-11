@@ -3,6 +3,7 @@ package s3
 import (
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -70,5 +71,48 @@ func NewUploader(bucket, region string) app.Uploader {
 		}
 
 		return nil
+	}
+}
+
+func NewLister(bucket, region, keyPrefix string) app.FileLister {
+
+	mediaExt := map[string]bool{
+		".jpg": true,
+		".mov": true,
+		".mp4": true,
+		".avi": true,
+	}
+
+	return func() ([]string, error) {
+		sess, _ := session.NewSession(&aws.Config{
+			Region: aws.String(region)},
+		)
+		client := s3.New(sess)
+
+		files := []string{}
+
+		input := &s3.ListObjectsV2Input{
+			Bucket: aws.String(bucket),
+			Prefix: aws.String(keyPrefix),
+		}
+
+		err := client.ListObjectsV2Pages(input,
+			func(page *s3.ListObjectsV2Output, lastPage bool) bool {
+				for _, f := range page.Contents {
+
+					// filter to media ext
+					key := *f.Key
+					ext := strings.ToLower(filepath.Ext(key))
+					if mediaExt[ext] {
+						files = append(files, key)
+					}
+				}
+				return true
+			})
+		if err != nil {
+			return files, err
+		}
+
+		return files, nil
 	}
 }
