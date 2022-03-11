@@ -9,25 +9,15 @@ export interface MediaTimelineProps {
 const MediaTimeline: React.FunctionComponent<MediaTimelineProps> = (props: MediaTimelineProps) => {
   const {mediaTimeline} = props
 
-  const mediaDays = mediaTimeline.days.map((mediaDay) => {
-    const media = mediaDay.media.map((mediaItem) => {
-      const srcString = "/thmnb/sqsm_"+mediaItem.media_src
-      const linkString = "/media/"+mediaItem.id
-      return (
-        <Link to={linkString}><img src={srcString} alt="" /></Link>
-      )
-    })
+  const mediaMonths = mediaTimeline.months.map((mediaDay) => {
     return (
       <div>
         <h1>{mediaDay.date}</h1>
-        <div>
-          {media}
-        </div>
       </div>
     )
   })
 
-  return (<div>{mediaDays}</div>)
+  return (<div>{mediaMonths}</div>)
 }
 
 export default MediaTimeline

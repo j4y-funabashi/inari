@@ -4,7 +4,7 @@ import MediaTimeline from './MediaTimeline';
 
 test('renders component', async () => {
   const mediaTimeline = {
-    days: []
+    months: []
   }
 
   render(<MediaTimeline mediaTimeline={mediaTimeline} />)

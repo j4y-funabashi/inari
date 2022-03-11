@@ -1,17 +1,11 @@
 import {API} from 'aws-amplify';
 
 export interface timelineResponse {
-    days: mediaDay[]
+    months: mediaMonth[]
 }
-interface mediaDay {
+interface mediaMonth {
     date: string;
-    media: mediaItem[];
-}
-interface mediaItem {
-    id: string;
-    mime_type: string;
-    date: string;
-    media_src: string;
+    ID: string;
 }
 
 export type TimelineQuery = () => Promise<timelineResponse>
