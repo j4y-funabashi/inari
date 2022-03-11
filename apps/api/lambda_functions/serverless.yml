@@ -16,31 +16,10 @@ provider:
           Action: "dynamodb:Query"
           Resource: "arn:aws:dynamodb:eu-central-1:725941804651:table/inari-dynamodb-dev-InariDatastore-1VAD7YFUNHWKE"
 
-        - Effect: "Allow"
-          Action:
-            - "s3:GetObject"
-            - "s3:ListBucket"
-          Resource:
-            - "arn:aws:s3:::backup.funabashi"
-            - "arn:aws:s3:::backup.funabashi/*"
-        - Effect: "Allow"
-          Action:
-            - "s3:PutObject"
-          Resource: "arn:aws:s3:::inari-mediastore-dev/*"
-
 package:
   patterns:
     - '!./**'
     - ./bin/**
-    - ./layers/**
-
-layers:
-  exiftool:
-    path: layers/exiftool/layer
-    description: exiftool with go1.x
-    compatibleRuntimes:
-      - go1.x
-    licenseInfo: MIT License
 
 functions:
   timeline:
@@ -53,22 +32,5 @@ functions:
             type: jwt
             id: ${env:AUTHORIZERID, ''}
 
-  import_from_queue:
-    handler: bin/import_from_queue
-    layers:
-      - !Ref ExiftoolLambdaLayer
-    events:
-      - sqs:
-          arn: !GetAtt ImportMediaQueue.Arn
-
-resources:
-  Resources:
-    ImportMediaQueue:
-      Type: AWS::SQS::Queue
-      Properties:
-        RedrivePolicy:
-          deadLetterTargetArn: !GetAtt ImportMediaDeadLetterQueue.Arn
-          maxReceiveCount: 3
-
-    ImportMediaDeadLetterQueue:
-      Type: AWS::SQS::Queue
+#resources:
+  #  Resources:
