@@ -212,8 +212,9 @@ func NewTimelineQuery(tableName, region string) app.TimelineQuery {
 				return timelineView, err
 			}
 			mediaMonth := app.MediaMonth{
-				ID:   mdr.Date,
-				Date: dat.Format("2006 Jan"),
+				ID:         mdr.Date,
+				Date:       dat.Format("2006 Jan"),
+				MediaCount: mdr.MediaCount,
 			}
 			timelineView.Months = append(timelineView.Months, mediaMonth)
 		}

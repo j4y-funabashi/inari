@@ -6,6 +6,7 @@ export interface timelineResponse {
 interface mediaMonth {
     date: string;
     ID: string;
+    media_count: number;
 }
 
 export type TimelineQuery = () => Promise<timelineResponse>

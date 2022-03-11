@@ -8,10 +8,10 @@ export interface MediaTimelineProps {
 const MediaTimeline: React.FunctionComponent<MediaTimelineProps> = (props: MediaTimelineProps) => {
   const {mediaTimeline} = props
 
-  const mediaMonths = mediaTimeline.months.map((mediaDay) => {
+  const mediaMonths = mediaTimeline.months.map((m) => {
     return (
       <div>
-        <h1>{mediaDay.date}</h1>
+        <h1>{m.date} ({m.media_count})</h1>
       </div>
     )
   })

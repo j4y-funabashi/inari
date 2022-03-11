@@ -21,8 +21,9 @@ type MetadataExtractor = func(mediaFile string) (MediaMetadata, error)
 type TimelineQuery = func() (TimelineView, error)
 
 type MediaMonth struct {
-	ID   string
-	Date string `json:"date"`
+	ID         string
+	Date       string `json:"date"`
+	MediaCount int    `json:"media_count"`
 }
 type TimelineView struct {
 	Months []MediaMonth `json:"months"`
