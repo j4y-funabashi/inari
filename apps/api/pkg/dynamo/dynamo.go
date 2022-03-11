@@ -136,17 +136,9 @@ func NewIndexer(tableName, region string) app.Indexer {
 		if err != nil {
 			return err
 		}
-		_, err = client.PutItem(&dynamodb.PutItemInput{
-			TableName: aws.String(tableName),
-			Item:      mrItem,
-		})
-		if err != nil {
-			return err
-		}
 
 		// -- save media date collection
-		mdckey := newMediaDateCollectionKey(mediaMeta)
-		mdckeyItem, err := dynamodbattribute.MarshalMap(mdckey)
+		mdckeyItem, err := dynamodbattribute.MarshalMap(newMediaDateCollectionKey(mediaMeta))
 		if err != nil {
 			return err
 		}
@@ -154,11 +146,25 @@ func NewIndexer(tableName, region string) app.Indexer {
 		if err != nil {
 			return err
 		}
-		_, err = client.UpdateItem(&dynamodb.UpdateItemInput{
-			TableName:                 aws.String(tableName),
-			Key:                       mdckeyItem,
-			UpdateExpression:          aws.String("SET media_date = :media_date, gsi1pk = :gsi1pk, gsi1sk = :gsi1sk ADD media_count :media_count"),
-			ExpressionAttributeValues: updateValues,
+
+		_, err = client.TransactWriteItems(&dynamodb.TransactWriteItemsInput{
+			TransactItems: []*dynamodb.TransactWriteItem{
+				{
+					Put: &dynamodb.Put{
+						TableName:           aws.String(tableName),
+						Item:                mrItem,
+						ConditionExpression: aws.String("attribute_not_exists(pk)"),
+					},
+				},
+				{
+					Update: &dynamodb.Update{
+						TableName:                 aws.String(tableName),
+						Key:                       mdckeyItem,
+						UpdateExpression:          aws.String("SET media_date = :media_date, gsi1pk = :gsi1pk, gsi1sk = :gsi1sk ADD media_count :media_count"),
+						ExpressionAttributeValues: updateValues,
+					},
+				},
+			},
 		})
 
 		return err
