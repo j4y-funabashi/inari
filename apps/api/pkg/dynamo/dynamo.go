@@ -11,8 +11,6 @@ import (
 )
 
 var mediaRecordName = "media"
-var mediaDateRecordName = "mediaDate"
-var collectionMediaDayRecordName = "collectionMediaDay"
 var collectionMonthPrefix = "month"
 
 type baseMediaRecordMeta struct {
@@ -74,18 +72,6 @@ func newMediaRecordPK(mediaMeta app.MediaMetadata) string {
 
 func newMediaRecordSK(mediaMeta app.MediaMetadata) string {
 	return mediaRecordName + "#" + mediaMeta.NewFilename()
-}
-
-func newMediaDateCollectionRecord(mediaMeta app.MediaMetadata) mediaDateCollectionRecord {
-	mdr := mediaDateCollectionRecord{}
-
-	mdr.Pk = newMediaRecordPK(mediaMeta)
-	mdr.Sk = newMediaDateCollectionRecordSK(mediaMeta)
-	mdr.Date = mediaMeta.Date.Format("2006-01")
-	mdr.Gsi1pk = "monthCollection"
-	mdr.Gsi1sk = newMediaDateCollectionRecordSK(mediaMeta)
-
-	return mdr
 }
 
 type mediaDateCollectionKey struct {
