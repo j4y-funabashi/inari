@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
@@ -38,25 +37,13 @@ type mediaRecord struct {
 	baseMediaRecordMeta
 }
 
-type mediaDateRecord struct {
-	Pk     string `json:"pk"`
-	Sk     string `json:"sk"`
-	Gsi1pk string `json:"gsi1pk"`
-	Gsi1sk string `json:"gsi1sk"`
-	baseMediaRecordMeta
-}
-
 type mediaDateCollectionRecord struct {
-	Pk     string `json:"pk"`
-	Sk     string `json:"sk"`
-	Date   string `json:"date"`
-	Gsi1pk string `json:"gsi1pk"`
-	Gsi1sk string `json:"gsi1sk"`
-}
-
-type mediaDateCollectionUpdate struct {
-	MediaKey  string   `json:":mk"`
-	MediaList []string `json:":mkl"`
+	Pk         string `json:"pk"`
+	Sk         string `json:"sk"`
+	Date       string `json:"media_date"`
+	Gsi1pk     string `json:"gsi1pk"`
+	Gsi1sk     string `json:"gsi1sk"`
+	MediaCount int    `json:"media_count"`
 }
 
 func newMediaRecord(mediaMeta app.MediaMetadata) mediaRecord {
@@ -101,6 +88,36 @@ func newMediaDateCollectionRecord(mediaMeta app.MediaMetadata) mediaDateCollecti
 	return mdr
 }
 
+type mediaDateCollectionKey struct {
+	Pk string `json:"pk"`
+	Sk string `json:"sk"`
+}
+
+func newMediaDateCollectionKey(mediaMeta app.MediaMetadata) mediaDateCollectionKey {
+	mdr := mediaDateCollectionKey{}
+
+	mdr.Pk = newMediaRecordPK(mediaMeta)
+	mdr.Sk = newMediaDateCollectionRecordSK(mediaMeta)
+
+	return mdr
+}
+
+type mediaDateCollectionUpdate struct {
+	Date       string `json:":media_date"`
+	Gsi1pk     string `json:":gsi1pk"`
+	Gsi1sk     string `json:":gsi1sk"`
+	MediaCount int    `json:":media_count"`
+}
+
+func newMediaDateCollectionUpdate(mediaMeta app.MediaMetadata) mediaDateCollectionUpdate {
+	out := mediaDateCollectionUpdate{}
+	out.Date = mediaMeta.Date.Format("2006-01")
+	out.Gsi1pk = "monthCollection"
+	out.Gsi1sk = newMediaDateCollectionRecordSK(mediaMeta)
+	out.MediaCount = 1
+	return out
+}
+
 func newMediaDateCollectionRecordSK(mediaMeta app.MediaMetadata) string {
 	return "META#" + mediaMeta.Date.Format("2006-01")
 }
@@ -127,28 +144,24 @@ func NewIndexer(tableName, region string) app.Indexer {
 			return err
 		}
 
-		// -- save media date collection if it does not exist
-		mdrcoll := newMediaDateCollectionRecord(mediaMeta)
-		mdrcollItem, err := dynamodbattribute.MarshalMap(mdrcoll)
+		// -- save media date collection
+		mdckey := newMediaDateCollectionKey(mediaMeta)
+		mdckeyItem, err := dynamodbattribute.MarshalMap(mdckey)
 		if err != nil {
 			return err
 		}
-		_, err = client.PutItem(&dynamodb.PutItemInput{
-			TableName:           aws.String(tableName),
-			Item:                mdrcollItem,
-			ConditionExpression: aws.String("attribute_not_exists(pk)"),
-		})
+		updateValues, err := dynamodbattribute.MarshalMap(newMediaDateCollectionUpdate(mediaMeta))
 		if err != nil {
-			if awsErr, ok := err.(awserr.Error); ok {
-				if awsErr.Code() != "ConditionalCheckFailedException" {
-					return err
-				}
-			} else {
-				return err
-			}
+			return err
 		}
+		_, err = client.UpdateItem(&dynamodb.UpdateItemInput{
+			TableName:                 aws.String(tableName),
+			Key:                       mdckeyItem,
+			UpdateExpression:          aws.String("SET media_date = :media_date, gsi1pk = :gsi1pk, gsi1sk = :gsi1sk ADD media_count :media_count"),
+			ExpressionAttributeValues: updateValues,
+		})
 
-		return nil
+		return err
 	}
 }
 
