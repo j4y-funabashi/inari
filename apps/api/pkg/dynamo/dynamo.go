@@ -166,6 +166,18 @@ func NewIndexer(tableName, region string) app.Indexer {
 				},
 			},
 		})
+		if err != nil {
+			switch t := err.(type) {
+			case *dynamodb.TransactionCanceledException:
+				for _, r := range t.CancellationReasons {
+					if *r.Code == "ConditionalCheckFailed" {
+						return nil
+					}
+				}
+			default:
+				return err
+			}
+		}
 
 		return err
 	}
