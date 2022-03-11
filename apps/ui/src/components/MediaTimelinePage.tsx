@@ -3,7 +3,7 @@ import {fetchTimeline, timelineResponse} from '../apiClient';
 import MediaTimeline from './MediaTimeline';
 
 const MediaTimelinePage: React.FunctionComponent = () => {
-  const [timelineData, setTimelineData] = React.useState<timelineResponse>({days: []});
+  const [timelineData, setTimelineData] = React.useState<timelineResponse>({months: []});
 
   React.useEffect(() => {
     (async () => {
