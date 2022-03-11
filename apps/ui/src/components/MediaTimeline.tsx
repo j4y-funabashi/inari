@@ -10,13 +10,11 @@ const MediaTimeline: React.FunctionComponent<MediaTimelineProps> = (props: Media
 
   const mediaMonths = mediaTimeline.months.map((m) => {
     return (
-      <div>
-        <h1>{m.date} ({m.media_count})</h1>
-      </div>
+        <li>{m.date} <small>({m.media_count})</small></li>
     )
   })
 
-  return (<div>{mediaMonths}</div>)
+  return (<ol>{mediaMonths}</ol>)
 }
 
 export default MediaTimeline
