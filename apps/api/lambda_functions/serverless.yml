@@ -14,7 +14,9 @@ provider:
       statements:
         - Effect: "Allow"
           Action: "dynamodb:Query"
-          Resource: "arn:aws:dynamodb:eu-central-1:725941804651:table/inari-dynamodb-dev-InariDatastore-1VAD7YFUNHWKE"
+          Resource:
+            - "arn:aws:dynamodb:eu-central-1:725941804651:table/inari-dynamodb-dev-InariDatastore-1VAD7YFUNHWKE"
+            - "arn:aws:dynamodb:eu-central-1:725941804651:table/inari-dynamodb-dev-InariDatastore-1VAD7YFUNHWKE/*"
 
 package:
   patterns:
