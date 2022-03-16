@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"time"
 
@@ -85,6 +86,7 @@ func NewImporter(logger *zap.SugaredLogger, downloadFromBackup Downloader, extra
 		logger.Infow("downloaded media from backup",
 			"backupFilename", backupFilename,
 			"filename", downloadedFilename)
+		defer os.Remove(downloadedFilename)
 
 		// extract metadata
 		mediaMeta, err := extractMetadata(downloadedFilename)

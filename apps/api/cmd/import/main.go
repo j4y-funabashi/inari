@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	zlogger, _ := zap.NewProduction()
+	zlogger, _ := zap.NewDevelopment()
 	logger := zlogger.Sugar()
 	defer logger.Sync()
 
