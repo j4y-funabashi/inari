@@ -10,4 +10,4 @@ build_func() {
 }
 
 build_func timeline
-build_func import_from_queue
+build_func create_thumbnails

@@ -47,6 +47,12 @@ functions:
             type: jwt
             id: ${env:AUTHORIZERID, ''}
 
+  create_thumbnails:
+    handler: bin/create_thumbnails
+    events:
+      - sqs:
+          arn: !GetAtt CreateThumbnailQueue.Arn
+
 resources:
   Resources:
     CreateThumbnailQueue:
