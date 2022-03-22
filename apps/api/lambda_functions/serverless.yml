@@ -18,6 +18,19 @@ provider:
             - "arn:aws:dynamodb:eu-central-1:725941804651:table/inari-dynamodb-dev-InariDatastore-1VAD7YFUNHWKE"
             - "arn:aws:dynamodb:eu-central-1:725941804651:table/inari-dynamodb-dev-InariDatastore-1VAD7YFUNHWKE/*"
 
+        - Effect: "Allow"
+          Action:
+            - "s3:GetObject"
+            - "s3:ListBucket"
+          Resource:
+            - "arn:aws:s3:::inari-mediastore-dev/*"
+            - "arn:aws:s3:::inari-mediastore-dev/*"
+        - Effect: "Allow"
+          Action:
+            - "s3:PutObject"
+          Resource:
+            - "arn:aws:s3:::inari-thumbnailstore-dev/*"
+
 package:
   patterns:
     - '!./**'
@@ -34,5 +47,14 @@ functions:
             type: jwt
             id: ${env:AUTHORIZERID, ''}
 
-#resources:
-  #  Resources:
+resources:
+  Resources:
+    CreateThumbnailQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        RedrivePolicy:
+          deadLetterTargetArn: !GetAtt CreateThumbnailDeadLetterQueue.Arn
+          maxReceiveCount: 3
+
+    CreateThumbnailDeadLetterQueue:
+      Type: AWS::SQS::Queue

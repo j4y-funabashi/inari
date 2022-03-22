@@ -11,7 +11,7 @@ import (
 )
 
 type Importer = func(backupFilename string) error
-type thumbnailer = func(mediastoreKey string) error
+type Thumbnailer = func(mediastoreKey string) error
 type viewTimeline = func() (TimelineView, error)
 type Resizer = func(imgFilename string) ([]string, error)
 type Downloader = func(backupFilename string) (string, error)
@@ -114,7 +114,7 @@ func NewImporter(logger *zap.SugaredLogger, downloadFromBackup Downloader, extra
 	}
 }
 
-func NewThumbnailer(downloadFromMediaStore Downloader, resizeImage Resizer, uploadToThumbnailStore Uploader) thumbnailer {
+func NewThumbnailer(downloadFromMediaStore Downloader, resizeImage Resizer, uploadToThumbnailStore Uploader) Thumbnailer {
 	return func(mediastoreKey string) error {
 		// download file from media store
 		downloadedFilename, err := downloadFromMediaStore(mediastoreKey)
