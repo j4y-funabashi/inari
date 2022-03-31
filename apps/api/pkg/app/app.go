@@ -20,6 +20,7 @@ type Indexer = func(mediaMeta MediaMetadata) error
 type FileLister = func() ([]string, error)
 type MetadataExtractor = func(mediaFile string) (MediaMetadata, error)
 type TimelineQuery = func() (TimelineView, error)
+type Geocoder = func(lat, lng float64) (Location, error)
 
 type MediaMonth struct {
 	ID         string
@@ -41,7 +42,16 @@ type Coordinates struct {
 	Lng float64
 }
 type Location struct {
-	Coordinates
+	Country  Country
+	Region   string
+	Locality string
+	Lat      float64
+	Lng      float64
+}
+
+type Country struct {
+	Short string
+	Long  string
 }
 type MediaMetadata struct {
 	Hash        string
@@ -154,5 +164,19 @@ func NewTimelineView(timelineQuery TimelineQuery) viewTimeline {
 			return TimelineView{}, err
 		}
 		return timelineView, nil
+	}
+}
+
+func NewGeocoder(logger *zap.SugaredLogger, reverseGeocode Geocoder) Geocoder {
+	return func(lat, lng float64) (Location, error) {
+		loc, err := reverseGeocode(lat, lng)
+		if err != nil {
+			logger.Errorw(
+				"failed to geocode location",
+				"lat", lat,
+				"lng", lng,
+			)
+		}
+		return loc, err
 	}
 }
