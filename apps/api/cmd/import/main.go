@@ -27,6 +27,19 @@ func main() {
 	indexer := dynamo.NewIndexer(mediaStoreTableName, region)
 	extractMetadata := exiftool.NewExtractor("/usr/bin/exiftool")
 	importMedia := app.NewImporter(logger, downloader, extractMetadata, uploader, indexer)
+
+	inputFilename := os.Args[1]
+	if inputFilename != "" {
+		err := importMedia(inputFilename)
+		if err != nil {
+			logger.Errorw("failed to import",
+				"error", err,
+				"inputFilename", inputFilename)
+			os.Exit(1)
+		}
+		os.Exit(0)
+	}
+
 	listFiles := s3.NewLister(backupBucket, region, "jayr")
 	files, err := listFiles()
 	if err != nil {
