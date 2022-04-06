@@ -18,6 +18,8 @@ func main() {
 	lng = -1.776
 	lat = 51.179
 	lng = -1.826
+	lat = 36.6392707777778
+	lng = -4.70883369444444
 
 	zlogger, _ := zap.NewDevelopment()
 	logger := zlogger.Sugar()
@@ -30,7 +32,12 @@ func main() {
 	reverseGeocode := app.NewGeocoder(logger, geocoder)
 	location, err := reverseGeocode(lat, lng)
 	if err != nil {
-		logger.Fatal("OH NOES")
+		logger.Fatal(
+			"failed to reverse geocode",
+			"lat", lat,
+			"lng", lng,
+			"err", err,
+		)
 	}
 
 	logger.Infow(
