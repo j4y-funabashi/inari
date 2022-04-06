@@ -39,8 +39,10 @@ func NewGeocoder(apiKey, baseURL string) app.Geocoder {
 		address := getAddress(results.Results)
 
 		return app.Location{
-			Lat:      lat,
-			Lng:      lng,
+			Coordinates: app.Coordinates{
+				Lat: lat,
+				Lng: lng,
+			},
 			Country:  getCountry(address),
 			Region:   getRegion(address),
 			Locality: getLocality(address),

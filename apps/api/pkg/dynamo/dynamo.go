@@ -66,6 +66,30 @@ func newMediaRecord(mediaMeta app.MediaMetadata) mediaRecord {
 	return mr
 }
 
+func newMediaFromMediaRecord(mr mediaRecord) app.MediaCollectionItem {
+	return app.MediaCollectionItem{
+		ID:       mr.MediaKey,
+		MediaSrc: mr.MediaKey,
+		MimeType: mr.MimeType,
+		Date:     mr.Date,
+		Location: app.Location{
+			Coordinates: app.Coordinates{
+				Lat: mr.LocationLat,
+				Lng: mr.LocationLng,
+			},
+		},
+	}
+}
+
+func newMediaMetaFromRecord(mr mediaDateCollectionRecord) app.MediaMonth {
+	dat, _ := time.Parse("2006-01", mr.Date)
+	return app.MediaMonth{
+		ID:         mr.Date,
+		Date:       dat.Format("2006 Jan"),
+		MediaCount: mr.MediaCount,
+	}
+}
+
 func newMediaRecordPK(mediaMeta app.MediaMetadata) string {
 	return collectionMonthPrefix + "#" + mediaMeta.Date.Format("2006-01")
 }
@@ -207,18 +231,98 @@ func NewTimelineQuery(tableName, region string) app.TimelineQuery {
 			}
 
 			// -- convert media record to media day
-			dat, err := time.Parse("2006-01", mdr.Date)
-			if err != nil {
-				return timelineView, err
-			}
-			mediaMonth := app.MediaMonth{
-				ID:         mdr.Date,
-				Date:       dat.Format("2006 Jan"),
-				MediaCount: mdr.MediaCount,
-			}
+			mediaMonth := newMediaMetaFromRecord(mdr)
 			timelineView.Months = append(timelineView.Months, mediaMonth)
 		}
 
 		return timelineView, nil
 	}
+}
+
+func NewTimelineMonthQuery(tableName string, client *dynamodb.DynamoDB) app.TimelineMonthQuery {
+	return func(monthID string) (app.TimelineMonthView, error) {
+
+		timelineView, err := fetchMediaRecords(client, tableName, monthID)
+		if err != nil {
+			return timelineView, err
+		}
+		monthMeta, err := fetchMonthMeta(client, tableName, monthID)
+		if err != nil {
+			return timelineView, err
+		}
+
+		timelineView.CollectionMeta = monthMeta
+		return timelineView, err
+	}
+}
+
+func fetchMonthMeta(client *dynamodb.DynamoDB, tableName, monthID string) (app.MediaMonth, error) {
+	meta := app.MediaMonth{}
+
+	eavalues, err := dynamodbattribute.MarshalMap(map[string]string{
+		":pk": "month#" + monthID,
+		":sk": "META#",
+	})
+	if err != nil {
+		return meta, err
+	}
+	res, err := client.Query(
+		&dynamodb.QueryInput{
+			TableName:                 aws.String(tableName),
+			KeyConditionExpression:    aws.String("pk = :pk and begins_with(sk, :sk)"),
+			ExpressionAttributeValues: eavalues,
+			ScanIndexForward:          aws.Bool(false),
+		},
+	)
+	if err != nil {
+		return meta, err
+	}
+
+	for _, item := range res.Items {
+		mdr := mediaDateCollectionRecord{}
+		err = dynamodbattribute.UnmarshalMap(item, &mdr)
+		if err != nil {
+			return meta, err
+		}
+
+		// -- convert media record to media
+		meta := newMediaMetaFromRecord(mdr)
+		return meta, nil
+	}
+	return meta, nil
+
+}
+
+func fetchMediaRecords(client *dynamodb.DynamoDB, tableName, monthID string) (app.TimelineMonthView, error) {
+	timelineView := app.TimelineMonthView{}
+	eavalues, err := dynamodbattribute.MarshalMap(map[string]string{
+		":pk": "month#" + monthID,
+		":sk": "media#",
+	})
+	if err != nil {
+		return timelineView, err
+	}
+	err = client.QueryPages(
+		&dynamodb.QueryInput{
+			TableName:                 aws.String(tableName),
+			KeyConditionExpression:    aws.String("pk = :pk and begins_with(sk, :sk)"),
+			ExpressionAttributeValues: eavalues,
+			ScanIndexForward:          aws.Bool(true),
+		},
+		func(res *dynamodb.QueryOutput, isLastPg bool) bool {
+			for _, item := range res.Items {
+				mdr := mediaRecord{}
+				err = dynamodbattribute.UnmarshalMap(item, &mdr)
+				if err != nil {
+					return false
+				}
+
+				// -- convert media record to media
+				media := newMediaFromMediaRecord(mdr)
+				timelineView.Media = append(timelineView.Media, media)
+			}
+
+			return true
+		})
+	return timelineView, err
 }

@@ -1,5 +1,6 @@
 import React from 'react';
 import {timelineResponse} from '../apiClient';
+import {Link} from 'react-router-dom';
 
 export interface MediaTimelineProps {
   mediaTimeline: timelineResponse
@@ -10,7 +11,7 @@ const MediaTimeline: React.FunctionComponent<MediaTimelineProps> = (props: Media
 
   const mediaMonths = mediaTimeline.months.map((m) => {
     return (
-        <li>{m.date} <small>({m.media_count})</small></li>
+        <li key={m.ID}><Link to={`/time/month/${m.ID}`}>{m.date}</Link> <small>({m.media_count})</small></li>
     )
   })
 

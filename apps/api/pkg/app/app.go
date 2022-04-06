@@ -12,7 +12,8 @@ import (
 
 type Importer = func(backupFilename string) error
 type Thumbnailer = func(mediastoreKey string) error
-type viewTimeline = func() (TimelineView, error)
+type ViewTimeline = func() (TimelineView, error)
+type ViewTimelineMonth = func(monthID string) (TimelineMonthView, error)
 type Resizer = func(imgFilename string) ([]string, error)
 type Downloader = func(backupFilename string) (string, error)
 type Uploader = func(localFilename, mediaStoreFilename string) error
@@ -20,6 +21,7 @@ type Indexer = func(mediaMeta MediaMetadata) error
 type FileLister = func() ([]string, error)
 type MetadataExtractor = func(mediaFile string) (MediaMetadata, error)
 type TimelineQuery = func() (TimelineView, error)
+type TimelineMonthQuery = func(monthID string) (TimelineMonthView, error)
 type Geocoder = func(lat, lng float64) (Location, error)
 
 type MediaMonth struct {
@@ -30,41 +32,45 @@ type MediaMonth struct {
 type TimelineView struct {
 	Months []MediaMonth `json:"months"`
 }
+type TimelineMonthView struct {
+	CollectionMeta MediaMonth            `json:"collection_meta"`
+	Media          []MediaCollectionItem `json:"media"`
+}
 type MediaCollectionItem struct {
-	ID       string `json:"id"`
-	MimeType string `json:"mime_type"`
-	Date     string `json:"date"`
-	MediaSrc string `json:"media_src"`
+	ID       string   `json:"id"`
+	MimeType string   `json:"mime_type"`
+	Date     string   `json:"date"`
+	MediaSrc string   `json:"media_src"`
+	Location Location `json:"location"`
 }
 
 type Coordinates struct {
-	Lat float64
-	Lng float64
+	Lat float64 `json:"lat"`
+	Lng float64 `json:"lng"`
 }
 type Location struct {
-	Country  Country
-	Region   string
-	Locality string
-	Lat      float64
-	Lng      float64
+	Country     Country `json:"country"`
+	Region      string  `json:"region"`
+	Locality    string  `json:"locality"`
+	Coordinates `json:"coordinates"`
 }
 
 type Country struct {
-	Short string
-	Long  string
+	Short string `json:"short"`
+	Long  string `json:"long"`
 }
 type MediaMetadata struct {
-	Hash        string
-	Date        time.Time
-	Location    Location
-	Ext         string
-	MimeType    string
-	Width       string
-	Height      string
-	CameraMake  string
-	CameraModel string
-	Keywords    string
-	Title       string
+	Hash        string    `json:"hash"`
+	Date        time.Time `json:"date"`
+	Location    Location  `json:"location"`
+	Ext         string    `json:"ext"`
+	MimeType    string    `json:"mime_type"`
+	Width       string    `json:"width"`
+	Height      string    `json:"height"`
+	CameraMake  string    `json:"camera_make"`
+	CameraModel string    `json:"camera_model"`
+	Keywords    string    `json:"keywords"`
+	Title       string    `json:"title"`
 }
 
 func (mm MediaMetadata) NewFilename() string {
@@ -157,11 +163,21 @@ func NewThumbnailer(downloadFromMediaStore Downloader, resizeImage Resizer, uplo
 	}
 }
 
-func NewTimelineView(timelineQuery TimelineQuery) viewTimeline {
+func NewTimelineView(timelineQuery TimelineQuery) ViewTimeline {
 	return func() (TimelineView, error) {
 		timelineView, err := timelineQuery()
 		if err != nil {
 			return TimelineView{}, err
+		}
+		return timelineView, nil
+	}
+}
+
+func NewTimelineMonthView(timelineQuery TimelineMonthQuery) ViewTimelineMonth {
+	return func(monthID string) (TimelineMonthView, error) {
+		timelineView, err := timelineQuery(monthID)
+		if err != nil {
+			return TimelineMonthView{}, nil
 		}
 		return timelineView, nil
 	}
