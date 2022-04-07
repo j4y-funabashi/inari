@@ -3,6 +3,7 @@ import {AmplifyAuthenticator, AmplifySignOut} from '@aws-amplify/ui-react';
 import React from 'react';
 import {BrowserRouter, Link, Route, Switch} from 'react-router-dom';
 import MediaTimelinePage from './components/MediaTimelinePage';
+import MediaTimelineMonthPage from './components/MediaTimelineMonthPage';
 import MediaDetailPage from './components/MediaDetailPage';
 
 interface User {
@@ -30,7 +31,7 @@ const App: React.FunctionComponent = () => {
         <MediaTimelinePage />
       </Route>
       <Route path="/time/month/:monthid">
-        <MediaDetailPage />
+        <MediaTimelineMonthPage />
       </Route>
       <Route path="/media/:mediaid">
         <MediaDetailPage />
