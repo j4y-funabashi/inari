@@ -42,7 +42,7 @@ functions:
     events:
       - httpApi:
           method: GET
-          path: /api/time
+          path: /api/months
           authorizer:
             type: jwt
             id: ${env:AUTHORIZERID, ''}
@@ -52,7 +52,7 @@ functions:
     events:
       - httpApi:
           method: GET
-          path: /api/time/month/{monthID+}
+          path: /api/month/{monthID+}
           authorizer:
             type: jwt
             id: ${env:AUTHORIZERID, ''}
