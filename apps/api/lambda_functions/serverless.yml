@@ -42,7 +42,17 @@ functions:
     events:
       - httpApi:
           method: GET
-          path: /api/timeline/{date+}
+          path: /api/time
+          authorizer:
+            type: jwt
+            id: ${env:AUTHORIZERID, ''}
+
+  timeline_month:
+    handler: bin/timeline_month
+    events:
+      - httpApi:
+          method: GET
+          path: /api/time/month/{monthID+}
           authorizer:
             type: jwt
             id: ${env:AUTHORIZERID, ''}

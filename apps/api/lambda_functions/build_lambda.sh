@@ -11,3 +11,4 @@ build_func() {
 
 build_func timeline
 build_func create_thumbnails
+build_func timeline_month

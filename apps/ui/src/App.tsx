@@ -29,6 +29,9 @@ const App: React.FunctionComponent = () => {
       <Route exact path="/">
         <MediaTimelinePage />
       </Route>
+      <Route path="/time/month/:monthid">
+        <MediaDetailPage />
+      </Route>
       <Route path="/media/:mediaid">
         <MediaDetailPage />
       </Route>
