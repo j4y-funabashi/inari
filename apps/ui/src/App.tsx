@@ -24,8 +24,6 @@ const App: React.FunctionComponent = () => {
   return authState === AuthState.SignedIn && user ? (
 
   <BrowserRouter>
-
-
     <Switch>
       <Route exact path="/">
         <MediaTimelinePage />
