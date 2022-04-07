@@ -23,7 +23,7 @@ func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (Response, 
 	userName := req.RequestContext.Authorizer["jwt"].(map[string]interface{})["claims"].(map[string]interface{})["cognito:username"].(string)
 	userEmail := req.RequestContext.Authorizer["jwt"].(map[string]interface{})["claims"].(map[string]interface{})["email"].(string)
 
-	monthID := "2018-05"
+	monthID := req.PathParameters["monthID"]
 
 	zlogger, _ := zap.NewDevelopment()
 	logger := zlogger.Sugar()
