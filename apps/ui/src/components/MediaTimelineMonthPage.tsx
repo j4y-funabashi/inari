@@ -1,6 +1,7 @@
 import React from 'react';
 import {fetchTimelineMonth, timelineMonthResponse} from '../apiClient';
 import {useParams} from 'react-router-dom';
+import MediaTimelineMonth from './MediaTimelineMonth'
 
 type urlParams = {
   monthid: string
@@ -21,7 +22,7 @@ const MediaTimelineMonthPage: React.FunctionComponent = () => {
 
   console.log(timelineData)
 
-  return (<div></div>)
+  return (<MediaTimelineMonth mediaTimeline={timelineData} />)
 }
 
 export default MediaTimelineMonthPage

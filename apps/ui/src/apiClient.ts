@@ -11,6 +11,7 @@ interface mediaMonth {
 interface media {
     id: string;
     media_src: string;
+    date: string;
 }
 export interface timelineMonthResponse {
     collection_meta: mediaMonth;
