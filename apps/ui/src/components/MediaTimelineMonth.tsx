@@ -17,7 +17,7 @@ const MediaTimelineMonth: React.FunctionComponent<MediaTimelineMonthProps> = (pr
   )
   const media = mediaTimeline.media.map((m) => {
     return (
-      <Link to={`/media/${m.id}`}><img src={m.media_src.small} /></Link>
+      <Link to={`/media/${m.id}`}><img src={`/${m.media_src.small}`} /></Link>
     )
   })
 
