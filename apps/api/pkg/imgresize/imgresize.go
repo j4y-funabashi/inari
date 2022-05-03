@@ -8,6 +8,9 @@ import (
 	"github.com/j4y_funabashi/inari/apps/api/pkg/app"
 )
 
+const ImgSizeSQSMPrefix = "sqsm"
+const ImgSizeSQMDPrefix = "sqmd"
+const ImgSizeLGPrefix = "lg"
 const ImgSizeSQSM = 92
 const ImgSizeSQMD = 420
 const ImgSizeLG = 1080
@@ -31,11 +34,11 @@ func NewResizer() app.Resizer {
 		} else {
 			src = imaging.Resize(src, 0, ImgSizeLG, imaging.Lanczos)
 		}
-		err = imaging.Save(src, generateFilename("lg", originalImgFilename))
+		err = imaging.Save(src, generateFilename(ImgSizeLGPrefix, originalImgFilename))
 		if err != nil {
 			return resizedFiles, err
 		}
-		resizedFiles = append(resizedFiles, generateFilename("lg", originalImgFilename))
+		resizedFiles = append(resizedFiles, generateFilename(ImgSizeLGPrefix, originalImgFilename))
 
 		// -- create sqmd image
 		if orientation == Landscape {

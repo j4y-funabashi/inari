@@ -3,14 +3,20 @@ import {API} from 'aws-amplify';
 export interface timelineResponse {
     months: mediaMonth[]
 }
-interface mediaMonth {
+export interface mediaMonth {
     date: string;
     ID: string;
     media_count: number;
 }
-interface media {
+
+interface mediaSrc {
+    small: string;
+    medium: string;
+    large: string;
+}
+export interface media {
     id: string;
-    media_src: string;
+    media_src: mediaSrc;
     date: string;
 }
 export interface timelineMonthResponse {

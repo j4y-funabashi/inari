@@ -1,6 +1,8 @@
 package dynamo
 
 import (
+	"fmt"
+	"path/filepath"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -8,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/app"
+	"github.com/j4y_funabashi/inari/apps/api/pkg/imgresize"
 )
 
 var mediaRecordName = "media"
@@ -67,9 +70,14 @@ func newMediaRecord(mediaMeta app.MediaMetadata) mediaRecord {
 }
 
 func newMediaFromMediaRecord(mr mediaRecord) app.MediaCollectionItem {
+	// https://photos-dev.funabashi.co.uk/thmnb/lg_20211016_143550_5deb3260c820dc1adc1b29282ad4d3d6.JPG
 	return app.MediaCollectionItem{
-		ID:       mr.MediaKey,
-		MediaSrc: mr.MediaKey,
+		ID: mr.MediaKey,
+		MediaSrc: app.MediaSrc{
+			Large:  fmt.Sprintf("%s/%s_%s", "thmnb", imgresize.ImgSizeLGPrefix, filepath.Base(mr.MediaKey)),
+			Medium: fmt.Sprintf("%s/%s_%s", "thmnb", imgresize.ImgSizeSQMDPrefix, filepath.Base(mr.MediaKey)),
+			Small:  fmt.Sprintf("%s/%s_%s", "thmnb", imgresize.ImgSizeSQSMPrefix, filepath.Base(mr.MediaKey)),
+		},
 		MimeType: mr.MimeType,
 		Date:     mr.Date,
 		Location: app.Location{

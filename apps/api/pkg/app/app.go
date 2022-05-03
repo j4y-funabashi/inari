@@ -36,11 +36,18 @@ type TimelineMonthView struct {
 	CollectionMeta MediaMonth            `json:"collection_meta"`
 	Media          []MediaCollectionItem `json:"media"`
 }
+
+type MediaSrc struct {
+	Large  string `json:"large"`
+	Medium string `json:"medium"`
+	Small  string `json:"small"`
+}
+
 type MediaCollectionItem struct {
 	ID       string   `json:"id"`
 	MimeType string   `json:"mime_type"`
 	Date     string   `json:"date"`
-	MediaSrc string   `json:"media_src"`
+	MediaSrc MediaSrc `json:"media_src"`
 	Location Location `json:"location"`
 }
 
