@@ -7,6 +7,7 @@ import (
 	"github.com/j4y_funabashi/inari/apps/api/pkg/dynamo"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/exiftool"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/s3"
+	"github.com/j4y_funabashi/inari/apps/api/pkg/sqs"
 	"go.uber.org/zap"
 )
 
@@ -26,18 +27,21 @@ func main() {
 	uploader := s3.NewUploader(mediaStoreBucket, region)
 	indexer := dynamo.NewIndexer(mediaStoreTableName, region)
 	extractMetadata := exiftool.NewExtractor("/usr/bin/exiftool")
-	importMedia := app.NewImporter(logger, downloader, extractMetadata, uploader, indexer)
+	notifier := sqs.NewNotifier(region)
+	importMedia := app.NewImporter(logger, downloader, extractMetadata, uploader, indexer, notifier)
 
-	inputFilename := os.Args[1]
-	if inputFilename != "" {
-		err := importMedia(inputFilename)
-		if err != nil {
-			logger.Errorw("failed to import",
-				"error", err,
-				"inputFilename", inputFilename)
-			os.Exit(1)
+	if len(os.Args) > 1 {
+		inputFilename := os.Args[1]
+		if inputFilename != "" {
+			err := importMedia(inputFilename)
+			if err != nil {
+				logger.Errorw("failed to import",
+					"error", err,
+					"inputFilename", inputFilename)
+				os.Exit(1)
+			}
+			os.Exit(0)
 		}
-		os.Exit(0)
 	}
 
 	listFiles := s3.NewLister(backupBucket, region, "jayr")

@@ -18,6 +18,7 @@ type Resizer = func(imgFilename string) ([]string, error)
 type Downloader = func(backupFilename string) (string, error)
 type Uploader = func(localFilename, mediaStoreFilename string) error
 type Indexer = func(mediaMeta MediaMetadata) error
+type Notifier = func(mediaMeta MediaMetadata) error
 type FileLister = func() ([]string, error)
 type MetadataExtractor = func(mediaFile string) (MediaMetadata, error)
 type TimelineQuery = func() (TimelineView, error)
@@ -98,7 +99,7 @@ func (mm MediaMetadata) ThumbnailKey() string {
 	)
 }
 
-func NewImporter(logger *zap.SugaredLogger, downloadFromBackup Downloader, extractMetadata MetadataExtractor, uploadToMediaStore Uploader, indexMedia Indexer) Importer {
+func NewImporter(logger *zap.SugaredLogger, downloadFromBackup Downloader, extractMetadata MetadataExtractor, uploadToMediaStore Uploader, indexMedia Indexer, addToQueue Notifier) Importer {
 	return func(backupFilename string) error {
 
 		// download file from backup storage
@@ -133,6 +134,17 @@ func NewImporter(logger *zap.SugaredLogger, downloadFromBackup Downloader, extra
 		if err != nil {
 			return fmt.Errorf("failed to index media metadata: %w", err)
 		}
+		logger.Infow("added to index",
+			"newFilename", mediaMeta.NewFilename())
+
+		// add to queue
+		err = addToQueue(mediaMeta)
+		if err != nil {
+			return fmt.Errorf("failed to add to queue: %w", err)
+		}
+		logger.Infow("notified downstream",
+			"newFilename", mediaMeta.NewFilename())
+
 		return nil
 	}
 }
@@ -144,6 +156,7 @@ func NewThumbnailer(downloadFromMediaStore Downloader, resizeImage Resizer, uplo
 		if err != nil {
 			return err
 		}
+		defer os.Remove(downloadedFilename)
 		logrus.
 			WithField("mediastoreKey", mediastoreKey).
 			WithField("filename", downloadedFilename).
