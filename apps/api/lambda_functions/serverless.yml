@@ -92,7 +92,7 @@ resources:
     CreateThumbnailSubscription:
       Type: AWS::SNS::Subscription
       Properties:
-        TopicArn: !GetAtt PostImportTopic.Arn
+        TopicArn: !Ref PostImportTopic
         RawMessageDelivery: true
         Endpoint: !GetAtt CreateThumbnailQueue.Arn
         Protocol: "sqs"
@@ -100,7 +100,7 @@ resources:
     GeocoderSubscription:
       Type: AWS::SNS::Subscription
       Properties:
-        TopicArn: !GetAtt PostImportTopic.Arn
+        TopicArn: !Ref PostImportTopic
         RawMessageDelivery: true
         Endpoint: !GetAtt GeocoderQueue.Arn
         Protocol: "sqs"
