@@ -69,11 +69,6 @@ resources:
     PostImportTopic:
       Type: AWS::SNS::Topic
       Properties:
-        Subscription:
-          - Endpoint: !GetAtt CreateThumbnailQueue.Arn
-            Protocol: "sqs"
-          - Endpoint: !GetAtt GeocoderQueue.Arn
-            Protocol: "sqs"
         TopicName: "PostImportTopic"
 
     CreateThumbnailQueue:
@@ -93,3 +88,19 @@ resources:
           maxReceiveCount: 2
     GeocoderDeadLetterQueue:
       Type: AWS::SQS::Queue
+
+    CreateThumbnailSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        TopicArn: !GetAtt PostImportTopic.Arn
+        RawMessageDelivery: true
+        Endpoint: !GetAtt CreateThumbnailQueue.Arn
+        Protocol: "sqs"
+
+    GeocoderSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        TopicArn: !GetAtt PostImportTopic.Arn
+        RawMessageDelivery: true
+        Endpoint: !GetAtt GeocoderQueue.Arn
+        Protocol: "sqs"
