@@ -65,12 +65,31 @@ functions:
 
 resources:
   Resources:
+
+    PostImportTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        Subscription:
+          - Endpoint: !GetAtt CreateThumbnailQueue.Arn
+            Protocol: "sqs"
+          - Endpoint: !GetAtt GeocoderQueue.Arn
+            Protocol: "sqs"
+        TopicName: "PostImportTopic"
+
     CreateThumbnailQueue:
       Type: AWS::SQS::Queue
       Properties:
         RedrivePolicy:
           deadLetterTargetArn: !GetAtt CreateThumbnailDeadLetterQueue.Arn
-          maxReceiveCount: 3
-
+          maxReceiveCount: 2
     CreateThumbnailDeadLetterQueue:
+      Type: AWS::SQS::Queue
+
+    GeocoderQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        RedrivePolicy:
+          deadLetterTargetArn: !GetAtt GeocoderDeadLetterQueue.Arn
+          maxReceiveCount: 2
+    GeocoderDeadLetterQueue:
       Type: AWS::SQS::Queue
