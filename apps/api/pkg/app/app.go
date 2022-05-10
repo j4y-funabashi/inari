@@ -23,7 +23,10 @@ type FileLister = func() ([]string, error)
 type MetadataExtractor = func(mediaFile string) (MediaMetadata, error)
 type TimelineQuery = func() (TimelineView, error)
 type TimelineMonthQuery = func(monthID string) (TimelineMonthView, error)
+type MediaDetailQuery = func(mediaID MediaCollectionID) (MediaDetailView, error)
 type Geocoder = func(lat, lng float64) (Location, error)
+type MediaGeocoder = func(mediaID MediaCollectionID) (Location, error)
+type LocationPutter = func(mediaID MediaCollectionID, location Location) error
 
 type MediaMonth struct {
 	ID         string
@@ -38,18 +41,27 @@ type TimelineMonthView struct {
 	Media          []MediaCollectionItem `json:"media"`
 }
 
+type MediaDetailView struct {
+	Media MediaCollectionItem `json:"media"`
+}
+
 type MediaSrc struct {
+	Key    string `json:"key"`
 	Large  string `json:"large"`
 	Medium string `json:"medium"`
 	Small  string `json:"small"`
 }
 
 type MediaCollectionItem struct {
-	ID       string   `json:"id"`
-	MimeType string   `json:"mime_type"`
-	Date     string   `json:"date"`
-	MediaSrc MediaSrc `json:"media_src"`
-	Location Location `json:"location"`
+	ID       MediaCollectionID `json:"id"`
+	Date     string            `json:"date"`
+	MediaSrc MediaSrc          `json:"media_src"`
+	MediaMetadata
+}
+
+type MediaCollectionID struct {
+	CollectionID string `json:"collection_id"`
+	MediaID      string `json:"media_id"`
 }
 
 type Coordinates struct {
@@ -99,7 +111,7 @@ func (mm MediaMetadata) ThumbnailKey() string {
 	)
 }
 
-func NewImporter(logger *zap.SugaredLogger, downloadFromBackup Downloader, extractMetadata MetadataExtractor, uploadToMediaStore Uploader, indexMedia Indexer, addToQueue Notifier) Importer {
+func NewImporter(logger *zap.SugaredLogger, downloadFromBackup Downloader, extractMetadata MetadataExtractor, uploadToMediaStore Uploader, indexMedia Indexer, notifyDownstream Notifier) Importer {
 	return func(backupFilename string) error {
 
 		// download file from backup storage
@@ -138,9 +150,9 @@ func NewImporter(logger *zap.SugaredLogger, downloadFromBackup Downloader, extra
 			"newFilename", mediaMeta.NewFilename())
 
 		// add to queue
-		err = addToQueue(mediaMeta)
+		err = notifyDownstream(mediaMeta)
 		if err != nil {
-			return fmt.Errorf("failed to add to queue: %w", err)
+			return fmt.Errorf("failed to notify downstream: %w", err)
 		}
 		logger.Infow("notified downstream",
 			"newFilename", mediaMeta.NewFilename())
@@ -203,14 +215,34 @@ func NewTimelineMonthView(timelineQuery TimelineMonthQuery) ViewTimelineMonth {
 	}
 }
 
-func NewGeocoder(logger *zap.SugaredLogger, reverseGeocode Geocoder) Geocoder {
-	return func(lat, lng float64) (Location, error) {
-		loc, err := reverseGeocode(lat, lng)
+func NewGeocoder(logger *zap.SugaredLogger, reverseGeocode Geocoder, fetchMediaDetail MediaDetailQuery, saveLocation LocationPutter) MediaGeocoder {
+	return func(mediaID MediaCollectionID) (Location, error) {
+		media, err := fetchMediaDetail(mediaID)
+		if err != nil {
+			logger.Errorw(
+				"failed to fetch media detail",
+				"mediaID", mediaID,
+				"err", err,
+			)
+		}
+
+		loc, err := reverseGeocode(
+			media.Media.Location.Lat,
+			media.Media.Location.Lng)
 		if err != nil {
 			logger.Errorw(
 				"failed to geocode location",
-				"lat", lat,
-				"lng", lng,
+				"media", media,
+				"err", err,
+			)
+		}
+
+		err = saveLocation(mediaID, loc)
+		if err != nil {
+			logger.Errorw(
+				"failed to save media location",
+				"media", media,
+				"err", err,
 			)
 		}
 		return loc, err

@@ -3,23 +3,30 @@ package main
 import (
 	"os"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/app"
+	"github.com/j4y_funabashi/inari/apps/api/pkg/dynamo"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/google"
 	"go.uber.org/zap"
 )
 
 func main() {
 
-	lat := 53.8700189722222
-	lng := -1.561703
-	lat = 40.416775
-	lng = -3.703790
-	lat = 51.173
-	lng = -1.776
-	lat = 51.179
-	lng = -1.826
-	lat = 36.6392707777778
-	lng = -4.70883369444444
+	mediaID := app.MediaCollectionID{
+		CollectionID: "month#2018-05",
+		MediaID:      "media#2018/20180527_211329_c436eb8941ec3979e8e9ea74ccea8139.JPG",
+	}
+
+	mediaStoreTableName := "inari-dynamodb-dev-InariDatastore-1VAD7YFUNHWKE"
+	region := "eu-central-1"
+
+	// -- create client
+	sess, _ := session.NewSession(&aws.Config{
+		Region: aws.String(region)},
+	)
+	dynamoClient := dynamodb.New(sess)
 
 	zlogger, _ := zap.NewDevelopment()
 	logger := zlogger.Sugar()
@@ -29,14 +36,14 @@ func main() {
 	baseURL := "https://maps.googleapis.com/maps/api/geocode/json"
 
 	geocoder := google.NewGeocoder(apiKey, baseURL)
-	reverseGeocode := app.NewGeocoder(logger, geocoder)
-	location, err := reverseGeocode(lat, lng)
+	fetchMedia := dynamo.NewMediaDetailQuery(mediaStoreTableName, dynamoClient)
+	saveLocation := dynamo.NewPutLocation(mediaStoreTableName, dynamoClient)
+	reverseGeocode := app.NewGeocoder(logger, geocoder, fetchMedia, saveLocation)
+	location, err := reverseGeocode(mediaID)
 	if err != nil {
 		logger.Fatal(
 			"failed to reverse geocode",
-			"lat", lat,
-			"lng", lng,
-			"err", err,
+			"mediaID", mediaID,
 		)
 	}
 

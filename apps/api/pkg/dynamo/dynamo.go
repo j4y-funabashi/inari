@@ -25,16 +25,20 @@ type baseMediaRecordMeta struct {
 }
 
 type mediaRecord struct {
-	Pk          string  `json:"pk"`
-	Sk          string  `json:"sk"`
-	Hash        string  `json:"hash"`
-	CameraMake  string  `json:"camera_make"`
-	CameraModel string  `json:"camera_model"`
-	LocationLat float64 `json:"location_lat"`
-	LocationLng float64 `json:"location_lng"`
-	Ext         string  `json:"ext"`
-	Keywords    string  `json:"keywords"`
-	Title       string  `json:"title"`
+	Pk                string  `json:"pk"`
+	Sk                string  `json:"sk"`
+	Hash              string  `json:"hash"`
+	CameraMake        string  `json:"camera_make"`
+	CameraModel       string  `json:"camera_model"`
+	LocationLat       float64 `json:"location_lat"`
+	LocationLng       float64 `json:"location_lng"`
+	LocationRegion    string  `json:"location_region"`
+	LocationLocality  string  `json:"location_locality"`
+	LocationCountryL  string  `json:"location_country_l"`
+	LocationCountrySh string  `json:"location_country_sh"`
+	Ext               string  `json:"ext"`
+	Keywords          string  `json:"keywords"`
+	Title             string  `json:"title"`
 	baseMediaRecordMeta
 }
 
@@ -70,23 +74,42 @@ func newMediaRecord(mediaMeta app.MediaMetadata) mediaRecord {
 }
 
 func newMediaFromMediaRecord(mr mediaRecord) app.MediaCollectionItem {
-	// https://photos-dev.funabashi.co.uk/thmnb/lg_20211016_143550_5deb3260c820dc1adc1b29282ad4d3d6.JPG
-	return app.MediaCollectionItem{
-		ID: mr.MediaKey,
-		MediaSrc: app.MediaSrc{
-			Large:  fmt.Sprintf("%s/%s_%s", "thmnb", imgresize.ImgSizeLGPrefix, filepath.Base(mr.MediaKey)),
-			Medium: fmt.Sprintf("%s/%s_%s", "thmnb", imgresize.ImgSizeSQMDPrefix, filepath.Base(mr.MediaKey)),
-			Small:  fmt.Sprintf("%s/%s_%s", "thmnb", imgresize.ImgSizeSQSMPrefix, filepath.Base(mr.MediaKey)),
+	m := app.MediaCollectionItem{}
+	m.ID = app.MediaCollectionID{
+		CollectionID: mr.Pk,
+		MediaID:      mr.Sk,
+	}
+	m.MediaSrc = app.MediaSrc{
+		Key:    mr.MediaKey,
+		Large:  fmt.Sprintf("%s/%s_%s", "thmnb", imgresize.ImgSizeLGPrefix, filepath.Base(mr.MediaKey)),
+		Medium: fmt.Sprintf("%s/%s_%s", "thmnb", imgresize.ImgSizeSQMDPrefix, filepath.Base(mr.MediaKey)),
+		Small:  fmt.Sprintf("%s/%s_%s", "thmnb", imgresize.ImgSizeSQSMPrefix, filepath.Base(mr.MediaKey)),
+	}
+
+	m.MimeType = mr.MimeType
+	m.Date = mr.Date
+	m.Location = app.Location{
+		Region:   mr.LocationRegion,
+		Locality: mr.LocationLocality,
+		Country: app.Country{
+			Short: mr.LocationCountrySh,
+			Long:  mr.LocationCountryL,
 		},
-		MimeType: mr.MimeType,
-		Date:     mr.Date,
-		Location: app.Location{
-			Coordinates: app.Coordinates{
-				Lat: mr.LocationLat,
-				Lng: mr.LocationLng,
-			},
+		Coordinates: app.Coordinates{
+			Lat: mr.LocationLat,
+			Lng: mr.LocationLng,
 		},
 	}
+	m.Width = mr.Width
+	m.Height = mr.Height
+	m.Ext = mr.Ext
+	m.CameraMake = mr.CameraMake
+	m.CameraModel = mr.CameraModel
+	m.Hash = mr.Hash
+	m.Keywords = mr.Keywords
+	m.Title = mr.Title
+
+	return m
 }
 
 func newMediaMetaFromRecord(mr mediaDateCollectionRecord) app.MediaMonth {
@@ -333,4 +356,76 @@ func fetchMediaRecords(client *dynamodb.DynamoDB, tableName, monthID string) (ap
 			return true
 		})
 	return timelineView, err
+}
+
+func NewMediaDetailQuery(tableName string, client *dynamodb.DynamoDB) app.MediaDetailQuery {
+	return func(mediaID app.MediaCollectionID) (app.MediaDetailView, error) {
+
+		view := app.MediaDetailView{}
+
+		// -- query dynamo
+		keyValue, err := dynamodbattribute.MarshalMap(
+			map[string]string{
+				"pk": mediaID.CollectionID,
+				"sk": mediaID.MediaID,
+			},
+		)
+		if err != nil {
+			return view, err
+		}
+		res, err := client.GetItem(&dynamodb.GetItemInput{
+			TableName: aws.String(tableName),
+			Key:       keyValue,
+		})
+		if err != nil {
+			return view, err
+		}
+
+		mdr := mediaRecord{}
+		err = dynamodbattribute.UnmarshalMap(res.Item, &mdr)
+		if err != nil {
+			return view, err
+		}
+
+		// -- convert media record to media day
+		media := newMediaFromMediaRecord(mdr)
+		view.Media = media
+
+		return view, nil
+	}
+}
+
+func NewPutLocation(tableName string, client *dynamodb.DynamoDB) app.LocationPutter {
+	return func(mediaID app.MediaCollectionID, location app.Location) error {
+		keyValue, err := dynamodbattribute.MarshalMap(
+			map[string]string{
+				"pk": mediaID.CollectionID,
+				"sk": mediaID.MediaID,
+			},
+		)
+		if err != nil {
+			return err
+		}
+		updateValues, err := dynamodbattribute.MarshalMap(
+			map[string]string{
+				":region":    location.Region,
+				":locality":  location.Locality,
+				":country_s": location.Country.Short,
+				":country_l": location.Country.Long,
+			},
+		)
+		if err != nil {
+			return err
+		}
+
+		_, err = client.UpdateItem(
+			&dynamodb.UpdateItemInput{
+				TableName:                 aws.String(tableName),
+				Key:                       keyValue,
+				UpdateExpression:          aws.String("SET location_region=:region, location_locality=:locality, location_country_sh=:country_s, location_country_l=:country_l"),
+				ExpressionAttributeValues: updateValues,
+			},
+		)
+		return err
+	}
 }
