@@ -74,6 +74,7 @@ resources:
     CreateThumbnailQueue:
       Type: AWS::SQS::Queue
       Properties:
+        DelaySeconds: 1
         RedrivePolicy:
           deadLetterTargetArn: !GetAtt CreateThumbnailDeadLetterQueue.Arn
           maxReceiveCount: 2
@@ -83,6 +84,7 @@ resources:
     GeocoderQueue:
       Type: AWS::SQS::Queue
       Properties:
+        DelaySeconds: 1
         RedrivePolicy:
           deadLetterTargetArn: !GetAtt GeocoderDeadLetterQueue.Arn
           maxReceiveCount: 2
