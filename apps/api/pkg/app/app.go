@@ -42,7 +42,7 @@ type MediaMonth struct {
 	MediaCount int    `json:"media_count"`
 }
 type TimelineView struct {
-	Months []MediaMonth `json:"months"`
+	Months []Collection `json:"months"`
 }
 type TimelineMonthView struct {
 	CollectionMeta MediaMonth            `json:"collection_meta"`

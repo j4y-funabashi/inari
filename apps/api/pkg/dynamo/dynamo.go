@@ -171,6 +171,24 @@ func newCollectionRecordKey(collectionID, collectionType string) collectionMedia
 	return mdr
 }
 
+type collectionRecord struct {
+	Gsi1pk     string `json:"gsi1pk,omitempty"`
+	Gsi1sk     string `json:"gsi1sk,omitempty"`
+	ID         string `json:"collection_id,omitempty"`
+	Title      string `json:"collection_title,omitempty"`
+	Type       string `json:"collection_type,omitempty"`
+	MediaCount int    `json:"media_count,omitempty"`
+}
+
+func (r collectionRecord) toCollection() app.Collection {
+	return app.Collection{
+		ID:         r.ID,
+		Title:      r.Title,
+		Type:       r.Type,
+		MediaCount: r.MediaCount,
+	}
+}
+
 type collectionRecordUpdate struct {
 	Gsi1pk     string `json:":gsi1pk,omitempty"`
 	Gsi1sk     string `json:":gsi1sk,omitempty"`
@@ -286,7 +304,7 @@ func NewTimelineQuery(tableName, region string) app.TimelineQuery {
 
 		// -- query dynamo
 		keyValues := map[string]string{
-			":pk": "monthCollection",
+			":pk": "collection--timeline_month",
 		}
 		eavalues, err := dynamodbattribute.MarshalMap(keyValues)
 		if err != nil {
@@ -304,15 +322,14 @@ func NewTimelineQuery(tableName, region string) app.TimelineQuery {
 		}
 
 		for _, item := range res.Items {
-			mdr := mediaDateCollectionRecord{}
-			err = dynamodbattribute.UnmarshalMap(item, &mdr)
+			cr := collectionRecord{}
+			err = dynamodbattribute.UnmarshalMap(item, &cr)
 			if err != nil {
 				return timelineView, err
 			}
 
 			// -- convert media record to media day
-			mediaMonth := newMediaMetaFromRecord(mdr)
-			timelineView.Months = append(timelineView.Months, mediaMonth)
+			timelineView.Months = append(timelineView.Months, cr.toCollection())
 		}
 
 		return timelineView, nil
