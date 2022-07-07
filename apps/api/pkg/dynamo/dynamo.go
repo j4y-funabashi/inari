@@ -13,16 +13,12 @@ import (
 	"github.com/j4y_funabashi/inari/apps/api/pkg/imgresize"
 )
 
-var mediaRecordName = "media"
-var collectionMonthPrefix = "month"
-
-type baseMediaRecordMeta struct {
-	MediaKey string `json:"media_key"`
-	MimeType string `json:"mime_type"`
-	Width    string `json:"width"`
-	Height   string `json:"height"`
-	Date     string `json:"date"`
-}
+const (
+	idSeperator            = "--"
+	collectionRecordPrefix = "collection"
+	mediaRecordPrefix      = "media"
+	collectionMonthPrefix  = "month"
+)
 
 type mediaRecord struct {
 	Pk                string  `json:"pk"`
@@ -39,7 +35,11 @@ type mediaRecord struct {
 	Ext               string  `json:"ext"`
 	Keywords          string  `json:"keywords"`
 	Title             string  `json:"title"`
-	baseMediaRecordMeta
+	MediaKey          string  `json:"media_key"`
+	MimeType          string  `json:"mime_type"`
+	Width             string  `json:"width"`
+	Height            string  `json:"height"`
+	Date              string  `json:"date"`
 }
 
 type mediaDateCollectionRecord struct {
@@ -55,7 +55,7 @@ func newMediaRecord(mediaMeta app.MediaMetadata) mediaRecord {
 	mr := mediaRecord{}
 
 	mr.Pk = newMediaRecordPK(mediaMeta)
-	mr.Sk = newMediaRecordSK(mediaMeta)
+	mr.Sk = newMediaRecordPK(mediaMeta)
 	mr.MediaKey = mediaMeta.NewFilename()
 	mr.Date = mediaMeta.Date.Format(time.RFC3339)
 	mr.Width = mediaMeta.Width
@@ -122,39 +122,71 @@ func newMediaMetaFromRecord(mr mediaDateCollectionRecord) app.MediaMonth {
 }
 
 func newMediaRecordPK(mediaMeta app.MediaMetadata) string {
-	return collectionMonthPrefix + "#" + mediaMeta.Date.Format("2006-01")
+	return mediaRecordPrefix + idSeperator + mediaMeta.ID()
 }
 
 func newMediaRecordSK(mediaMeta app.MediaMetadata) string {
-	return mediaRecordName + "#" + mediaMeta.NewFilename()
+	return mediaRecordPrefix + "#" + mediaMeta.NewFilename()
 }
 
-type mediaDateCollectionKey struct {
+func newCollectionMediaRecordPK(collectionType, collectionID string) string {
+	return fmt.Sprintf(
+		"%s%s%s%s%s",
+		collectionRecordPrefix,
+		idSeperator,
+		collectionType,
+		idSeperator,
+		collectionID,
+	)
+}
+
+func newCollectionRecordSK(collectionID string) string {
+	return fmt.Sprintf(
+		"meta%s%s",
+		idSeperator,
+		collectionID,
+	)
+}
+
+type collectionMediaRecord struct {
 	Pk string `json:"pk"`
 	Sk string `json:"sk"`
 }
 
-func newMediaDateCollectionKey(mediaMeta app.MediaMetadata) mediaDateCollectionKey {
-	mdr := mediaDateCollectionKey{}
+func newCollectionMediaRecord(collectionType, collectionID string, mediaMeta app.MediaMetadata) collectionMediaRecord {
+	mdr := collectionMediaRecord{}
 
-	mdr.Pk = newMediaRecordPK(mediaMeta)
-	mdr.Sk = newMediaDateCollectionRecordSK(mediaMeta)
+	mdr.Pk = newCollectionMediaRecordPK(collectionType, collectionID)
+	mdr.Sk = newMediaRecordPK(mediaMeta)
 
 	return mdr
 }
 
-type mediaDateCollectionUpdate struct {
-	Date       string `json:":media_date"`
-	Gsi1pk     string `json:":gsi1pk"`
-	Gsi1sk     string `json:":gsi1sk"`
-	MediaCount int    `json:":media_count"`
+func newCollectionRecordKey(collectionID, collectionType string) collectionMediaRecord {
+	mdr := collectionMediaRecord{}
+
+	mdr.Pk = newCollectionMediaRecordPK(collectionType, collectionID)
+	mdr.Sk = newCollectionRecordSK(collectionID)
+
+	return mdr
 }
 
-func newMediaDateCollectionUpdate(mediaMeta app.MediaMetadata) mediaDateCollectionUpdate {
-	out := mediaDateCollectionUpdate{}
-	out.Date = mediaMeta.Date.Format("2006-01")
-	out.Gsi1pk = "monthCollection"
-	out.Gsi1sk = newMediaDateCollectionRecordSK(mediaMeta)
+type collectionRecordUpdate struct {
+	Gsi1pk     string `json:":gsi1pk,omitempty"`
+	Gsi1sk     string `json:":gsi1sk,omitempty"`
+	ID         string `json:":collection_id,omitempty"`
+	Title      string `json:":collection_title,omitempty"`
+	Type       string `json:":collection_type,omitempty"`
+	MediaCount int    `json:":media_count,omitempty"`
+}
+
+func newCollectionRecordUpdate(collectionID, collectionType, collectionTitle string) collectionRecordUpdate {
+	out := collectionRecordUpdate{}
+	out.ID = collectionID
+	out.Type = collectionType
+	out.Title = collectionTitle
+	out.Gsi1pk = collectionRecordPrefix + idSeperator + collectionType
+	out.Gsi1sk = "meta" + idSeperator + collectionID
 	out.MediaCount = 1
 	return out
 }
@@ -172,18 +204,35 @@ func NewIndexer(tableName, region string) app.Indexer {
 		client := dynamodb.New(sess)
 
 		// -- save media record
-		mr := newMediaRecord(mediaMeta)
-		mrItem, err := dynamodbattribute.MarshalMap(mr)
+		mediaRecord, err := dynamodbattribute.MarshalMap(newMediaRecord(mediaMeta))
+		if err != nil {
+			return err
+		}
+		putInput := dynamodb.PutItemInput{
+			Item:      mediaRecord,
+			TableName: &tableName,
+		}
+		_, err = client.PutItem(&putInput)
 		if err != nil {
 			return err
 		}
 
-		// -- save media date collection
-		mdckeyItem, err := dynamodbattribute.MarshalMap(newMediaDateCollectionKey(mediaMeta))
+		// collection--timeline_month--2016-04	 media--20160409_223441_23790b8c0f257a9c0789ba144c345a2f
+		// media--20160409_223441_23790b8c0f257a9c0789ba144c345a2f
+		collectionType := "timeline_month"
+		collectionID := mediaMeta.Date.Format("2006-01")
+		collectionTitle := mediaMeta.Date.Format("2006 January")
+
+		// // -- save media collection
+		collectionMediaRecord, err := dynamodbattribute.MarshalMap(newCollectionMediaRecord(collectionType, collectionID, mediaMeta))
 		if err != nil {
 			return err
 		}
-		updateValues, err := dynamodbattribute.MarshalMap(newMediaDateCollectionUpdate(mediaMeta))
+		collectionRecordKey, err := dynamodbattribute.MarshalMap(newCollectionRecordKey(collectionID, collectionType))
+		if err != nil {
+			return err
+		}
+		collectionRecordUpdate, err := dynamodbattribute.MarshalMap(newCollectionRecordUpdate(collectionID, collectionType, collectionTitle))
 		if err != nil {
 			return err
 		}
@@ -193,16 +242,16 @@ func NewIndexer(tableName, region string) app.Indexer {
 				{
 					Put: &dynamodb.Put{
 						TableName:           aws.String(tableName),
-						Item:                mrItem,
+						Item:                collectionMediaRecord,
 						ConditionExpression: aws.String("attribute_not_exists(pk)"),
 					},
 				},
 				{
 					Update: &dynamodb.Update{
 						TableName:                 aws.String(tableName),
-						Key:                       mdckeyItem,
-						UpdateExpression:          aws.String("SET media_date = :media_date, gsi1pk = :gsi1pk, gsi1sk = :gsi1sk ADD media_count :media_count"),
-						ExpressionAttributeValues: updateValues,
+						Key:                       collectionRecordKey,
+						UpdateExpression:          aws.String("SET collection_id = :collection_id, collection_title = :collection_title, collection_type = :collection_type, gsi1pk = :gsi1pk, gsi1sk = :gsi1sk ADD media_count :media_count"),
+						ExpressionAttributeValues: collectionRecordUpdate,
 					},
 				},
 			},

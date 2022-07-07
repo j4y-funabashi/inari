@@ -28,6 +28,14 @@ type Geocoder = func(lat, lng float64) (Location, error)
 type MediaGeocoder = func(mediaID MediaCollectionID) (Location, error)
 type LocationPutter = func(mediaID MediaCollectionID, location Location) error
 
+// Collection types can be TIMELINE_MONTH
+type Collection struct {
+	ID         string `json:"id,omitempty"`
+	Title      string `json:"title,omitempty"`
+	Type       string `json:"type,omitempty"`
+	MediaCount int    `json:"media_count,omitempty"`
+}
+
 type MediaMonth struct {
 	ID         string
 	Date       string `json:"date"`
@@ -93,20 +101,27 @@ type MediaMetadata struct {
 	Title       string    `json:"title"`
 }
 
+func (mm MediaMetadata) ID() string {
+	return fmt.Sprintf(
+		"%s_%s",
+		mm.Date.Format("20060102_150405"),
+		mm.Hash,
+	)
+}
+
 func (mm MediaMetadata) NewFilename() string {
 	return fmt.Sprintf(
-		"%s_%s.%s",
-		mm.Date.Format("2006/20060102_150405"),
-		mm.Hash,
+		"%s/%s.%s",
+		mm.Date.Format("2006"),
+		mm.ID(),
 		mm.Ext,
 	)
 }
 
 func (mm MediaMetadata) ThumbnailKey() string {
 	return fmt.Sprintf(
-		"%s_%s.%s",
-		mm.Date.Format("20060102_150405"),
-		mm.Hash,
+		"%s.%s",
+		mm.ID(),
 		mm.Ext,
 	)
 }
