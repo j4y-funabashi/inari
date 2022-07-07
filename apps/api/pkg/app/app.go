@@ -45,7 +45,7 @@ type TimelineView struct {
 	Months []Collection `json:"months"`
 }
 type TimelineMonthView struct {
-	CollectionMeta MediaMonth            `json:"collection_meta"`
+	CollectionMeta Collection            `json:"collection_meta"`
 	Media          []MediaCollectionItem `json:"media"`
 }
 
@@ -61,9 +61,9 @@ type MediaSrc struct {
 }
 
 type MediaCollectionItem struct {
-	ID       MediaCollectionID `json:"id"`
-	Date     string            `json:"date"`
-	MediaSrc MediaSrc          `json:"media_src"`
+	ID       string   `json:"id"`
+	Date     string   `json:"date"`
+	MediaSrc MediaSrc `json:"media_src"`
 	MediaMetadata
 }
 
