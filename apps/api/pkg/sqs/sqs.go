@@ -16,7 +16,7 @@ func NewNotifier(region string) app.Notifier {
 		queueURL := "https://sqs.eu-central-1.amazonaws.com/725941804651/funabashi-photos-dev-CreateThumbnailQueue-0fuB2xmTMHuQ"
 
 		_, err := svc.SendMessage(&sqs.SendMessageInput{
-			MessageBody: aws.String(mediaMeta.NewFilename()),
+			MessageBody: aws.String(mediaMeta.ID()),
 			QueueUrl:    aws.String(queueURL),
 		})
 

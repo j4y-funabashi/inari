@@ -171,12 +171,18 @@ func NewImporter(logger *zap.SugaredLogger, downloadFromBackup Downloader, extra
 	}
 }
 
-func NewThumbnailer(downloadFromMediaStore Downloader, resizeImage Resizer, uploadToThumbnailStore Uploader) Thumbnailer {
-	return func(mediastoreKey string) error {
+func NewThumbnailer(fetchMediaDetail MediaDetailQuery, downloadFromMediaStore Downloader, resizeImage Resizer, uploadToThumbnailStore Uploader) Thumbnailer {
+	return func(mediaID string) error {
+		media, err := fetchMediaDetail(mediaID)
+		if err != nil {
+			return fmt.Errorf("failed to fetch media detail: %w", err)
+		}
+		mediastoreKey := media.Media.MediaSrc.Key
+
 		// download file from media store
 		downloadedFilename, err := downloadFromMediaStore(mediastoreKey)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to download media %s: %w", mediastoreKey, err)
 		}
 		defer os.Remove(downloadedFilename)
 		logrus.
