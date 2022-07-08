@@ -30,6 +30,9 @@ func NewGeocoder(apiKey, baseURL string) app.Geocoder {
 		// parse results
 		results := geocodeRes{}
 		err = json.Unmarshal(body, &results)
+		if err != nil {
+			return app.Location{}, err
+		}
 
 		if len(results.Results) == 0 {
 			return app.Location{}, fmt.Errorf("no geocode results found")

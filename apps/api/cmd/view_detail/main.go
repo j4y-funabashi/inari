@@ -7,7 +7,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/j4y_funabashi/inari/apps/api/pkg/app"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/dynamo"
 	"go.uber.org/zap"
 )
@@ -27,12 +26,11 @@ func main() {
 	)
 	dynamoClient := dynamodb.New(sess)
 
-	collectionID := os.Args[1]
-	mediaID := os.Args[2]
+	mediaID := os.Args[1]
 
 	// deps
 	viewDetail := dynamo.NewMediaDetailQuery(mediaStoreTableName, dynamoClient)
-	view, err := viewDetail(app.MediaCollectionID{MediaID: mediaID, CollectionID: collectionID})
+	view, err := viewDetail(mediaID)
 	if err != nil {
 		logger.Errorw("failed to fetch media detail",
 			"err", err)

@@ -14,10 +14,7 @@ import (
 
 func main() {
 
-	mediaID := app.MediaCollectionID{
-		CollectionID: "month#2018-05",
-		MediaID:      "media#2018/20180527_211329_c436eb8941ec3979e8e9ea74ccea8139.JPG",
-	}
+	mediaID := os.Args[1]
 
 	mediaStoreTableName := "inari-dynamodb-dev-InariDatastore-1VAD7YFUNHWKE"
 	region := "eu-central-1"

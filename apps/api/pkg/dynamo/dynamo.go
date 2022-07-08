@@ -454,15 +454,15 @@ func fetchMediaRecords(client *dynamodb.DynamoDB, tableName, monthID string) (ap
 }
 
 func NewMediaDetailQuery(tableName string, client *dynamodb.DynamoDB) app.MediaDetailQuery {
-	return func(mediaID app.MediaCollectionID) (app.MediaDetailView, error) {
+	return func(mediaID string) (app.MediaDetailView, error) {
 
 		view := app.MediaDetailView{}
 
 		// -- query dynamo
 		keyValue, err := dynamodbattribute.MarshalMap(
 			map[string]string{
-				"pk": mediaID.CollectionID,
-				"sk": mediaID.MediaID,
+				"pk": mediaID,
+				"sk": mediaID,
 			},
 		)
 		if err != nil {
@@ -491,11 +491,11 @@ func NewMediaDetailQuery(tableName string, client *dynamodb.DynamoDB) app.MediaD
 }
 
 func NewPutLocation(tableName string, client *dynamodb.DynamoDB) app.LocationPutter {
-	return func(mediaID app.MediaCollectionID, location app.Location) error {
+	return func(mediaID string, location app.Location) error {
 		keyValue, err := dynamodbattribute.MarshalMap(
 			map[string]string{
-				"pk": mediaID.CollectionID,
-				"sk": mediaID.MediaID,
+				"pk": mediaID,
+				"sk": mediaID,
 			},
 		)
 		if err != nil {

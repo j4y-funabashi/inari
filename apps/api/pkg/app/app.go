@@ -23,10 +23,10 @@ type FileLister = func() ([]string, error)
 type MetadataExtractor = func(mediaFile string) (MediaMetadata, error)
 type TimelineQuery = func() (TimelineView, error)
 type TimelineMonthQuery = func(monthID string) (TimelineMonthView, error)
-type MediaDetailQuery = func(mediaID MediaCollectionID) (MediaDetailView, error)
+type MediaDetailQuery = func(mediaID string) (MediaDetailView, error)
 type Geocoder = func(lat, lng float64) (Location, error)
-type MediaGeocoder = func(mediaID MediaCollectionID) (Location, error)
-type LocationPutter = func(mediaID MediaCollectionID, location Location) error
+type MediaGeocoder = func(mediaID string) (Location, error)
+type LocationPutter = func(mediaID string, location Location) error
 
 // Collection types can be TIMELINE_MONTH
 type Collection struct {
@@ -65,11 +65,6 @@ type MediaCollectionItem struct {
 	Date     string   `json:"date"`
 	MediaSrc MediaSrc `json:"media_src"`
 	MediaMetadata
-}
-
-type MediaCollectionID struct {
-	CollectionID string `json:"collection_id"`
-	MediaID      string `json:"media_id"`
 }
 
 type Coordinates struct {
@@ -231,34 +226,22 @@ func NewTimelineMonthView(timelineQuery TimelineMonthQuery) ViewTimelineMonth {
 }
 
 func NewGeocoder(logger *zap.SugaredLogger, reverseGeocode Geocoder, fetchMediaDetail MediaDetailQuery, saveLocation LocationPutter) MediaGeocoder {
-	return func(mediaID MediaCollectionID) (Location, error) {
+	return func(mediaID string) (Location, error) {
 		media, err := fetchMediaDetail(mediaID)
 		if err != nil {
-			logger.Errorw(
-				"failed to fetch media detail",
-				"mediaID", mediaID,
-				"err", err,
-			)
+			return Location{}, fmt.Errorf("failed to fetch media detail: %w", err)
 		}
 
 		loc, err := reverseGeocode(
 			media.Media.Location.Lat,
 			media.Media.Location.Lng)
 		if err != nil {
-			logger.Errorw(
-				"failed to geocode location",
-				"media", media,
-				"err", err,
-			)
+			return Location{}, fmt.Errorf("failed to geocode location: %w", err)
 		}
 
 		err = saveLocation(mediaID, loc)
 		if err != nil {
-			logger.Errorw(
-				"failed to save media location",
-				"media", media,
-				"err", err,
-			)
+			return Location{}, fmt.Errorf("failed to save media location: %w", err)
 		}
 		return loc, err
 	}
