@@ -13,7 +13,9 @@ provider:
     role:
       statements:
         - Effect: "Allow"
-          Action: "dynamodb:Query"
+          Action:
+            - "dynamodb:Query"
+            - "dynamodb:GetItem"
           Resource:
             - "arn:aws:dynamodb:eu-central-1:725941804651:table/inari-dynamodb-dev-InariDatastore-1VAD7YFUNHWKE"
             - "arn:aws:dynamodb:eu-central-1:725941804651:table/inari-dynamodb-dev-InariDatastore-1VAD7YFUNHWKE/*"
@@ -25,6 +27,7 @@ provider:
           Resource:
             - "arn:aws:s3:::inari-mediastore-dev/*"
             - "arn:aws:s3:::inari-mediastore-dev/*"
+
         - Effect: "Allow"
           Action:
             - "s3:PutObject"
