@@ -74,3 +74,8 @@ resources:
       Type: AWS::SNS::Topic
       Properties:
         TopicName: "PostImportTopic"
+
+    GoogleAPIKey:
+      Type: 'AWS::SecretsManager::Secret'
+      Properties:
+        Name: GoogleApiKey
