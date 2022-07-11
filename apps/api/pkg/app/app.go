@@ -231,6 +231,10 @@ func NewGeocoder(logger *zap.SugaredLogger, reverseGeocode Geocoder, fetchMediaD
 			return Location{}, fmt.Errorf("failed to fetch media detail: %w", err)
 		}
 
+		if media.Media.Location.Lat == 0 && media.Media.Location.Lng == 0 {
+			return Location{}, nil
+		}
+
 		loc, err := reverseGeocode(
 			media.Media.Location.Lat,
 			media.Media.Location.Lng)
