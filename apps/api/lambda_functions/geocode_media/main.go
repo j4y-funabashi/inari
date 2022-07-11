@@ -52,7 +52,7 @@ func main() {
 	)
 	dynamoClient := dynamodb.New(sess)
 
-	zlogger, _ := zap.NewDevelopment()
+	zlogger, _ := zap.NewProduction()
 	logger := zlogger.Sugar()
 	defer logger.Sync()
 
