@@ -63,8 +63,8 @@ functions:
   create_thumbnails:
     handler: bin/create_thumbnails
     events:
-      - sqs:
-          arn: !GetAtt CreateThumbnailQueue.Arn
+      - sns:
+          arn: !Ref PostImportTopic
 
 resources:
   Resources:
@@ -73,39 +73,3 @@ resources:
       Type: AWS::SNS::Topic
       Properties:
         TopicName: "PostImportTopic"
-
-    CreateThumbnailQueue:
-      Type: AWS::SQS::Queue
-      Properties:
-        DelaySeconds: 1
-        RedrivePolicy:
-          deadLetterTargetArn: !GetAtt CreateThumbnailDeadLetterQueue.Arn
-          maxReceiveCount: 2
-    CreateThumbnailDeadLetterQueue:
-      Type: AWS::SQS::Queue
-
-    GeocoderQueue:
-      Type: AWS::SQS::Queue
-      Properties:
-        DelaySeconds: 1
-        RedrivePolicy:
-          deadLetterTargetArn: !GetAtt GeocoderDeadLetterQueue.Arn
-          maxReceiveCount: 2
-    GeocoderDeadLetterQueue:
-      Type: AWS::SQS::Queue
-
-    CreateThumbnailSubscription:
-      Type: AWS::SNS::Subscription
-      Properties:
-        TopicArn: !Ref PostImportTopic
-        RawMessageDelivery: true
-        Endpoint: !GetAtt CreateThumbnailQueue.Arn
-        Protocol: "sqs"
-
-    GeocoderSubscription:
-      Type: AWS::SNS::Subscription
-      Properties:
-        TopicArn: !Ref PostImportTopic
-        RawMessageDelivery: true
-        Endpoint: !GetAtt GeocoderQueue.Arn
-        Protocol: "sqs"

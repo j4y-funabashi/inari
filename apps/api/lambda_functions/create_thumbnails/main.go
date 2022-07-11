@@ -15,11 +15,11 @@ import (
 	"go.uber.org/zap"
 )
 
-func NewHandler(logger *zap.SugaredLogger, createThumbnails app.Thumbnailer) func(ctx context.Context, req events.SQSEvent) error {
-	return func(ctx context.Context, req events.SQSEvent) error {
+func NewHandler(logger *zap.SugaredLogger, createThumbnails app.Thumbnailer) func(ctx context.Context, req events.SNSEvent) error {
+	return func(ctx context.Context, req events.SNSEvent) error {
 
 		for _, record := range req.Records {
-			mediaID := record.Body
+			mediaID := record.SNS.Message
 
 			err := createThumbnails(mediaID)
 			if err != nil {
