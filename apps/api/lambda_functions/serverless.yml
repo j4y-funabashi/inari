@@ -65,6 +65,7 @@ functions:
     events:
       - sns:
           arn: !Ref PostImportTopic
+          topicName: "PostImportTopic"
 
 resources:
   Resources:
