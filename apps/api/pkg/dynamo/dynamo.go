@@ -152,11 +152,11 @@ type collectionMediaRecord struct {
 	Sk string `json:"sk"`
 }
 
-func newCollectionMediaRecord(collectionType, collectionID string, mediaMeta app.MediaMetadata) collectionMediaRecord {
+func newCollectionMediaRecord(collectionID, collectionType, mediaID string) collectionMediaRecord {
 	mdr := collectionMediaRecord{}
 
 	mdr.Pk = newCollectionRecordPK(collectionType, collectionID)
-	mdr.Sk = newMediaRecordPK(mediaMeta.ID())
+	mdr.Sk = newMediaRecordPK(mediaID)
 
 	return mdr
 }
@@ -234,60 +234,61 @@ func NewIndexer(tableName, region string) app.Indexer {
 			return err
 		}
 
-		// collection--timeline_month--2016-04	 media--20160409_223441_23790b8c0f257a9c0789ba144c345a2f
-		// media--20160409_223441_23790b8c0f257a9c0789ba144c345a2f
-		collectionType := "timeline_month"
 		collectionID := mediaMeta.Date.Format("2006-01")
+		collectionType := "timeline_month"
 		collectionTitle := mediaMeta.Date.Format("2006 January")
 
-		// // -- save media collection
-		collectionMediaRecord, err := dynamodbattribute.MarshalMap(newCollectionMediaRecord(collectionType, collectionID, mediaMeta))
-		if err != nil {
-			return err
-		}
-		collectionRecordKey, err := dynamodbattribute.MarshalMap(newCollectionRecordKey(collectionID, collectionType))
-		if err != nil {
-			return err
-		}
-		collectionRecordUpdate, err := dynamodbattribute.MarshalMap(newCollectionRecordUpdate(collectionID, collectionType, collectionTitle))
-		if err != nil {
-			return err
-		}
-
-		_, err = client.TransactWriteItems(&dynamodb.TransactWriteItemsInput{
-			TransactItems: []*dynamodb.TransactWriteItem{
-				{
-					Put: &dynamodb.Put{
-						TableName:           aws.String(tableName),
-						Item:                collectionMediaRecord,
-						ConditionExpression: aws.String("attribute_not_exists(pk)"),
-					},
-				},
-				{
-					Update: &dynamodb.Update{
-						TableName:                 aws.String(tableName),
-						Key:                       collectionRecordKey,
-						UpdateExpression:          aws.String("SET collection_id = :collection_id, collection_title = :collection_title, collection_type = :collection_type, gsi1pk = :gsi1pk, gsi1sk = :gsi1sk ADD media_count :media_count"),
-						ExpressionAttributeValues: collectionRecordUpdate,
-					},
-				},
-			},
-		})
-		if err != nil {
-			switch t := err.(type) {
-			case *dynamodb.TransactionCanceledException:
-				for _, r := range t.CancellationReasons {
-					if *r.Code == "ConditionalCheckFailed" {
-						return nil
-					}
-				}
-			default:
-				return err
-			}
-		}
-
+		err = addMediaToCollection(client, tableName, collectionID, collectionType, collectionTitle, mediaMeta.ID())
 		return err
 	}
+}
+
+func addMediaToCollection(client *dynamodb.DynamoDB, tableName, collectionID, collectionType, collectionTitle, mediaID string) error {
+	collectionMediaRecord, err := dynamodbattribute.MarshalMap(newCollectionMediaRecord(collectionID, collectionType, mediaID))
+	if err != nil {
+		return err
+	}
+	collectionRecordKey, err := dynamodbattribute.MarshalMap(newCollectionRecordKey(collectionID, collectionType))
+	if err != nil {
+		return err
+	}
+	collectionRecordUpdate, err := dynamodbattribute.MarshalMap(newCollectionRecordUpdate(collectionID, collectionType, collectionTitle))
+	if err != nil {
+		return err
+	}
+
+	_, err = client.TransactWriteItems(&dynamodb.TransactWriteItemsInput{
+		TransactItems: []*dynamodb.TransactWriteItem{
+			{
+				Put: &dynamodb.Put{
+					TableName:           aws.String(tableName),
+					Item:                collectionMediaRecord,
+					ConditionExpression: aws.String("attribute_not_exists(pk)"),
+				},
+			},
+			{
+				Update: &dynamodb.Update{
+					TableName:                 aws.String(tableName),
+					Key:                       collectionRecordKey,
+					UpdateExpression:          aws.String("SET collection_id = :collection_id, collection_title = :collection_title, collection_type = :collection_type, gsi1pk = :gsi1pk, gsi1sk = :gsi1sk ADD media_count :media_count"),
+					ExpressionAttributeValues: collectionRecordUpdate,
+				},
+			},
+		},
+	})
+	if err != nil {
+		switch t := err.(type) {
+		case *dynamodb.TransactionCanceledException:
+			for _, r := range t.CancellationReasons {
+				if *r.Code == "ConditionalCheckFailed" {
+					return nil
+				}
+			}
+		default:
+			return err
+		}
+	}
+	return nil
 }
 
 func NewTimelineQuery(tableName, region string) app.TimelineQuery {
