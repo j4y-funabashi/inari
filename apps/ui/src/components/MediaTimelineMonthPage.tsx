@@ -1,6 +1,6 @@
 import React from 'react';
-import {fetchTimelineMonth, timelineMonthResponse} from '../apiClient';
-import {useParams} from 'react-router-dom';
+import { fetchTimelineMonth, timelineMonthResponse } from '../apiClient';
+import { useParams } from 'react-router-dom';
 import MediaTimelineMonth from './MediaTimelineMonth'
 
 type urlParams = {
@@ -8,9 +8,9 @@ type urlParams = {
 }
 
 const MediaTimelineMonthPage: React.FunctionComponent = () => {
-  const [timelineData, setTimelineData] = React.useState<timelineMonthResponse>({media: [],collection_meta: {date:"", ID:"", media_count:0}});
+  const [timelineData, setTimelineData] = React.useState<timelineMonthResponse>({ media: [], collection_meta: { title: "", id: "", type: "", media_count: 0 } });
 
-  const {monthid} = useParams<urlParams>()
+  const { monthid } = useParams<urlParams>()
   console.log(monthid)
 
   React.useEffect(() => {

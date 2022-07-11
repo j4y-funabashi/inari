@@ -18,11 +18,12 @@ function __log_info () {
 
 
 __log_info "Installing deps"
-
 yarn install
 
-__log_info "Testing"
+__log_info "Building"
+yarn build
 
+__log_info "Testing"
 yarn test
 
 __log_info "END"
