@@ -65,7 +65,7 @@ functions:
     events:
       - sns:
           arn: !Ref PostImportTopic
-          topicName: !GetAtt PostImportTopic.TopicName
+          topicName: "PostImportTopic"
 
 resources:
   Resources:
