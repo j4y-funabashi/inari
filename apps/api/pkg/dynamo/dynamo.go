@@ -3,6 +3,7 @@ package dynamo
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -524,6 +525,17 @@ func NewPutLocation(tableName string, client *dynamodb.DynamoDB) app.LocationPut
 				ExpressionAttributeValues: updateValues,
 			},
 		)
+		if err != nil {
+			return err
+		}
+
+		// add to collections
+		collectionID := strings.ReplaceAll(strings.ToLower(location.Country.Long), " ", idSeperator)
+		collectionType := "places_country"
+		collectionTitle := location.Country.Long
+
+		err = addMediaToCollection(client, tableName, collectionID, collectionType, collectionTitle, mediaID)
+
 		return err
 	}
 }
