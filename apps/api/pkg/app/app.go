@@ -129,9 +129,6 @@ func NewImporter(logger *zap.SugaredLogger, downloadFromBackup Downloader, extra
 		if err != nil {
 			return fmt.Errorf("failed to download media from backup: %w", err)
 		}
-		logger.Infow("downloaded media from backup",
-			"backupFilename", backupFilename,
-			"filename", downloadedFilename)
 		defer os.Remove(downloadedFilename)
 
 		// extract metadata
@@ -139,33 +136,29 @@ func NewImporter(logger *zap.SugaredLogger, downloadFromBackup Downloader, extra
 		if err != nil {
 			return fmt.Errorf("failed to extract media metadata: %w", err)
 		}
-		logger.Infow("extracted metadata",
-			"meta", mediaMeta,
-			"newFilename", mediaMeta.NewFilename())
 
 		// upload renamed file to media storage
 		err = uploadToMediaStore(downloadedFilename, mediaMeta.NewFilename())
 		if err != nil {
 			return fmt.Errorf("failed to upload to media store: %w", err)
 		}
-		logger.Infow("uploaded to media store",
-			"newFilename", mediaMeta.NewFilename())
 
 		// index metadata in datastore
 		err = indexMedia(mediaMeta)
 		if err != nil {
 			return fmt.Errorf("failed to index media metadata: %w", err)
 		}
-		logger.Infow("added to index",
-			"newFilename", mediaMeta.NewFilename())
 
 		// add to queue
 		err = notifyDownstream(mediaMeta)
 		if err != nil {
 			return fmt.Errorf("failed to notify downstream: %w", err)
 		}
-		logger.Infow("notified downstream",
-			"newFilename", mediaMeta.NewFilename())
+
+		logger.Infow("imported media",
+			"backupFilename", backupFilename,
+			"downloadedFilename", downloadedFilename,
+			"mediaMeta", mediaMeta)
 
 		return nil
 	}

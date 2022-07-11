@@ -23,6 +23,7 @@ const (
 type mediaRecord struct {
 	Pk                string  `json:"pk"`
 	Sk                string  `json:"sk"`
+	ID                string  `json:"id"`
 	Hash              string  `json:"hash"`
 	CameraMake        string  `json:"camera_make"`
 	CameraModel       string  `json:"camera_model"`
@@ -54,8 +55,9 @@ type mediaDateCollectionRecord struct {
 func newMediaRecord(mediaMeta app.MediaMetadata) mediaRecord {
 	mr := mediaRecord{}
 
-	mr.Pk = newMediaRecordPK(mediaMeta)
-	mr.Sk = newMediaRecordPK(mediaMeta)
+	mr.Pk = newMediaRecordPK(mediaMeta.ID())
+	mr.Sk = newMediaRecordPK(mediaMeta.ID())
+	mr.ID = mediaMeta.ID()
 	mr.MediaKey = mediaMeta.NewFilename()
 	mr.Date = mediaMeta.Date.Format(time.RFC3339)
 	mr.Width = mediaMeta.Width
@@ -75,7 +77,7 @@ func newMediaRecord(mediaMeta app.MediaMetadata) mediaRecord {
 
 func newMediaFromMediaRecord(mr mediaRecord) app.MediaCollectionItem {
 	m := app.MediaCollectionItem{}
-	m.ID = mr.Pk
+	m.ID = mr.ID
 	m.MediaSrc = app.MediaSrc{
 		Key:    mr.MediaKey,
 		Large:  fmt.Sprintf("%s/%s_%s", "thmnb", imgresize.ImgSizeLGPrefix, filepath.Base(mr.MediaKey)),
@@ -118,8 +120,8 @@ func newMediaMetaFromRecord(mr mediaDateCollectionRecord) app.MediaMonth {
 	}
 }
 
-func newMediaRecordPK(mediaMeta app.MediaMetadata) string {
-	return mediaRecordPrefix + idSeperator + mediaMeta.ID()
+func newMediaRecordPK(mediaID string) string {
+	return mediaRecordPrefix + idSeperator + mediaID
 }
 
 func newMediaRecordSK(mediaMeta app.MediaMetadata) string {
@@ -154,7 +156,7 @@ func newCollectionMediaRecord(collectionType, collectionID string, mediaMeta app
 	mdr := collectionMediaRecord{}
 
 	mdr.Pk = newCollectionRecordPK(collectionType, collectionID)
-	mdr.Sk = newMediaRecordPK(mediaMeta)
+	mdr.Sk = newMediaRecordPK(mediaMeta.ID())
 
 	return mdr
 }
@@ -461,8 +463,8 @@ func NewMediaDetailQuery(tableName string, client *dynamodb.DynamoDB) app.MediaD
 		// -- query dynamo
 		keyValue, err := dynamodbattribute.MarshalMap(
 			map[string]string{
-				"pk": mediaID,
-				"sk": mediaID,
+				"pk": newMediaRecordPK(mediaID),
+				"sk": newMediaRecordPK(mediaID),
 			},
 		)
 		if err != nil {
