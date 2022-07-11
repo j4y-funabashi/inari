@@ -67,6 +67,15 @@ functions:
           arn: !Ref PostImportTopic
           topicName: "PostImportTopic"
 
+  geocode_media:
+    handler: bin/geocode_media
+    environment:
+      GOOGLE_API_KEY: ${ssm:GoogleApiKey}
+    events:
+      - sns:
+          arn: !Ref PostImportTopic
+          topicName: "PostImportTopic"
+
 resources:
   Resources:
 

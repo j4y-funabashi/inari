@@ -15,8 +15,28 @@ import (
 	"go.uber.org/zap"
 )
 
-func NewHandler(logger *zap.SugaredLogger, geocodeMedia app.MediaGeocoder) func(ctx context.Context, req events.SQSEvent) error {
-	return func(ctx context.Context, req events.SQSEvent) error {
+func NewHandler(logger *zap.SugaredLogger, geocodeMedia app.MediaGeocoder) func(ctx context.Context, req events.SNSEvent) error {
+	return func(ctx context.Context, req events.SNSEvent) error {
+		for _, record := range req.Records {
+			mediaID := record.SNS.Message
+
+			location, err := geocodeMedia(mediaID)
+			if err != nil {
+				logger.
+					Errorw("failed to geocode media",
+						"err", err,
+						"mediaKey", mediaID)
+				return err
+			}
+
+			logger.
+				Infow("geocoded media",
+					"mediaKey", mediaID,
+					"location", location,
+				)
+
+		}
+
 		return nil
 	}
 }
