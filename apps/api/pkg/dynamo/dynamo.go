@@ -431,27 +431,67 @@ func fetchMediaRecords(client *dynamodb.DynamoDB, tableName, monthID string) (ap
 
 	// batchget media from keys
 	media := []app.MediaCollectionItem{}
-	params := dynamodb.BatchGetItemInput{
-		RequestItems: map[string]*dynamodb.KeysAndAttributes{
-			tableName: {
-				Keys: collectionMediaKeys,
-			},
-		},
-	}
-	err = client.BatchGetItemPages(&params,
-		func(page *dynamodb.BatchGetItemOutput, lastPage bool) bool {
-			for _, item := range page.Responses[tableName] {
-				mr := mediaRecord{}
-				err = dynamodbattribute.UnmarshalMap(item, &mr)
-				if err != nil {
-					// TODO fixme
-					fmt.Printf("\n\n%+s\n\n", err)
-					return false
-				}
-				media = append(media, newMediaFromMediaRecord(mr))
+	collectionMediaKeyChunk := []map[string]*dynamodb.AttributeValue{}
+
+	for _, m := range collectionMediaKeys {
+
+		collectionMediaKeyChunk = append(collectionMediaKeyChunk, m)
+
+		if len(collectionMediaKeyChunk) == 100 {
+			params := dynamodb.BatchGetItemInput{
+				RequestItems: map[string]*dynamodb.KeysAndAttributes{
+					tableName: {
+						Keys: collectionMediaKeyChunk,
+					},
+				},
 			}
-			return true
-		})
+			err = client.BatchGetItemPages(&params,
+				func(page *dynamodb.BatchGetItemOutput, lastPage bool) bool {
+					for _, item := range page.Responses[tableName] {
+						mr := mediaRecord{}
+						err = dynamodbattribute.UnmarshalMap(item, &mr)
+						if err != nil {
+							// TODO fixme
+							fmt.Printf("\n\n%+s\n\n", err)
+							return false
+						}
+						media = append(media, newMediaFromMediaRecord(mr))
+					}
+					return true
+				})
+			if err != nil {
+				return timelineView, err
+			}
+			collectionMediaKeyChunk = []map[string]*dynamodb.AttributeValue{}
+		}
+
+	}
+	if len(collectionMediaKeyChunk) > 0 {
+		params := dynamodb.BatchGetItemInput{
+			RequestItems: map[string]*dynamodb.KeysAndAttributes{
+				tableName: {
+					Keys: collectionMediaKeyChunk,
+				},
+			},
+		}
+		err = client.BatchGetItemPages(&params,
+			func(page *dynamodb.BatchGetItemOutput, lastPage bool) bool {
+				for _, item := range page.Responses[tableName] {
+					mr := mediaRecord{}
+					err = dynamodbattribute.UnmarshalMap(item, &mr)
+					if err != nil {
+						// TODO fixme
+						fmt.Printf("\n\n%+s\n\n", err)
+						return false
+					}
+					media = append(media, newMediaFromMediaRecord(mr))
+				}
+				return true
+			})
+		if err != nil {
+			return timelineView, err
+		}
+	}
 
 	timelineView.Media = append(timelineView.Media, media...)
 	return timelineView, err
