@@ -25,13 +25,14 @@ func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (Response, 
 
 	monthID := req.PathParameters["monthID"]
 
-	zlogger, _ := zap.NewDevelopment()
+	zlogger, _ := zap.NewProduction()
 	logger := zlogger.Sugar()
 	defer logger.Sync()
 	logger.
 		Infow("timeline month!",
 			"username", userName,
 			"userEmail", userEmail,
+			"monthID", monthID,
 		)
 
 	// ----
