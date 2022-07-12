@@ -18,6 +18,7 @@ provider:
             - "dynamodb:GetItem"
             - "dynamodb:UpdateItem"
             - "dynamodb:PutItem"
+            - "dynamodb:BatchGetItem"
           Resource:
             - "arn:aws:dynamodb:eu-central-1:725941804651:table/inari-dynamodb-dev-InariDatastore-1VAD7YFUNHWKE"
             - "arn:aws:dynamodb:eu-central-1:725941804651:table/inari-dynamodb-dev-InariDatastore-1VAD7YFUNHWKE/*"
