@@ -218,7 +218,7 @@ func NewTimelineMonthView(timelineQuery TimelineMonthQuery) ViewTimelineMonth {
 	return func(monthID string) (TimelineMonthView, error) {
 		timelineView, err := timelineQuery(monthID)
 		if err != nil {
-			return TimelineMonthView{}, nil
+			return TimelineMonthView{}, err
 		}
 		return timelineView, nil
 	}
