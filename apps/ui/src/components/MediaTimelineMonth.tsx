@@ -17,14 +17,14 @@ const MediaTimelineMonth: React.FunctionComponent<MediaTimelineMonthProps> = (pr
   )
   const media = mediaTimeline.media.map((m) => {
     return (
-      <Link to={`/media/${m.id}`}><img src={`/${m.media_src.small}`} /></Link>
+      <li key={m.id} ><Link to={`/media/${m.id}`}><img src={`/${m.media_src.small}`} /></Link></li >
     )
   })
 
   return (
     <div>
       {header}
-      <div>{media}</div>
+      <ul>{media}</ul>
     </div>
   )
 }

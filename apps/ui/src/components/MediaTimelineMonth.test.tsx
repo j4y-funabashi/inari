@@ -1,13 +1,13 @@
-import {render, screen} from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 import MediaTimelineMonth from './MediaTimelineMonth';
-import {media} from '../apiClient'
-import {BrowserRouter} from 'react-router-dom';
+import { media } from '../apiClient'
+import { BrowserRouter } from 'react-router-dom';
 
 test('renders component', async () => {
-  const testMedia:media = {
+  const testMedia: media = {
     id: "test-id-1",
-    media_src : {
+    media_src: {
       small: "img-sm.jpg",
       medium: "img-sm.jpg",
       large: "img-sm.jpg",
@@ -17,9 +17,11 @@ test('renders component', async () => {
 
   const mediaTimeline = {
     collection_meta: {
-      ID: "123",
-      date: "Jan 2006",
-      media_count: 200},
+      id: "123",
+      title: "Jan 2006",
+      type: "timeline_month",
+      media_count: 200
+    },
     media: [testMedia]
   }
 
