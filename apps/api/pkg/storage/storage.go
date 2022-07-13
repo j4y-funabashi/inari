@@ -1,4 +1,4 @@
-package s3
+package storage
 
 import (
 	"os"
@@ -12,7 +12,7 @@ import (
 	"github.com/j4y_funabashi/inari/apps/api/pkg/app"
 )
 
-func NewDownloader(bucket, region string) app.Downloader {
+func NewDownloader(bucket string, downloader *s3manager.Downloader) app.Downloader {
 	return func(backupFilename string) (string, error) {
 		tmpFilename := filepath.Join(os.TempDir(), filepath.Base(backupFilename))
 		file, err := os.Create(tmpFilename)
@@ -20,10 +20,6 @@ func NewDownloader(bucket, region string) app.Downloader {
 			return "", err
 		}
 		defer file.Close()
-		sess, _ := session.NewSession(&aws.Config{
-			Region: aws.String(region)},
-		)
-		downloader := s3manager.NewDownloader(sess)
 
 		_, err = downloader.Download(file,
 			&s3.GetObjectInput{
@@ -38,18 +34,13 @@ func NewDownloader(bucket, region string) app.Downloader {
 	}
 }
 
-func NewUploader(bucket, region string) app.Uploader {
+func NewUploader(bucket string, uploader *s3manager.Uploader, s3Client *s3.S3) app.Uploader {
 	return func(localFilename, mediaStoreFilename string) error {
 		file, err := os.Open(localFilename)
 		if err != nil {
 			return err
 		}
 		defer file.Close()
-		sess, _ := session.NewSession(&aws.Config{
-			Region: aws.String(region)},
-		)
-		uploader := s3manager.NewUploader(sess)
-		s3Client := s3.New(sess)
 
 		// check object exists
 		headRes, err := s3Client.HeadObject(&s3.HeadObjectInput{

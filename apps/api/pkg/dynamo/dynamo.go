@@ -213,13 +213,8 @@ func newMediaDateCollectionRecordSK(mediaMeta app.MediaMetadata) string {
 	return "META#" + mediaMeta.Date.Format("2006-01")
 }
 
-func NewIndexer(tableName, region string) app.Indexer {
+func NewIndexer(tableName string, client *dynamodb.DynamoDB) app.Indexer {
 	return func(mediaMeta app.MediaMetadata) error {
-
-		sess, _ := session.NewSession(&aws.Config{
-			Region: aws.String(region)},
-		)
-		client := dynamodb.New(sess)
 
 		// -- save media record
 		mediaRecord, err := dynamodbattribute.MarshalMap(newMediaRecord(mediaMeta))
@@ -538,8 +533,8 @@ func NewPutLocation(tableName string, client *dynamodb.DynamoDB) app.LocationPut
 	return func(mediaID string, location app.Location) error {
 		keyValue, err := dynamodbattribute.MarshalMap(
 			map[string]string{
-				"pk": mediaID,
-				"sk": mediaID,
+				"pk": newMediaRecordPK(mediaID),
+				"sk": newMediaRecordPK(mediaID),
 			},
 		)
 		if err != nil {

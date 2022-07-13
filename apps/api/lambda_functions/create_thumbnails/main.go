@@ -8,10 +8,12 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/app"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/dynamo"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/imgresize"
-	"github.com/j4y_funabashi/inari/apps/api/pkg/s3"
+	"github.com/j4y_funabashi/inari/apps/api/pkg/storage"
 	"go.uber.org/zap"
 )
 
@@ -58,11 +60,14 @@ func main() {
 		Region: aws.String(region)},
 	)
 	dynamoClient := dynamodb.New(sess)
+	s3Downloader := s3manager.NewDownloader(sess)
+	s3Uploader := s3manager.NewUploader(sess)
+	s3Client := s3.New(sess)
 
 	// deps
 	fetchMedia := dynamo.NewMediaDetailQuery(mediaStoreTableName, dynamoClient)
-	downloader := s3.NewDownloader(mediaStoreBucket, region)
-	uploader := s3.NewUploader(thumbnailStoreBucket, region)
+	downloader := storage.NewDownloader(mediaStoreBucket, s3Downloader)
+	uploader := storage.NewUploader(thumbnailStoreBucket, s3Uploader, s3Client)
 	resizer := imgresize.NewResizer()
 	createThumbnails := app.NewThumbnailer(fetchMedia, downloader, resizer, uploader)
 

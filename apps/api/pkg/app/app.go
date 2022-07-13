@@ -152,7 +152,10 @@ func NewImporter(logger *zap.SugaredLogger, downloadFromBackup Downloader, extra
 		// add to queue
 		err = notifyDownstream(mediaMeta)
 		if err != nil {
-			return fmt.Errorf("failed to notify downstream: %w", err)
+			logger.Errorw("failed to notify downstream",
+				"err", err,
+				"backupFilename", backupFilename)
+			return nil
 		}
 
 		logger.Infow("imported media",
