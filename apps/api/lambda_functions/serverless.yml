@@ -91,3 +91,14 @@ resources:
       Type: 'AWS::SecretsManager::Secret'
       Properties:
         Name: GoogleApiKey
+
+    ImportMediaQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: "ImportMediaQueue"
+        RedrivePolicy: 
+          deadLetterTargetArn: !GetAtt ImportMediaDLQ.Arn
+          maxReceiveCount: 3
+
+    ImportMediaDLQ:
+      Type: AWS::SQS::Queue
