@@ -15,10 +15,11 @@ import (
 )
 
 const (
-	idSeperator            = "--"
-	collectionRecordPrefix = "collection"
-	mediaRecordPrefix      = "media"
-	collectionMonthPrefix  = "month"
+	idSeperator                 = "--"
+	collectionRecordPrefix      = "collection"
+	mediaRecordPrefix           = "media"
+	collectionMonthPrefix       = "month"
+	collectionTypeTimelineMonth = "timeline_month"
 )
 
 type mediaRecord struct {
@@ -204,11 +205,18 @@ func NewIndexer(tableName string, client *dynamodb.DynamoDB) app.Indexer {
 			return err
 		}
 
-		collectionID := mediaMeta.Date.Format("2006-01")
-		collectionType := "timeline_month"
-		collectionTitle := mediaMeta.Date.Format("2006 January")
+		// collections
 
-		err = addMediaToCollection(client, tableName, collectionID, collectionType, collectionTitle, mediaMeta.ID())
+		// month
+		err = addMediaToCollection(
+			client,
+			tableName,
+			mediaMeta.Date.Format("2006-01"),
+			"timeline_month",
+			mediaMeta.Date.Format("2006 January"),
+			mediaMeta.ID(),
+		)
+
 		return err
 	}
 }
