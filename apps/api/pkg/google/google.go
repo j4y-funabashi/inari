@@ -40,6 +40,7 @@ func NewGeocoder(apiKey, baseURL string) app.Geocoder {
 
 		// create Location
 		address := getAddress(results.Results)
+		// fmt.Printf("\n\n%+v\n\n", address)
 
 		return app.Location{
 			Coordinates: app.Coordinates{
@@ -101,23 +102,38 @@ func getCountry(address geocodeResItem) app.Country {
 }
 
 func getRegion(address geocodeResItem) string {
-	for _, c := range address.AddressComponents {
-		if listContains(c.Types, "administrative_area_level_1") {
-			return c.LongName
+	componentTypes := []string{
+		"administrative_area_level_2",
+		"administrative_area_level_1",
+	}
+	for _, componentType := range componentTypes {
+		r := pickAddressComponent(address, componentType)
+		if r != "" {
+			return r
 		}
 	}
 	return ""
 }
 
 func getLocality(address geocodeResItem) string {
+	componentTypes := []string{
+		"sublocality",
+		"locality",
+		"postal_town",
+		"administrative_area_level_2",
+	}
+	for _, componentType := range componentTypes {
+		r := pickAddressComponent(address, componentType)
+		if r != "" {
+			return r
+		}
+	}
+	return ""
+}
+
+func pickAddressComponent(address geocodeResItem, componentType string) string {
 	for _, c := range address.AddressComponents {
-		if listContains(c.Types, "locality") {
-			return c.LongName
-		}
-		if listContains(c.Types, "postal_town") {
-			return c.LongName
-		}
-		if listContains(c.Types, "administrative_area_level_2") {
+		if listContains(c.Types, componentType) {
 			return c.LongName
 		}
 	}
