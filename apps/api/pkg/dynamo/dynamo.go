@@ -18,7 +18,6 @@ const (
 	idSeperator                 = "--"
 	collectionRecordPrefix      = "collection"
 	mediaRecordPrefix           = "media"
-	collectionMonthPrefix       = "month"
 	collectionTypeTimelineMonth = "timeline_month"
 )
 
@@ -212,7 +211,7 @@ func NewIndexer(tableName string, client *dynamodb.DynamoDB) app.Indexer {
 			client,
 			tableName,
 			mediaMeta.Date.Format("2006-01"),
-			"timeline_month",
+			collectionTypeTimelineMonth,
 			mediaMeta.Date.Format("2006 January"),
 			mediaMeta.ID(),
 		)
@@ -282,7 +281,7 @@ func NewTimelineQuery(tableName, region string) app.TimelineQuery {
 
 		// -- query dynamo
 		keyValues := map[string]string{
-			":pk": "collection--timeline_month",
+			":pk": collectionRecordPrefix + idSeperator + collectionTypeTimelineMonth,
 		}
 		eavalues, err := dynamodbattribute.MarshalMap(keyValues)
 		if err != nil {
@@ -334,7 +333,7 @@ func NewTimelineMonthQuery(tableName string, client *dynamodb.DynamoDB) app.Time
 func fetchMonthCollection(client *dynamodb.DynamoDB, tableName, monthID string) (app.Collection, error) {
 	meta := app.Collection{}
 
-	collectionRecordKey, err := dynamodbattribute.MarshalMap(newCollectionRecordKey(monthID, "timeline_month"))
+	collectionRecordKey, err := dynamodbattribute.MarshalMap(newCollectionRecordKey(monthID, collectionTypeTimelineMonth))
 	if err != nil {
 		return meta, err
 	}
@@ -367,7 +366,7 @@ func fetchMediaRecords(client *dynamodb.DynamoDB, tableName, monthID string) (ap
 
 	// fetch collectionMediaRecords
 	eavalues, err := dynamodbattribute.MarshalMap(map[string]string{
-		":pk": newCollectionRecordPK("timeline_month", monthID),
+		":pk": newCollectionRecordPK(collectionTypeTimelineMonth, monthID),
 		":sk": mediaRecordPrefix + idSeperator,
 	})
 	if err != nil {
