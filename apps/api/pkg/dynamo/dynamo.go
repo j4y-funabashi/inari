@@ -539,11 +539,30 @@ func NewPutLocation(tableName string, client *dynamodb.DynamoDB) app.LocationPut
 		}
 
 		// add to collections
-		collectionID := strings.ReplaceAll(strings.ToLower(location.Country.Long), " ", idSeperator)
-		collectionType := "places_country"
-		collectionTitle := location.Country.Long
 
-		err = addMediaToCollection(client, tableName, collectionID, collectionType, collectionTitle, mediaID)
+		// country
+		err = addMediaToCollection(
+			client,
+			tableName,
+			strings.ReplaceAll(strings.ToLower(location.Country.Long), " ", idSeperator),
+			"places_country",
+			location.Country.Long,
+			mediaID)
+		if err != nil {
+			return err
+		}
+
+		// region
+		err = addMediaToCollection(
+			client,
+			tableName,
+			strings.ReplaceAll(strings.ToLower(location.Region), " ", idSeperator),
+			"places_region",
+			location.Region,
+			mediaID)
+		if err != nil {
+			return err
+		}
 
 		return err
 	}
