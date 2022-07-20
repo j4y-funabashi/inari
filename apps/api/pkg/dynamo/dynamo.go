@@ -19,6 +19,9 @@ const (
 	collectionRecordPrefix      = "collection"
 	mediaRecordPrefix           = "media"
 	collectionTypeTimelineMonth = "timeline_month"
+	collectionTypeTimelineDay   = "timeline_day"
+	collectionTypePlacesCountry = "places_country"
+	collectionTypePlacesRegion  = "places_region"
 )
 
 type mediaRecord struct {
@@ -215,8 +218,24 @@ func NewIndexer(tableName string, client *dynamodb.DynamoDB) app.Indexer {
 			mediaMeta.Date.Format("2006 January"),
 			mediaMeta.ID(),
 		)
+		if err != nil {
+			return err
+		}
 
-		return err
+		// day
+		err = addMediaToCollection(
+			client,
+			tableName,
+			mediaMeta.Date.Format("2006-01-02"),
+			collectionTypeTimelineDay,
+			mediaMeta.Date.Format("Mon, 02 Jan 2006"),
+			mediaMeta.ID(),
+		)
+		if err != nil {
+			return err
+		}
+
+		return nil
 	}
 }
 
@@ -552,7 +571,7 @@ func NewPutLocation(tableName string, client *dynamodb.DynamoDB) app.LocationPut
 			client,
 			tableName,
 			strings.ReplaceAll(strings.ToLower(location.Country.Long), " ", idSeperator),
-			"places_country",
+			collectionTypePlacesCountry,
 			location.Country.Long,
 			mediaID)
 		if err != nil {
@@ -569,7 +588,7 @@ func NewPutLocation(tableName string, client *dynamodb.DynamoDB) app.LocationPut
 				idSeperator,
 				strings.ReplaceAll(strings.ToLower(location.Region), " ", idSeperator),
 			),
-			"places_region",
+			collectionTypePlacesRegion,
 			fmt.Sprintf("%s, %s", location.Region, location.Country.Long),
 			mediaID)
 		if err != nil {
