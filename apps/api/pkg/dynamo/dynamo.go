@@ -44,15 +44,6 @@ type mediaRecord struct {
 	Date              string  `json:"date"`
 }
 
-type mediaDateCollectionRecord struct {
-	Pk         string `json:"pk"`
-	Sk         string `json:"sk"`
-	Date       string `json:"media_date"`
-	Gsi1pk     string `json:"gsi1pk"`
-	Gsi1sk     string `json:"gsi1sk"`
-	MediaCount int    `json:"media_count"`
-}
-
 func newMediaRecord(mediaMeta app.MediaMetadata) mediaRecord {
 	mr := mediaRecord{}
 
@@ -112,21 +103,8 @@ func newMediaFromMediaRecord(mr mediaRecord) app.MediaCollectionItem {
 	return m
 }
 
-func newMediaMetaFromRecord(mr mediaDateCollectionRecord) app.MediaMonth {
-	dat, _ := time.Parse("2006-01", mr.Date)
-	return app.MediaMonth{
-		ID:         mr.Date,
-		Date:       dat.Format("2006 Jan"),
-		MediaCount: mr.MediaCount,
-	}
-}
-
 func newMediaRecordPK(mediaID string) string {
 	return mediaRecordPrefix + idSeperator + mediaID
-}
-
-func newMediaRecordSK(mediaMeta app.MediaMetadata) string {
-	return mediaRecordPrefix + "#" + mediaMeta.NewFilename()
 }
 
 func newCollectionRecordPK(collectionType, collectionID string) string {
@@ -207,10 +185,6 @@ func newCollectionRecordUpdate(collectionID, collectionType, collectionTitle str
 	out.Gsi1sk = "meta" + idSeperator + collectionID
 	out.MediaCount = 1
 	return out
-}
-
-func newMediaDateCollectionRecordSK(mediaMeta app.MediaMetadata) string {
-	return "META#" + mediaMeta.Date.Format("2006-01")
 }
 
 func NewIndexer(tableName string, client *dynamodb.DynamoDB) app.Indexer {
