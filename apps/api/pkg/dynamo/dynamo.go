@@ -556,14 +556,19 @@ func NewPutLocation(tableName string, client *dynamodb.DynamoDB) app.LocationPut
 		err = addMediaToCollection(
 			client,
 			tableName,
-			strings.ReplaceAll(strings.ToLower(location.Region), " ", idSeperator),
+			fmt.Sprintf(
+				"%s%s%s",
+				strings.ReplaceAll(strings.ToLower(location.Country.Long), " ", idSeperator),
+				idSeperator,
+				strings.ReplaceAll(strings.ToLower(location.Region), " ", idSeperator),
+			),
 			"places_region",
-			location.Region,
+			fmt.Sprintf("%s, %s", location.Region, location.Country.Long),
 			mediaID)
 		if err != nil {
 			return err
 		}
 
-		return err
+		return nil
 	}
 }
