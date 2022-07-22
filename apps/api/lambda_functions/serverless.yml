@@ -63,6 +63,16 @@ functions:
             type: jwt
             id: ${env:AUTHORIZERID, ''}
 
+  media_detail:
+    handler: bin/media_detail
+    events:
+      - httpApi:
+          method: GET
+          path: /api/media/{mediaID+}
+          authorizer:
+            type: jwt
+            id: ${env:AUTHORIZERID, ''}
+
   create_thumbnails:
     handler: bin/create_thumbnails
     events:
@@ -102,3 +112,5 @@ resources:
 
     ImportMediaDLQ:
       Type: AWS::SQS::Queue
+      Properties:
+        MessageRetentionPeriod: 1209600 ## (14 days)

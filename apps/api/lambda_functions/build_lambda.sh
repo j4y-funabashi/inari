@@ -13,3 +13,4 @@ build_func timeline
 build_func create_thumbnails
 build_func geocode_media
 build_func timeline_month
+build_func media_detail
