@@ -1,18 +1,31 @@
 import React from 'react';
-import {useParams} from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import { fetchMediaDetail, mediaDetailResponse } from '../apiClient';
 
-type MediaDetailURLParams = {
+type urlParams = {
   mediaid: string
 }
 
 const MediaDetailPage: React.FunctionComponent = () => {
-  // const {mediaid} = useParams<MediaDetailURLParams>()
+  const [mediaDetailData, setMediaDetailData] = React.useState<mediaDetailResponse>({ media: { id: "", date: "", media_src: { small: "", medium: "", large: "" } } });
+
+  const { mediaid } = useParams<urlParams>()
+  console.log(mediaid)
+
+  React.useEffect(() => {
+    (async () => {
+      const mediaDetailResponse = await fetchMediaDetail(mediaid)
+      setMediaDetailData(mediaDetailResponse)
+    })()
+  }, [setMediaDetailData])
+
+  console.log(mediaDetailData)
 
   return (
 
     <article className="vh-100 dt w-100 bg-dark-gray">
       <div className="dtc v-mid tc">
-        <img src="https://photos-dev.funabashi.co.uk/thmnb/lg_20211016_143550_5deb3260c820dc1adc1b29282ad4d3d6.JPG" alt="" />
+        <img src={`https://photos-dev.funabashi.co.uk/${mediaDetailData.media.media_src.large}`} alt="" />
       </div>
     </article>
 

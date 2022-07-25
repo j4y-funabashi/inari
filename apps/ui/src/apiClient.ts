@@ -24,9 +24,13 @@ export interface timelineMonthResponse {
     collection_meta: mediaMonth;
     media: media[]
 }
+export interface mediaDetailResponse {
+    media: media
+}
 
 export type TimelineQuery = () => Promise<timelineResponse>
 export type TimelineMonthQuery = (monthID: string) => Promise<timelineMonthResponse>
+export type MediaDetailQuery = (mediaID: string) => Promise<mediaDetailResponse>
 
 export const fetchTimeline: TimelineQuery = async (): Promise<timelineResponse> => {
     const res = await API.get("photosAPIdev", "/months", {})
@@ -40,4 +44,11 @@ export const fetchTimelineMonth: TimelineMonthQuery = async (monthID: string): P
     console.log(res)
 
     return res as timelineMonthResponse
+}
+
+export const fetchMediaDetail: MediaDetailQuery = async (mediaID: string): Promise<mediaDetailResponse> => {
+    const res = await API.get("photosAPIdev", "/media/" + mediaID, {})
+    console.log(res)
+
+    return res as mediaDetailResponse
 }

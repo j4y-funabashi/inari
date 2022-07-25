@@ -106,6 +106,7 @@ resources:
       Type: AWS::SQS::Queue
       Properties:
         QueueName: "ImportMediaQueue"
+        MessageRetentionPeriod: 1209600 ## (14 days)
         RedrivePolicy: 
           deadLetterTargetArn: !GetAtt ImportMediaDLQ.Arn
           maxReceiveCount: 3
