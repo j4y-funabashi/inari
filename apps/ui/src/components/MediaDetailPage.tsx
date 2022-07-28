@@ -17,7 +17,7 @@ const MediaDetailPage: React.FunctionComponent = () => {
       const mediaDetailResponse = await fetchMediaDetail(mediaid)
       setMediaDetailData(mediaDetailResponse)
     })()
-  }, [setMediaDetailData])
+  }, [setMediaDetailData, mediaid])
 
   console.log(mediaDetailData)
 

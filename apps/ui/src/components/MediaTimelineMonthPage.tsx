@@ -18,7 +18,7 @@ const MediaTimelineMonthPage: React.FunctionComponent = () => {
       const timelineResponse = await fetchTimelineMonth(monthid)
       setTimelineData(timelineResponse)
     })()
-  }, [setTimelineData])
+  }, [setTimelineData, monthid])
 
   console.log(timelineData)
 
