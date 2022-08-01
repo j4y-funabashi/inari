@@ -8,27 +8,27 @@ test('renders component', async () => {
   const testMedia1: media = {
     id: "test-id-1",
     media_src: {
-      small: "img-sm.jpg",
-      medium: "img-sm.jpg",
-      large: "img-sm.jpg",
+      small: "img1-sm.jpg",
+      medium: "img1-md.jpg",
+      large: "img1-lg.jpg",
     },
     date: "2022-06-09T22:19:14Z",
   }
   const testMedia2: media = {
     id: "test-id-2",
     media_src: {
-      small: "img-sm.jpg",
-      medium: "img-sm.jpg",
-      large: "img-sm.jpg",
+      small: "img2-sm.jpg",
+      medium: "img2-md.jpg",
+      large: "img2-lg.jpg",
     },
     date: "2022-06-09T23:19:14Z",
   }
   const testMedia3: media = {
     id: "test-id-3",
     media_src: {
-      small: "img-sm.jpg",
-      medium: "img-sm.jpg",
-      large: "img-sm.jpg",
+      small: "img3-sm.jpg",
+      medium: "img3-md.jpg",
+      large: "img3-lg.jpg",
     },
     date: "2022-06-19T23:19:14Z",
   }

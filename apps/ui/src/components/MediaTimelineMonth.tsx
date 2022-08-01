@@ -2,6 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { timelineMonthResponse } from '../apiClient';
 import { format } from 'date-fns'
+import LightGallery from 'lightgallery/react';
+import 'lightgallery/css/lightgallery.css';
 
 export interface MediaTimelineMonthProps {
   mediaTimeline: timelineMonthResponse
@@ -43,13 +45,13 @@ const MediaTimelineMonth: React.FunctionComponent<MediaTimelineMonthProps> = (pr
   const media = Array.from(dayCollections.values()).map((v) => {
     const thumbs = v.media.map((m) => {
       return (
-        <Link key={m.id} to={`/media/${m.id}`}><img src={`/${m.media_src.small}`} /></Link>
+        <a href={`/${m.media_src.large}`}><img alt="" src={`/${m.media_src.small}`} /></a>
       )
     })
     return (
       <div key={v.collection_meta.id}>
         <h2>{v.collection_meta.title}</h2>
-        <div>{thumbs}</div>
+        <LightGallery>{thumbs}</LightGallery>
       </div>
     )
   })
