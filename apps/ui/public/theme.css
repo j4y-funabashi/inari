@@ -1,0 +1,13 @@
+body {
+    background-color: #282a36;
+    color: #aaa;
+}
+
+a[href] {
+    color: #ff79c6;
+}
+
+a[href]:hover {
+    background-color: #44475a;
+    color: #f8f8f2;
+}
