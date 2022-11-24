@@ -1,54 +1,61 @@
-import {AuthState, onAuthUIStateChange} from '@aws-amplify/ui-components';
-import {AmplifyAuthenticator, AmplifySignOut} from '@aws-amplify/ui-react';
-import React from 'react';
-import {BrowserRouter, Link, Route, Switch} from 'react-router-dom';
-import MediaTimelinePage from './components/MediaTimelinePage';
-import MediaTimelineMonthPage from './components/MediaTimelineMonthPage';
-import MediaDetailPage from './components/MediaDetailPage';
+import { AuthState, onAuthUIStateChange } from "@aws-amplify/ui-components";
+import { AmplifyAuthenticator } from "@aws-amplify/ui-react";
+import { Amplify, Auth } from "aws-amplify";
+import React from "react";
+import Router from "./components/Router";
 
 interface User {
-  username: string
+	username: string;
 }
 
 const App: React.FunctionComponent = () => {
-  const [authState, setAuthState] = React.useState<AuthState>();
-  const [user, setUser] = React.useState<User | undefined>();
+	const awsconfig = {
+		Auth: {
+			region: process.env.REACT_APP_AWS_REGION,
+			userPoolId: process.env.REACT_APP_USER_POOL_ID,
+			userPoolWebClientId: process.env.REACT_APP_API_CLIENT_ID,
+		},
+		API: {
+			endpoints: [
+				{
+					name: "photosAPIdev",
+					endpoint: `https://${process.env.REACT_APP_BASE_DOMAIN}/api`,
+					custom_header: async () => {
+						return {
+							Authorization: `Bearer ${(await Auth.currentSession())
+								.getIdToken()
+								.getJwtToken()}`,
+						};
+					},
+				},
+			],
+		},
+	};
+	Amplify.configure(awsconfig);
 
-  React.useEffect(() => {
-    return onAuthUIStateChange((nextAuthState, authData) => {
-      setAuthState(nextAuthState);
-      setUser(authData as User)
-    });
-  }, []);
+	const [authState, setAuthState] = React.useState<AuthState>();
+	const [user, setUser] = React.useState<User | undefined>();
 
-  return authState === AuthState.SignedIn && user ? (
+	React.useEffect(() => {
+		return onAuthUIStateChange((nextAuthState, authData) => {
+			setAuthState(nextAuthState);
+			setUser(authData as User);
+		});
+	}, []);
 
-  <BrowserRouter>
-    <Switch>
-      <Route exact path="/">
-        <MediaTimelinePage />
-      </Route>
-      <Route path="/time/month/:monthid">
-        <MediaTimelineMonthPage />
-      </Route>
-      <Route path="/media/:mediaid">
-        <MediaDetailPage />
-      </Route>
-    </Switch>
+	const isDevMode = process.env.NODE_ENV === "development";
+	const isLoggedIn = authState === AuthState.SignedIn && user;
 
-    <div>
-      <nav>
-        <Link to="/">Timeline</Link>
-        <div>Hello, {user.username}</div>
-        <AmplifySignOut />
-      </nav>
-    </div>
-
-  </BrowserRouter>
-
-  ) : (
-    <AmplifyAuthenticator />
-  );
-}
+	return isDevMode || isLoggedIn ? (
+		<div>
+			<Router isDevMode={true} />
+		</div>
+	) : (
+		<div>
+			<h1>{process.env.NODE_ENV}</h1>
+			<AmplifyAuthenticator />
+		</div>
+	);
+};
 
 export default App;

@@ -1,16 +1,20 @@
 import React from 'react';
-import {fetchTimeline, timelineResponse} from '../apiClient';
+import { TimelineQuery, timelineResponse } from '../apiClient';
 import MediaTimeline from './MediaTimeline';
 
-const MediaTimelinePage: React.FunctionComponent = () => {
-  const [timelineData, setTimelineData] = React.useState<timelineResponse>({months: []});
+interface MediaTimelinePageProps {
+  fetchTimeline: TimelineQuery
+}
+
+const MediaTimelinePage: React.FunctionComponent<MediaTimelinePageProps> = (props: MediaTimelinePageProps) => {
+  const [timelineData, setTimelineData] = React.useState<timelineResponse>({ months: [] });
 
   React.useEffect(() => {
     (async () => {
-      const timelineResponse = await fetchTimeline()
+      const timelineResponse = await props.fetchTimeline()
       setTimelineData(timelineResponse)
     })()
-  }, [setTimelineData])
+  }, [setTimelineData, props])
 
   return (
     <MediaTimeline mediaTimeline={timelineData} />
