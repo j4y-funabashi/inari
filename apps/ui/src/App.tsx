@@ -48,7 +48,7 @@ const App: React.FunctionComponent = () => {
 
 	return isDevMode || isLoggedIn ? (
 		<div>
-			<Router isDevMode={true} />
+			<Router isDevMode={isDevMode} />
 		</div>
 	) : (
 		<div>
