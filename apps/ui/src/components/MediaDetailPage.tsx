@@ -1,35 +1,55 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
-import { fetchMediaDetail, mediaDetailResponse } from '../apiClient';
+import format from "date-fns/format";
+import React from "react";
+import { useParams } from "react-router-dom";
+import { MediaDetailQuery, mediaDetailResponse } from "../apiClient";
 
 type urlParams = {
-  mediaid: string
+	mediaid: string;
+};
+
+interface MediaDetailPageProps {
+	fetchMediaDetail: MediaDetailQuery;
 }
 
-const MediaDetailPage: React.FunctionComponent = () => {
-  const [mediaDetailData, setMediaDetailData] = React.useState<mediaDetailResponse>({ media: { id: "", date: "", media_src: { small: "", medium: "", large: "" } } });
+const MediaDetailPage: React.FunctionComponent<MediaDetailPageProps> = (
+	props: MediaDetailPageProps,
+) => {
+	const [media, setMediaDetailData] = React.useState<mediaDetailResponse>({
+		media: {
+			id: "",
+			date: "1984-01-28T11:00:00",
+			media_src: { small: "", medium: "", large: "" },
+		},
+	});
 
-  const { mediaid } = useParams<urlParams>()
-  console.log(mediaid)
+	const { mediaid } = useParams<urlParams>();
+	console.log(mediaid);
 
-  React.useEffect(() => {
-    (async () => {
-      const mediaDetailResponse = await fetchMediaDetail(mediaid)
-      setMediaDetailData(mediaDetailResponse)
-    })()
-  }, [setMediaDetailData, mediaid])
+	React.useEffect(() => {
+		(async () => {
+			const mediaDetailResponse = await props.fetchMediaDetail(mediaid);
+			setMediaDetailData(mediaDetailResponse);
+		})();
+	}, [setMediaDetailData, mediaid, props]);
 
-  console.log(mediaDetailData)
+	console.log(media);
+	const dat = new Date(media.media.date);
+	console.log(dat);
+	const datKey = format(dat, "eee, do MMM yyyy - HH:mm");
 
-  return (
+	return (
+		<article>
+			<div>
+				<img src={`${media.media.media_src.large}`} alt="" />
+				<p>{datKey}</p>
+			</div>
+			<div>
+				<button type="submit">Add Caption</button>
+				<button type="submit">Add Location</button>
+				<button type="submit">Delete</button>
+			</div>
+		</article>
+	);
+};
 
-    <article className="vh-100 dt w-100 bg-dark-gray">
-      <div className="dtc v-mid tc">
-        <img src={`https://photos-dev.funabashi.co.uk/${mediaDetailData.media.media_src.large}`} alt="" />
-      </div>
-    </article>
-
-  )
-}
-
-export default MediaDetailPage
+export default MediaDetailPage;

@@ -80,13 +80,58 @@ export const mockFetchTimelineMonth: TimelineMonthQuery = async (
 		},
 		media: [
 			{
-				id: "345",
+				id: "123",
 				media_src: {
-					small: "https://via.placeholder.com/150",
-					medium: "",
-					large: "",
+					small: "https://via.placeholder.com/320",
+					medium: "https://via.placeholder.com/320",
+					large: "https://via.placeholder.com/1080",
+				},
+				date: "1984-01-25T10:00:00",
+			},
+			{
+				id: "456",
+				media_src: {
+					small: "https://via.placeholder.com/320",
+					medium: "https://via.placeholder.com/320",
+					large: "https://via.placeholder.com/1080",
+				},
+				date: "1984-01-26T10:00:00",
+			},
+			{
+				id: "789",
+				media_src: {
+					small: "https://via.placeholder.com/320",
+					medium: "https://via.placeholder.com/320",
+					large: "https://via.placeholder.com/1080",
 				},
 				date: "1984-01-28T10:00:00",
+			},
+			{
+				id: "101112",
+				media_src: {
+					small: "https://via.placeholder.com/320",
+					medium: "https://via.placeholder.com/320",
+					large: "https://via.placeholder.com/1080",
+				},
+				date: "1984-01-28T11:00:00",
+			},
+			{
+				id: "101113",
+				media_src: {
+					small: "https://via.placeholder.com/320",
+					medium: "https://via.placeholder.com/320",
+					large: "https://via.placeholder.com/1080",
+				},
+				date: "1984-01-28T11:00:00",
+			},
+			{
+				id: "101114",
+				media_src: {
+					small: "https://via.placeholder.com/320",
+					medium: "https://via.placeholder.com/320",
+					large: "https://via.placeholder.com/1080",
+				},
+				date: "1984-01-28T11:00:00",
 			},
 		],
 	};
@@ -98,6 +143,24 @@ export const fetchMediaDetail: MediaDetailQuery = async (
 ): Promise<mediaDetailResponse> => {
 	const res = await API.get("photosAPIdev", `/media/${mediaID}`, {});
 	console.log(res);
+
+	return res as mediaDetailResponse;
+};
+
+export const mockFetchMediaDetail: MediaDetailQuery = async (
+	mediaID: string,
+): Promise<mediaDetailResponse> => {
+	const res = {
+		media: {
+			id: "101114",
+			media_src: {
+				small: "https://via.placeholder.com/320",
+				medium: "https://via.placeholder.com/320",
+				large: "https://via.placeholder.com/1080",
+			},
+			date: "1984-01-28T13:38:00",
+		},
+	};
 
 	return res as mediaDetailResponse;
 };
