@@ -1,4 +1,5 @@
 import { API } from "aws-amplify";
+import { formatISO } from "date-fns";
 
 export interface timelineResponse {
 	months: mediaMonth[];
@@ -10,16 +11,34 @@ export interface mediaMonth {
 	media_count: number;
 }
 
+export interface media {
+	id: string;
+	media_src: mediaSrc;
+	date: string;
+	location: location;
+}
+
 interface mediaSrc {
 	small: string;
 	medium: string;
 	large: string;
 }
-export interface media {
-	id: string;
-	media_src: mediaSrc;
-	date: string;
+
+interface location {
+	region: string;
+	locality: string;
+	country: country;
+	cooridnates: coordinates;
 }
+interface country {
+	short: string;
+	long: string;
+}
+interface coordinates {
+	lat: number;
+	lng: number;
+}
+
 export interface timelineMonthResponse {
 	collection_meta: mediaMonth;
 	media: media[];
@@ -73,66 +92,21 @@ export const mockFetchTimelineMonth: TimelineMonthQuery = async (
 ): Promise<timelineMonthResponse> => {
 	const mRes: timelineMonthResponse = {
 		collection_meta: {
-			id: "1",
+			id: crypto.randomUUID(),
 			title: "Collection!",
 			type: "",
 			media_count: 1,
 		},
 		media: [
-			{
-				id: "123",
-				media_src: {
-					small: "https://via.placeholder.com/320",
-					medium: "https://via.placeholder.com/320",
-					large: "https://via.placeholder.com/1080",
-				},
-				date: "1984-01-25T10:00:00",
-			},
-			{
-				id: "456",
-				media_src: {
-					small: "https://via.placeholder.com/320",
-					medium: "https://via.placeholder.com/320",
-					large: "https://via.placeholder.com/1080",
-				},
-				date: "1984-01-26T10:00:00",
-			},
-			{
-				id: "789",
-				media_src: {
-					small: "https://via.placeholder.com/320",
-					medium: "https://via.placeholder.com/320",
-					large: "https://via.placeholder.com/1080",
-				},
-				date: "1984-01-28T10:00:00",
-			},
-			{
-				id: "101112",
-				media_src: {
-					small: "https://via.placeholder.com/320",
-					medium: "https://via.placeholder.com/320",
-					large: "https://via.placeholder.com/1080",
-				},
-				date: "1984-01-28T11:00:00",
-			},
-			{
-				id: "101113",
-				media_src: {
-					small: "https://via.placeholder.com/320",
-					medium: "https://via.placeholder.com/320",
-					large: "https://via.placeholder.com/1080",
-				},
-				date: "1984-01-28T11:00:00",
-			},
-			{
-				id: "101114",
-				media_src: {
-					small: "https://via.placeholder.com/320",
-					medium: "https://via.placeholder.com/320",
-					large: "https://via.placeholder.com/1080",
-				},
-				date: "1984-01-28T11:00:00",
-			},
+			mockMedia(new Date(1984, 0, 28, 19, 0, 52)),
+			mockMedia(new Date(1984, 0, 28, 19, 0, 52)),
+			mockMedia(new Date(1984, 0, 28, 19, 0, 52)),
+			mockMedia(new Date(1984, 0, 28, 19, 0, 52)),
+			mockMedia(new Date(1984, 0, 25, 19, 0, 52)),
+			mockMedia(new Date(1984, 0, 25, 19, 0, 52)),
+			mockMedia(new Date(1984, 0, 25, 19, 0, 52)),
+			mockMedia(new Date(1984, 0, 2, 19, 0, 52)),
+			mockMedia(new Date(1984, 0, 2, 19, 0, 52)),
 		],
 	};
 	return mRes as timelineMonthResponse;
@@ -151,16 +125,35 @@ export const mockFetchMediaDetail: MediaDetailQuery = async (
 	mediaID: string,
 ): Promise<mediaDetailResponse> => {
 	const res = {
-		media: {
-			id: "101114",
-			media_src: {
-				small: "https://via.placeholder.com/320",
-				medium: "https://via.placeholder.com/320",
-				large: "https://via.placeholder.com/1080",
-			},
-			date: "1984-01-28T13:38:00",
-		},
+		media: mockMedia(new Date(1984, 0, 28, 19, 0, 52)),
 	};
 
 	return res as mediaDetailResponse;
+};
+
+export const mockMedia = (dat: Date): media => {
+	return {
+		id: crypto.randomUUID(),
+		media_src: {
+			small: "https://via.placeholder.com/320",
+			medium: "https://via.placeholder.com/320",
+			large: "https://via.placeholder.com/1080",
+		},
+		date: formatISO(dat),
+		location: mockLocation(),
+	};
+};
+const mockLocation = (): location => {
+	return {
+		region: "West Yorkshire",
+		locality: "Leeds",
+		country: {
+			short: "GB",
+			long: "United Kingdom",
+		},
+		cooridnates: {
+			lat: 53.8700189722222,
+			lng: -1.561703,
+		},
+	};
 };
