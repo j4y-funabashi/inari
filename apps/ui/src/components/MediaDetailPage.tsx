@@ -37,7 +37,7 @@ const MediaDetailPage: React.FunctionComponent<MediaDetailPageProps> = (
 	return (
 		<article>
 			<div>
-				<img src={`/${media.media.media_src.large}`} alt="" />
+				<img src={`${media.media.media_src.large}`} alt="" />
 				<p>{datKey}</p>
 				<p>{location}</p>
 			</div>

@@ -75,9 +75,9 @@ func newMediaFromMediaRecord(mr mediaRecord) app.MediaCollectionItem {
 	m.ID = mr.ID
 	m.MediaSrc = app.MediaSrc{
 		Key:    mr.MediaKey,
-		Large:  fmt.Sprintf("%s/%s_%s", "thmnb", imgresize.ImgSizeLGPrefix, filepath.Base(mr.MediaKey)),
-		Medium: fmt.Sprintf("%s/%s_%s", "thmnb", imgresize.ImgSizeSQMDPrefix, filepath.Base(mr.MediaKey)),
-		Small:  fmt.Sprintf("%s/%s_%s", "thmnb", imgresize.ImgSizeSQSMPrefix, filepath.Base(mr.MediaKey)),
+		Large:  fmt.Sprintf("/%s/%s_%s", "thmnb", imgresize.ImgSizeLGPrefix, filepath.Base(mr.MediaKey)),
+		Medium: fmt.Sprintf("/%s/%s_%s", "thmnb", imgresize.ImgSizeSQMDPrefix, filepath.Base(mr.MediaKey)),
+		Small:  fmt.Sprintf("/%s/%s_%s", "thmnb", imgresize.ImgSizeSQSMPrefix, filepath.Base(mr.MediaKey)),
 	}
 
 	m.MimeType = mr.MimeType
