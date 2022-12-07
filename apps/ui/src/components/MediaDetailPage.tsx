@@ -33,11 +33,13 @@ const MediaDetailPage: React.FunctionComponent<MediaDetailPageProps> = (
 	console.log(dat);
 	const datKey = format(dat, "eee, do MMM yyyy - HH:mm");
 	const location = `${media.media.location.locality}, ${media.media.location.region}`;
+	const caption = media.media.caption;
 
 	return (
 		<article>
 			<div>
 				<img src={`${media.media.media_src.large}`} alt="" />
+				<p>{caption}</p>
 				<p>{datKey}</p>
 				<p>{location}</p>
 			</div>

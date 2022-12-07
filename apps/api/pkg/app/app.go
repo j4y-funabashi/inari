@@ -64,6 +64,7 @@ type MediaCollectionItem struct {
 	ID       string   `json:"id"`
 	Date     string   `json:"date"`
 	MediaSrc MediaSrc `json:"media_src"`
+	Caption  string   `json:"caption"`
 	MediaMetadata
 }
 

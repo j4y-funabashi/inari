@@ -16,6 +16,7 @@ export interface media {
 	media_src: mediaSrc;
 	date: string;
 	location: location;
+	caption: string;
 }
 
 interface mediaSrc {
@@ -141,6 +142,7 @@ export const mockMedia = (dat: Date): media => {
 		},
 		date: formatISO(dat),
 		location: mockLocation(),
+		caption: "hello this is a good media!",
 	};
 };
 const mockLocation = (): location => {

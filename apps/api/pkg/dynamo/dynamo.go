@@ -102,6 +102,7 @@ func newMediaFromMediaRecord(mr mediaRecord) app.MediaCollectionItem {
 	m.Hash = mr.Hash
 	m.Keywords = mr.Keywords
 	m.Title = mr.Title
+	m.Caption = mr.Title
 
 	return m
 }
