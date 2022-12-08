@@ -1,7 +1,7 @@
 import format from "date-fns/format";
 import React from "react";
 import { useParams } from "react-router-dom";
-import { MediaDetailQuery, mediaDetailResponse, mockMedia } from "../apiClient";
+import { MediaDetailQuery, mediaDetailResponse } from "../apiClient";
 
 type urlParams = {
 	mediaid: string;
@@ -9,24 +9,24 @@ type urlParams = {
 
 interface MediaDetailPageProps {
 	fetchMediaDetail: MediaDetailQuery;
+	setMediaDetailData: React.Dispatch<React.SetStateAction<mediaDetailResponse>>;
+	media: mediaDetailResponse;
 }
 
 const MediaDetailPage: React.FunctionComponent<MediaDetailPageProps> = (
 	props: MediaDetailPageProps,
 ) => {
-	const [media, setMediaDetailData] = React.useState<mediaDetailResponse>({
-		media: mockMedia(new Date(1984, 0, 28, 19, 0, 52)),
-	});
+	const { media, setMediaDetailData, fetchMediaDetail } = props;
 
 	const { mediaid } = useParams<urlParams>();
 	console.log(mediaid);
 
 	React.useEffect(() => {
 		(async () => {
-			const mediaDetailResponse = await props.fetchMediaDetail(mediaid);
+			const mediaDetailResponse = await fetchMediaDetail(mediaid);
 			setMediaDetailData(mediaDetailResponse);
 		})();
-	}, [setMediaDetailData, mediaid, props]);
+	}, [setMediaDetailData, mediaid, fetchMediaDetail]);
 
 	console.log(media);
 	const dat = new Date(media.media.date);

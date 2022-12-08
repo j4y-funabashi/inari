@@ -10,6 +10,8 @@ import {
 	MediaDetailQuery,
 	mockFetchMediaDetail,
 	fetchMediaDetail,
+	mediaDetailResponse,
+	mockMedia,
 } from "../apiClient";
 
 import MediaDetailPage from "./MediaDetailPage";
@@ -22,6 +24,7 @@ interface RouterProps {
 }
 
 const Router: React.FunctionComponent<RouterProps> = (props: RouterProps) => {
+	// API calls
 	const timelineQuery: TimelineQuery = props.isDevMode
 		? mockFetchTimeline
 		: fetchTimeline;
@@ -31,6 +34,13 @@ const Router: React.FunctionComponent<RouterProps> = (props: RouterProps) => {
 	const mediaDetailQuery: MediaDetailQuery = props.isDevMode
 		? mockFetchMediaDetail
 		: fetchMediaDetail;
+
+	// state
+	const [mediaDetail, setMediaDetailData] = React.useState<mediaDetailResponse>(
+		{
+			media: mockMedia(new Date(1984, 0, 28, 19, 0, 52)),
+		},
+	);
 
 	return (
 		<BrowserRouter>
@@ -42,7 +52,11 @@ const Router: React.FunctionComponent<RouterProps> = (props: RouterProps) => {
 					<MediaTimelineMonthPage fetchTimelineMonth={timelineMonthQuery} />
 				</Route>
 				<Route path="/media/:mediaid">
-					<MediaDetailPage fetchMediaDetail={mediaDetailQuery} />
+					<MediaDetailPage
+						fetchMediaDetail={mediaDetailQuery}
+						media={mediaDetail}
+						setMediaDetailData={setMediaDetailData}
+					/>
 				</Route>
 			</Switch>
 
