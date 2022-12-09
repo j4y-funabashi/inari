@@ -46,10 +46,22 @@ const MediaDetailPage: React.FunctionComponent<MediaDetailPageProps> = (
 			<div>
 				<button type="submit">Add Caption</button>
 				<button type="submit">Add Location</button>
-				<button type="submit">Delete</button>
+				<DeleteMediaButton mediaID={mediaid} />
 			</div>
 		</article>
 	);
+};
+
+interface DeleteMediaButtonProps {
+	mediaID: string;
+}
+const DeleteMediaButton: React.FunctionComponent<DeleteMediaButtonProps> = (
+	props: DeleteMediaButtonProps,
+) => {
+	const handleDeleteMedia = () => {
+		console.log(props.mediaID);
+	};
+	return <button onClick={handleDeleteMedia}>Delete</button>;
 };
 
 export default MediaDetailPage;

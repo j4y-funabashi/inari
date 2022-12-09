@@ -35,7 +35,7 @@ const Router: React.FunctionComponent<RouterProps> = (props: RouterProps) => {
 		? mockFetchMediaDetail
 		: fetchMediaDetail;
 
-	// state
+	// timeline state
 	const [mediaDetail, setMediaDetailData] = React.useState<mediaDetailResponse>(
 		{
 			media: mockMedia(new Date(1984, 0, 28, 19, 0, 52)),
@@ -59,7 +59,6 @@ const Router: React.FunctionComponent<RouterProps> = (props: RouterProps) => {
 					/>
 				</Route>
 			</Switch>
-
 			<NavBar />
 		</BrowserRouter>
 	);
