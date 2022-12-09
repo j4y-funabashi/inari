@@ -10,7 +10,9 @@ interface MediaTimelineMonthPageProps {
 	fetchTimelineMonth: TimelineMonthQuery;
 }
 
-const MediaTimelineMonthPage: React.FunctionComponent<React.PropsWithChildren<MediaTimelineMonthPageProps>> = (props: MediaTimelineMonthPageProps) => {
+const MediaTimelineMonthPage: React.FunctionComponent<
+	React.PropsWithChildren<MediaTimelineMonthPageProps>
+> = (props: MediaTimelineMonthPageProps) => {
 	const [timelineData, setTimelineData] = React.useState<timelineMonthResponse>(
 		{
 			media: [],
@@ -23,7 +25,7 @@ const MediaTimelineMonthPage: React.FunctionComponent<React.PropsWithChildren<Me
 
 	React.useEffect(() => {
 		(async () => {
-			const timelineResponse = await props.fetchTimelineMonth(monthid);
+			const timelineResponse = await props.fetchTimelineMonth(monthid!);
 			setTimelineData(timelineResponse);
 		})();
 	}, [setTimelineData, monthid, props]);

@@ -13,9 +13,9 @@ interface MediaDetailPageProps {
 	media: mediaDetailResponse;
 }
 
-const MediaDetailPage: React.FunctionComponent<React.PropsWithChildren<MediaDetailPageProps>> = (
-	props: MediaDetailPageProps,
-) => {
+const MediaDetailPage: React.FunctionComponent<
+	React.PropsWithChildren<MediaDetailPageProps>
+> = (props: MediaDetailPageProps) => {
 	const { media, setMediaDetailData, fetchMediaDetail } = props;
 
 	const { mediaid } = useParams<urlParams>();
@@ -23,7 +23,7 @@ const MediaDetailPage: React.FunctionComponent<React.PropsWithChildren<MediaDeta
 
 	React.useEffect(() => {
 		(async () => {
-			const mediaDetailResponse = await fetchMediaDetail(mediaid);
+			const mediaDetailResponse = await fetchMediaDetail(mediaid!);
 			setMediaDetailData(mediaDetailResponse);
 		})();
 	}, [setMediaDetailData, mediaid, fetchMediaDetail]);
@@ -46,7 +46,7 @@ const MediaDetailPage: React.FunctionComponent<React.PropsWithChildren<MediaDeta
 			<div>
 				<button type="submit">Add Caption</button>
 				<button type="submit">Add Location</button>
-				<DeleteMediaButton mediaID={mediaid} />
+				<DeleteMediaButton mediaID={mediaid!} />
 			</div>
 		</article>
 	);
@@ -55,9 +55,9 @@ const MediaDetailPage: React.FunctionComponent<React.PropsWithChildren<MediaDeta
 interface DeleteMediaButtonProps {
 	mediaID: string;
 }
-const DeleteMediaButton: React.FunctionComponent<React.PropsWithChildren<DeleteMediaButtonProps>> = (
-	props: DeleteMediaButtonProps,
-) => {
+const DeleteMediaButton: React.FunctionComponent<
+	React.PropsWithChildren<DeleteMediaButtonProps>
+> = (props: DeleteMediaButtonProps) => {
 	const handleDeleteMedia = () => {
 		console.log(props.mediaID);
 	};

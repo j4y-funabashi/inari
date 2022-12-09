@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Route, Switch } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import {
 	mockFetchTimeline,
 	fetchTimeline,
@@ -23,7 +23,9 @@ interface RouterProps {
 	isDevMode: boolean;
 }
 
-const Router: React.FunctionComponent<React.PropsWithChildren<RouterProps>> = (props: RouterProps) => {
+const Router: React.FunctionComponent<React.PropsWithChildren<RouterProps>> = (
+	props: RouterProps,
+) => {
 	// API calls
 	const timelineQuery: TimelineQuery = props.isDevMode
 		? mockFetchTimeline
@@ -44,21 +46,28 @@ const Router: React.FunctionComponent<React.PropsWithChildren<RouterProps>> = (p
 
 	return (
 		<BrowserRouter>
-			<Switch>
-				<Route exact={true} path="/">
-					<MediaTimelinePage fetchTimeline={timelineQuery} />
-				</Route>
-				<Route path="/time/month/:monthid">
-					<MediaTimelineMonthPage fetchTimelineMonth={timelineMonthQuery} />
-				</Route>
-				<Route path="/media/:mediaid">
-					<MediaDetailPage
-						fetchMediaDetail={mediaDetailQuery}
-						media={mediaDetail}
-						setMediaDetailData={setMediaDetailData}
-					/>
-				</Route>
-			</Switch>
+			<Routes>
+				<Route
+					path="/"
+					element={<MediaTimelinePage fetchTimeline={timelineQuery} />}
+				/>
+				<Route
+					path="/time/month/:monthid"
+					element={
+						<MediaTimelineMonthPage fetchTimelineMonth={timelineMonthQuery} />
+					}
+				/>
+				<Route
+					path="/media/:mediaid"
+					element={
+						<MediaDetailPage
+							fetchMediaDetail={mediaDetailQuery}
+							media={mediaDetail}
+							setMediaDetailData={setMediaDetailData}
+						/>
+					}
+				/>
+			</Routes>
 			<NavBar />
 		</BrowserRouter>
 	);
