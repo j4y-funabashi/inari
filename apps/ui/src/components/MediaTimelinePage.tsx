@@ -6,7 +6,7 @@ interface MediaTimelinePageProps {
   fetchTimeline: TimelineQuery
 }
 
-const MediaTimelinePage: React.FunctionComponent<MediaTimelinePageProps> = (props: MediaTimelinePageProps) => {
+const MediaTimelinePage: React.FunctionComponent<React.PropsWithChildren<MediaTimelinePageProps>> = (props: MediaTimelinePageProps) => {
   const [timelineData, setTimelineData] = React.useState<timelineResponse>({ months: [] });
 
   React.useEffect(() => {

@@ -23,7 +23,7 @@ interface RouterProps {
 	isDevMode: boolean;
 }
 
-const Router: React.FunctionComponent<RouterProps> = (props: RouterProps) => {
+const Router: React.FunctionComponent<React.PropsWithChildren<RouterProps>> = (props: RouterProps) => {
 	// API calls
 	const timelineQuery: TimelineQuery = props.isDevMode
 		? mockFetchTimeline

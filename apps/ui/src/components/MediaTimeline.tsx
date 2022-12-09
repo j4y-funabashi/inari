@@ -6,7 +6,7 @@ export interface MediaTimelineProps {
   mediaTimeline: timelineResponse
 }
 
-const MediaTimeline: React.FunctionComponent<MediaTimelineProps> = (props: MediaTimelineProps) => {
+const MediaTimeline: React.FunctionComponent<React.PropsWithChildren<MediaTimelineProps>> = (props: MediaTimelineProps) => {
   const { mediaTimeline } = props
 
   const mediaMonths = mediaTimeline.months.map((m) => {

@@ -6,7 +6,7 @@ export interface MediaTimelineMonthProps {
 	mediaTimeline: timelineMonthResponse;
 }
 
-const MediaTimelineMonth: React.FunctionComponent<MediaTimelineMonthProps> = (
+const MediaTimelineMonth: React.FunctionComponent<React.PropsWithChildren<MediaTimelineMonthProps>> = (
 	props: MediaTimelineMonthProps,
 ) => {
 	const { mediaTimeline } = props;

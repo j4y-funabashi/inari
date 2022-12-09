@@ -8,7 +8,7 @@ interface User {
 	username: string;
 }
 
-const App: React.FunctionComponent = () => {
+const App: React.FunctionComponent<React.PropsWithChildren<unknown>> = () => {
 	const awsconfig = {
 		Auth: {
 			region: process.env.REACT_APP_AWS_REGION,

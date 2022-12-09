@@ -10,9 +10,7 @@ interface MediaTimelineMonthPageProps {
 	fetchTimelineMonth: TimelineMonthQuery;
 }
 
-const MediaTimelineMonthPage: React.FunctionComponent<
-	MediaTimelineMonthPageProps
-> = (props: MediaTimelineMonthPageProps) => {
+const MediaTimelineMonthPage: React.FunctionComponent<React.PropsWithChildren<MediaTimelineMonthPageProps>> = (props: MediaTimelineMonthPageProps) => {
 	const [timelineData, setTimelineData] = React.useState<timelineMonthResponse>(
 		{
 			media: [],

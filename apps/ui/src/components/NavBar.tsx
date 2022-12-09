@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-const NavBar: React.FunctionComponent = () => {
+const NavBar: React.FunctionComponent<React.PropsWithChildren<unknown>> = () => {
 	return (
 		<div>
 			<nav>

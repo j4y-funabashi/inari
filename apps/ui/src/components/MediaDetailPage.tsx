@@ -13,7 +13,7 @@ interface MediaDetailPageProps {
 	media: mediaDetailResponse;
 }
 
-const MediaDetailPage: React.FunctionComponent<MediaDetailPageProps> = (
+const MediaDetailPage: React.FunctionComponent<React.PropsWithChildren<MediaDetailPageProps>> = (
 	props: MediaDetailPageProps,
 ) => {
 	const { media, setMediaDetailData, fetchMediaDetail } = props;
@@ -55,7 +55,7 @@ const MediaDetailPage: React.FunctionComponent<MediaDetailPageProps> = (
 interface DeleteMediaButtonProps {
 	mediaID: string;
 }
-const DeleteMediaButton: React.FunctionComponent<DeleteMediaButtonProps> = (
+const DeleteMediaButton: React.FunctionComponent<React.PropsWithChildren<DeleteMediaButtonProps>> = (
 	props: DeleteMediaButtonProps,
 ) => {
 	const handleDeleteMedia = () => {
