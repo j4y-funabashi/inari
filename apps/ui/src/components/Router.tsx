@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import {
 	mockFetchTimeline,
 	fetchTimeline,
@@ -44,33 +44,30 @@ const Router: React.FunctionComponent<React.PropsWithChildren<RouterProps>> = (
 		},
 	);
 
-	return (
-		<BrowserRouter>
-			<Routes>
-				<Route
-					path="/"
-					element={<MediaTimelinePage fetchTimeline={timelineQuery} />}
+	const router = createBrowserRouter([
+		{
+			path: "/",
+			element: <MediaTimelinePage fetchTimeline={timelineQuery} />,
+		},
+		{
+			path: "/time/month/:monthid",
+			element: (
+				<MediaTimelineMonthPage fetchTimelineMonth={timelineMonthQuery} />
+			),
+		},
+		{
+			path: "/media/:mediaid",
+			element: (
+				<MediaDetailPage
+					fetchMediaDetail={mediaDetailQuery}
+					media={mediaDetail}
+					setMediaDetailData={setMediaDetailData}
 				/>
-				<Route
-					path="/time/month/:monthid"
-					element={
-						<MediaTimelineMonthPage fetchTimelineMonth={timelineMonthQuery} />
-					}
-				/>
-				<Route
-					path="/media/:mediaid"
-					element={
-						<MediaDetailPage
-							fetchMediaDetail={mediaDetailQuery}
-							media={mediaDetail}
-							setMediaDetailData={setMediaDetailData}
-						/>
-					}
-				/>
-			</Routes>
-			<NavBar />
-		</BrowserRouter>
-	);
+			),
+		},
+	]);
+
+	return <RouterProvider router={router} />;
 };
 
 export default Router;
