@@ -1,15 +1,26 @@
 import React from "react";
-import { timelineMonthResponse } from "../apiClient";
+import { timelineMonthResponse, media, mockMedia } from "../apiClient";
 import { format } from "date-fns";
+import MediaDetail from "./MediaDetail";
 
 export interface MediaTimelineMonthProps {
 	mediaTimeline: timelineMonthResponse;
 }
 
-const MediaTimelineMonth: React.FunctionComponent<React.PropsWithChildren<MediaTimelineMonthProps>> = (
-	props: MediaTimelineMonthProps,
-) => {
+interface currentMedia {
+	isVisible: boolean;
+	media: media;
+}
+
+const MediaTimelineMonth: React.FunctionComponent<
+	React.PropsWithChildren<MediaTimelineMonthProps>
+> = (props: MediaTimelineMonthProps) => {
 	const { mediaTimeline } = props;
+
+	const [currentMedia, setCurrentMedia] = React.useState<currentMedia>({
+		isVisible: false,
+		media: mockMedia(new Date(1984, 0, 28, 19, 0, 52)),
+	});
 
 	// sort by date
 	mediaTimeline.media.sort((a, b) => {
@@ -47,9 +58,9 @@ const MediaTimelineMonth: React.FunctionComponent<React.PropsWithChildren<MediaT
 	const media = Array.from(dayCollections.values()).map((v) => {
 		const thumbs = v.media.map((m) => {
 			return (
-				<a key={m.id} href={`/media/${m.id}`}>
-					<img alt="" width="150" src={`${m.media_src.small}`} />
-				</a>
+				<li key={m.id}>
+					<MediaThumb media={m} setCurrentMedia={setCurrentMedia} />
+				</li>
 			);
 		});
 		return (
@@ -69,9 +80,47 @@ const MediaTimelineMonth: React.FunctionComponent<React.PropsWithChildren<MediaT
 
 	return (
 		<div>
+			{currentMedia.isVisible && (
+				<MediaDetail
+					media={currentMedia.media}
+					handleDelete={() => {
+						setCurrentMedia({
+							isVisible: false,
+							media: currentMedia.media,
+						});
+					}}
+				/>
+			)}
 			{header}
 			{media}
 		</div>
+	);
+};
+
+interface MediaThumbProps {
+	media: media;
+	setCurrentMedia: React.Dispatch<React.SetStateAction<currentMedia>>;
+}
+const MediaThumb: React.FunctionComponent<
+	React.PropsWithChildren<MediaThumbProps>
+> = (props: MediaThumbProps) => {
+	const { media } = props;
+	const handleMediaClick = () => {
+		console.log(`HELL! ${media.id}`);
+		props.setCurrentMedia({
+			media: media,
+			isVisible: true,
+		});
+	};
+
+	return (
+		// rome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
+		<img
+			alt=""
+			width="150"
+			src={`${media.media_src.small}`}
+			onClick={handleMediaClick}
+		/>
 	);
 };
 

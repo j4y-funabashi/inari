@@ -4,12 +4,13 @@ import { media } from "../apiClient";
 
 interface MediaDetailProps {
 	media: media;
+	handleDelete: () => void;
 }
 
 const MediaDetail: React.FunctionComponent<
 	React.PropsWithChildren<MediaDetailProps>
 > = (props: MediaDetailProps) => {
-	const { media } = props;
+	const { media, handleDelete } = props;
 
 	const dat = new Date(media.date);
 	const datKey = format(dat, "eee, do MMM yyyy - HH:mm");
@@ -27,7 +28,7 @@ const MediaDetail: React.FunctionComponent<
 			<div>
 				<button type="submit">Add Caption</button>
 				<button type="submit">Add Location</button>
-				<DeleteMediaButton mediaID={media.id} />
+				<DeleteMediaButton mediaID={media.id} handleDelete={handleDelete} />
 			</div>
 		</article>
 	);
@@ -35,14 +36,12 @@ const MediaDetail: React.FunctionComponent<
 
 interface DeleteMediaButtonProps {
 	mediaID: string;
+	handleDelete: () => void;
 }
 const DeleteMediaButton: React.FunctionComponent<
 	React.PropsWithChildren<DeleteMediaButtonProps>
 > = (props: DeleteMediaButtonProps) => {
-	const handleDeleteMedia = () => {
-		console.log(props.mediaID);
-	};
-	return <button onClick={handleDeleteMedia}>Delete</button>;
+	return <button onClick={props.handleDelete}>Delete</button>;
 };
 
 export default MediaDetail;

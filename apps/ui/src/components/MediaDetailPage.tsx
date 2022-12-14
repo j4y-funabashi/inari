@@ -28,7 +28,7 @@ const MediaDetailPage: React.FunctionComponent<
 		})();
 	}, [setMediaDetailData, mediaid, fetchMediaDetail]);
 
-	return <MediaDetail media={media.media} />;
+	return <MediaDetail media={media.media} handleDelete={() => {}} />;
 };
 
 export default MediaDetailPage;
