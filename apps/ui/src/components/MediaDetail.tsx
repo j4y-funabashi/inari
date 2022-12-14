@@ -1,6 +1,6 @@
 import format from "date-fns/format";
 import React from "react";
-import { media, mediaDetailResponse } from "../apiClient";
+import { media } from "../apiClient";
 
 interface MediaDetailProps {
 	media: media;

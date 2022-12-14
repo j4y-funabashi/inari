@@ -17,7 +17,6 @@ import {
 import MediaDetailPage from "./MediaDetailPage";
 import MediaTimelineMonthPage from "./MediaTimelineMonthPage";
 import MediaTimelinePage from "./MediaTimelinePage";
-import NavBar from "./NavBar";
 
 interface RouterProps {
 	isDevMode: boolean;
