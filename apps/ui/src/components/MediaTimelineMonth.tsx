@@ -95,6 +95,12 @@ const MediaTimelineMonth: React.FunctionComponent<
 								media: currentMedia.media,
 							});
 						}}
+						handleClose={() => {
+							setCurrentMedia({
+								isVisible: false,
+								media: currentMedia.media,
+							});
+						}}
 					/>
 				</div>
 			)}
