@@ -1,7 +1,7 @@
 import React from "react";
 import { timelineMonthResponse, media, mockMedia } from "../apiClient";
 import { format } from "date-fns";
-import MediaDetail from "./MediaDetail";
+import MediaDetail from "./Media";
 
 export interface MediaTimelineMonthProps {
 	mediaTimeline: timelineMonthResponse;

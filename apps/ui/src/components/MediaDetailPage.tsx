@@ -1,7 +1,7 @@
 import React from "react";
 import { useParams } from "react-router-dom";
 import { MediaDetailQuery, mediaDetailResponse } from "../apiClient";
-import MediaDetail from "./MediaDetail";
+import MediaDetail from "./Media";
 
 type urlParams = {
 	mediaid: string;
