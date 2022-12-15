@@ -5,13 +5,12 @@ import { media } from "../apiClient";
 interface MediaDetailProps {
 	media: media;
 	handleDelete: () => void;
-	handleClose: () => void;
 }
 
 const MediaDetail: React.FunctionComponent<
 	React.PropsWithChildren<MediaDetailProps>
 > = (props: MediaDetailProps) => {
-	const { media, handleDelete, handleClose } = props;
+	const { media, handleDelete } = props;
 
 	const dat = new Date(media.date);
 	const datKey = format(dat, "eee, do MMM yyyy - HH:mm");
@@ -20,11 +19,8 @@ const MediaDetail: React.FunctionComponent<
 
 	return (
 		<article>
-			<button type="submit">Prev</button>
-			<button onClick={handleClose}>Close</button>
-			<button type="submit">Next</button>
 			<div>
-				<img src={`${media.media_src.large}`} alt="" />
+				<img src={`${media.media_src.large}`} width="100" alt="" />
 				<p>{caption}</p>
 				<p>{datKey}</p>
 				<p>{location}</p>

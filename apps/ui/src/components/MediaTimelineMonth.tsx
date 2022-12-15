@@ -59,7 +59,20 @@ const MediaTimelineMonth: React.FunctionComponent<
 		const thumbs = v.media.map((m) => {
 			return (
 				<li key={m.id}>
-					<MediaThumb media={m} setCurrentMedia={setCurrentMedia} />
+					<MediaDetail
+						media={m}
+						handleDelete={() => {
+							const newMediaList = mediaTimeline.media.filter((om) => {
+								return om.id !== m.id;
+							});
+							console.log(newMediaList);
+							props.mediaTimeline.media = newMediaList;
+							setCurrentMedia({
+								isVisible: false,
+								media: currentMedia.media,
+							});
+						}}
+					/>
 				</li>
 			);
 		});
@@ -95,45 +108,12 @@ const MediaTimelineMonth: React.FunctionComponent<
 								media: currentMedia.media,
 							});
 						}}
-						handleClose={() => {
-							setCurrentMedia({
-								isVisible: false,
-								media: currentMedia.media,
-							});
-						}}
 					/>
 				</div>
 			)}
 			{header}
 			{media}
 		</div>
-	);
-};
-
-interface MediaThumbProps {
-	media: media;
-	setCurrentMedia: React.Dispatch<React.SetStateAction<currentMedia>>;
-}
-const MediaThumb: React.FunctionComponent<
-	React.PropsWithChildren<MediaThumbProps>
-> = (props: MediaThumbProps) => {
-	const { media } = props;
-	const handleMediaClick = () => {
-		console.log(`HELL! ${media.id}`);
-		props.setCurrentMedia({
-			media: media,
-			isVisible: true,
-		});
-	};
-
-	return (
-		// rome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
-		<img
-			alt=""
-			width="150"
-			src={`${media.media_src.small}`}
-			onClick={handleMediaClick}
-		/>
 	);
 };
 
