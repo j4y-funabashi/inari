@@ -85,6 +85,11 @@ const MediaTimelineMonth: React.FunctionComponent<
 					<MediaDetail
 						media={currentMedia.media}
 						handleDelete={() => {
+							const newMediaList = mediaTimeline.media.filter((om) => {
+								return om.id !== currentMedia.media.id;
+							});
+							console.log(newMediaList);
+							props.mediaTimeline.media = newMediaList;
 							setCurrentMedia({
 								isVisible: false,
 								media: currentMedia.media,
