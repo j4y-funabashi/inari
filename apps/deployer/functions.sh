@@ -114,7 +114,7 @@ deploy_ui() {
     aws s3 cp "${APPS_DIR}/ui/build" s3://$S3_UI_BUCKET_NAME --recursive
 
     aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID \
-        --paths /index.html
+        --paths "/index.html" "/theme.css"
 }
 
 deploy_api() {
