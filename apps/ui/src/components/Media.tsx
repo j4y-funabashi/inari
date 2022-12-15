@@ -2,14 +2,14 @@ import format from "date-fns/format";
 import React from "react";
 import { media } from "../apiClient";
 
-interface MediaDetailProps {
+interface MediaProps {
 	media: media;
 	handleDelete: () => void;
 }
 
-const MediaDetail: React.FunctionComponent<
-	React.PropsWithChildren<MediaDetailProps>
-> = (props: MediaDetailProps) => {
+const Media: React.FunctionComponent<React.PropsWithChildren<MediaProps>> = (
+	props: MediaProps,
+) => {
 	const { media, handleDelete } = props;
 
 	const dat = new Date(media.date);
@@ -44,4 +44,4 @@ const DeleteMediaButton: React.FunctionComponent<
 	return <button onClick={props.handleDelete}>Delete</button>;
 };
 
-export default MediaDetail;
+export default Media;

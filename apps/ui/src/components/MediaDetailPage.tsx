@@ -1,7 +1,7 @@
 import React from "react";
 import { useParams } from "react-router-dom";
 import { MediaDetailQuery, mediaDetailResponse } from "../apiClient";
-import MediaDetail from "./Media";
+import Media from "./Media";
 
 type urlParams = {
 	mediaid: string;
@@ -28,7 +28,7 @@ const MediaDetailPage: React.FunctionComponent<
 		})();
 	}, [setMediaDetailData, mediaid, fetchMediaDetail]);
 
-	return <MediaDetail media={media.media} handleDelete={() => {}} />;
+	return <Media media={media.media} handleDelete={() => {}} />;
 };
 
 export default MediaDetailPage;

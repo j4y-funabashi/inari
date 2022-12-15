@@ -1,7 +1,7 @@
 import React from "react";
 import { timelineMonthResponse, media, mockMedia } from "../apiClient";
 import { format } from "date-fns";
-import MediaDetail from "./Media";
+import Media from "./Media";
 
 export interface MediaTimelineMonthProps {
 	mediaTimeline: timelineMonthResponse;
@@ -59,7 +59,7 @@ const MediaTimelineMonth: React.FunctionComponent<
 		const thumbs = v.media.map((m) => {
 			return (
 				<li key={m.id}>
-					<MediaDetail
+					<Media
 						media={m}
 						handleDelete={() => {
 							const newMediaList = mediaTimeline.media.filter((om) => {
@@ -95,7 +95,7 @@ const MediaTimelineMonth: React.FunctionComponent<
 		<div>
 			{currentMedia.isVisible && (
 				<div className="modal">
-					<MediaDetail
+					<Media
 						media={currentMedia.media}
 						handleDelete={() => {
 							const newMediaList = mediaTimeline.media.filter((om) => {
