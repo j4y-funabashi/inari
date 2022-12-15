@@ -11,3 +11,22 @@ a[href]:hover {
     background-color: #44475a;
     color: #f8f8f2;
 }
+
+.modal {
+    display: block;
+    /* Hidden by default */
+    position: fixed;
+    /* Stay in place */
+    z-index: 1;
+    /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%;
+    /* Full width */
+    height: 100%;
+    /* Full height */
+    overflow: auto;
+    /* Enable scroll if needed */
+    background-color: #282a36;
+    padding: 1em 0 1em 0;
+}

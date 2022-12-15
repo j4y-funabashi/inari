@@ -81,15 +81,17 @@ const MediaTimelineMonth: React.FunctionComponent<
 	return (
 		<div>
 			{currentMedia.isVisible && (
-				<MediaDetail
-					media={currentMedia.media}
-					handleDelete={() => {
-						setCurrentMedia({
-							isVisible: false,
-							media: currentMedia.media,
-						});
-					}}
-				/>
+				<div className="modal">
+					<MediaDetail
+						media={currentMedia.media}
+						handleDelete={() => {
+							setCurrentMedia({
+								isVisible: false,
+								media: currentMedia.media,
+							});
+						}}
+					/>
+				</div>
 			)}
 			{header}
 			{media}
