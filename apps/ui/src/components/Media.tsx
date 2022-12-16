@@ -14,13 +14,15 @@ const Media: React.FunctionComponent<React.PropsWithChildren<MediaProps>> = (
 
 	const dat = new Date(media.date);
 	const datKey = format(dat, "eee, do MMM yyyy - HH:mm");
-	const location = `${media.location.locality}, ${media.location.region}`;
+	const location = `${media.location.locality}, ${media.location.region}, ${media.location.country.long}`;
 	const caption = media.caption;
 
 	return (
 		<article>
 			<div>
-				<img src={`${media.media_src.large}`} width="100" alt="" />
+				<img src={`${media.media_src.medium}`} alt="" />
+			</div>
+			<div>
 				<p>{caption}</p>
 				<p>{datKey}</p>
 				<p>{location}</p>
