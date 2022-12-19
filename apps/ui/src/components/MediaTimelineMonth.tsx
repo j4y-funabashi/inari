@@ -79,7 +79,7 @@ const MediaTimelineMonth: React.FunctionComponent<
 		return (
 			<div key={v.collection_meta.id}>
 				<h2>{v.collection_meta.title}</h2>
-				{thumbs}
+				<div className="collection-media">{thumbs}</div>
 			</div>
 		);
 	});

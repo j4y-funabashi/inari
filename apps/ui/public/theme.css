@@ -30,3 +30,8 @@ a[href]:hover {
     background-color: #282a36;
     padding: 1em 0 1em 0;
 }
+
+.collection-media {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+}
