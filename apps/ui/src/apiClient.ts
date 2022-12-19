@@ -136,8 +136,8 @@ export const mockMedia = (dat: Date): media => {
 	return {
 		id: crypto.randomUUID(),
 		media_src: {
-			small: "https://via.placeholder.com/320",
-			medium: "https://via.placeholder.com/320",
+			small: "https://via.placeholder.com/92",
+			medium: "https://via.placeholder.com/420",
 			large: "https://via.placeholder.com/1080",
 		},
 		date: formatISO(dat),
