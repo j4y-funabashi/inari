@@ -17,3 +17,9 @@ func NewNotifier(snsClient *sns.SNS, topicARN string) app.Notifier {
 		return err
 	}
 }
+
+func NewNoopNotifier() app.Notifier {
+	return func(mediaMeta app.MediaMetadata) error {
+		return nil
+	}
+}

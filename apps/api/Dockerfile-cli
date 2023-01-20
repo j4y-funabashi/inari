@@ -1,5 +1,9 @@
 FROM golang:alpine as build
 
+RUN apk update && \
+    apk add \
+    build-base
+
 WORKDIR /build
 COPY . .
 RUN go mod download
@@ -7,12 +11,12 @@ RUN go build -o inari cmd/cli/main.go
 
 FROM alpine:latest
 
+RUN apk update && \
+	apk add \
+	exiftool
+
 WORKDIR /
 
 COPY --from=build /build/inari /inari
-
-# RUN apk update && \
-#     apk add bash
-# 	exiftool
 
 CMD [ "./inari" ]

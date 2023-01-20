@@ -1,30 +1,70 @@
 package main
 
 import (
+	"database/sql"
 	"os"
+	"path/filepath"
 
+	log "github.com/inconshreveable/log15"
+	"github.com/j4y_funabashi/inari/apps/api/pkg/app"
+	"github.com/j4y_funabashi/inari/apps/api/pkg/exiftool"
+	"github.com/j4y_funabashi/inari/apps/api/pkg/index"
+	"github.com/j4y_funabashi/inari/apps/api/pkg/notify"
+	"github.com/j4y_funabashi/inari/apps/api/pkg/storage"
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/urfave/cli/v2"
-	"go.uber.org/zap"
 )
 
 func main() {
-	zlogger, _ := zap.NewDevelopment()
-	logger := zlogger.Sugar()
-	defer logger.Sync()
 
+	// conf
+	dbFileName := "inari-media-db.db"
+	dbFilepath := filepath.Join(os.TempDir(), filepath.Base(dbFileName))
+	mediaStorePath := os.TempDir()
+
+	// deps
+	logger := log.New()
+
+	db, err := sql.Open("sqlite3", dbFilepath)
+	if err != nil {
+		logger.Error("failed to open db",
+			"err", err)
+		panic(err)
+	}
+	err = index.CreateIndex(db)
+	if err != nil {
+		logger.Error("failed to create index",
+			"err", err)
+		panic(err)
+	}
+
+	downloader := storage.NewLocalFSDownloader()
+	uploader := storage.NewLocalFSUploader(mediaStorePath)
+	indexer := index.NewSqliteIndexer(db)
+	extractMetadata := exiftool.NewExtractor("/usr/bin/exiftool")
+	notifier := notify.NewNoopNotifier()
+	importMedia := app.ImportDir(app.NewImporter(logger, downloader, extractMetadata, uploader, indexer, notifier), logger)
+
+	// app commands
 	app := &cli.App{
 		Name:  "inari",
 		Usage: "photo organiser",
-		Action: func(*cli.Context) error {
-			logger.Infow("hello!",
-				"context", 123,
-			)
-			return nil
+		Commands: []*cli.Command{
+			{
+				Name:    "import",
+				Aliases: []string{"i"},
+				Usage:   "import media",
+				Action: func(cCtx *cli.Context) error {
+					inputFilename := cCtx.Args().First()
+					err := importMedia(inputFilename)
+					return err
+				},
+			},
 		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
-		logger.Errorw("failed to run cli app",
+		logger.Error("failed to run cli app",
 			"err", err)
 	}
 

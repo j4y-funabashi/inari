@@ -1,5 +1,9 @@
 FROM golang:alpine as buildAPI
 
+RUN apk update && \
+    apk add \
+    build-base
+
 WORKDIR /api
 COPY apps/api .
 RUN go mod download

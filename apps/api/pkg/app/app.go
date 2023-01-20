@@ -2,10 +2,13 @@ package app
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
+	log "github.com/inconshreveable/log15"
 	"github.com/sirupsen/logrus"
 	"go.uber.org/zap"
 )
@@ -97,6 +100,14 @@ type MediaMetadata struct {
 	Title       string    `json:"title"`
 }
 
+// file extensions inari will import
+var mediaExtensions = map[string]bool{
+	".jpg": true,
+	".mov": true,
+	".mp4": true,
+	".avi": true,
+}
+
 func (mm MediaMetadata) ID() string {
 	return fmt.Sprintf(
 		"%s_%s",
@@ -122,24 +133,57 @@ func (mm MediaMetadata) ThumbnailKey() string {
 	)
 }
 
-func NewImporter(logger *zap.SugaredLogger, downloadFromBackup Downloader, extractMetadata MetadataExtractor, uploadToMediaStore Uploader, indexMedia Indexer, notifyDownstream Notifier) Importer {
+// ImportDir will check if backupFilename is a directory
+// if it is a directory we will import all files with media extensions
+func ImportDir(importFile Importer, logger log.Logger) Importer {
 	return func(backupFilename string) error {
+		fInfo, err := os.Lstat(backupFilename)
+		if err != nil {
+			return err
+		}
+		if !fInfo.IsDir() {
+			return importFile(backupFilename)
+		}
+
+		filepath.Walk(
+			backupFilename,
+			func(path string, info fs.FileInfo, err error) error {
+				if info.IsDir() {
+					return nil
+				}
+				iErr := importFile(path)
+				if iErr != nil {
+					logger.Error("failed to import file", "err", iErr)
+				}
+				return nil
+			})
+		return nil
+	}
+}
+
+func NewImporter(logger log.Logger, downloadFromBackup Downloader, extractMetadata MetadataExtractor, uploadToMediaStore Uploader, indexMedia Indexer, notifyDownstream Notifier) Importer {
+	return func(inputFilename string) error {
+
+		ext := strings.ToLower(filepath.Ext(inputFilename))
+		if _, extValid := mediaExtensions[ext]; !extValid {
+			return nil
+		}
 
 		// download file from backup storage
-		downloadedFilename, err := downloadFromBackup(backupFilename)
+		tmpFilename, err := downloadFromBackup(inputFilename)
 		if err != nil {
 			return fmt.Errorf("failed to download media from backup: %w", err)
 		}
-		defer os.Remove(downloadedFilename)
+		defer os.Remove(tmpFilename)
 
 		// extract metadata
-		mediaMeta, err := extractMetadata(downloadedFilename)
+		mediaMeta, err := extractMetadata(tmpFilename)
 		if err != nil {
 			return fmt.Errorf("failed to extract media metadata: %w", err)
 		}
 
 		// upload renamed file to media storage
-		err = uploadToMediaStore(downloadedFilename, mediaMeta.NewFilename())
+		err = uploadToMediaStore(tmpFilename, mediaMeta.NewFilename())
 		if err != nil {
 			return fmt.Errorf("failed to upload to media store: %w", err)
 		}
@@ -153,16 +197,17 @@ func NewImporter(logger *zap.SugaredLogger, downloadFromBackup Downloader, extra
 		// add to queue
 		err = notifyDownstream(mediaMeta)
 		if err != nil {
-			logger.Errorw("failed to notify downstream",
+			logger.Error("failed to notify downstream",
 				"err", err,
-				"backupFilename", backupFilename)
+				"backupFilename", inputFilename)
 			return nil
 		}
 
-		logger.Infow("imported media",
-			"backupFilename", backupFilename,
-			"downloadedFilename", downloadedFilename,
-			"mediaMeta", mediaMeta)
+		logger.Info("imported media",
+			"backupFilename", inputFilename,
+			"downloadedFilename", tmpFilename,
+			"mediaMeta", mediaMeta,
+			"newFilename", mediaMeta.NewFilename())
 
 		return nil
 	}
