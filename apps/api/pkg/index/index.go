@@ -10,14 +10,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const (
-	collectionTypeInbox         = "inbox"
-	collectionTypeTimelineMonth = "timeline_month"
-	collectionTypeTimelineDay   = "timeline_day"
-	collectionTypePlacesCountry = "places_country"
-	collectionTypePlacesRegion  = "places_region"
-)
-
 func CreateIndex(db *sql.DB) error {
 	q := `CREATE TABLE IF NOT EXISTS media (
   id TEXT NOT NULL PRIMARY KEY,
@@ -52,7 +44,6 @@ func CreateIndex(db *sql.DB) error {
 		return err
 	}
 
-	fmt.Println("index created")
 	return nil
 }
 
@@ -80,7 +71,7 @@ func NewSqliteIndexer(db *sql.DB) app.Indexer {
 		err = addMediaToCollection(
 			db,
 			fmt.Sprintf("inbox_%s", mediaMeta.Date.Format("2006-01")),
-			collectionTypeInbox,
+			app.CollectionTypeInbox,
 			fmt.Sprintf("inbox_%s", mediaMeta.Date.Format("2006-01")),
 			mediaMeta.ID(),
 		)
@@ -92,7 +83,7 @@ func NewSqliteIndexer(db *sql.DB) app.Indexer {
 		err = addMediaToCollection(
 			db,
 			mediaMeta.Date.Format("2006-01"),
-			collectionTypeTimelineMonth,
+			app.CollectionTypeTimelineMonth,
 			mediaMeta.Date.Format("2006 January"),
 			mediaMeta.ID(),
 		)
@@ -104,7 +95,7 @@ func NewSqliteIndexer(db *sql.DB) app.Indexer {
 		err = addMediaToCollection(
 			db,
 			mediaMeta.Date.Format("2006-01-02"),
-			collectionTypeTimelineDay,
+			app.CollectionTypeTimelineDay,
 			mediaMeta.Date.Format("Mon, 02 Jan 2006"),
 			mediaMeta.ID(),
 		)
@@ -113,6 +104,34 @@ func NewSqliteIndexer(db *sql.DB) app.Indexer {
 		}
 
 		return err
+	}
+}
+
+func NewSqliteCollectionLister(db *sql.DB) app.CollectionLister {
+	return func(collectionType string) ([]app.Collection, error) {
+		out := []app.Collection{}
+
+		q := `SELECT
+			id, collection_type, title
+			FROM collection
+			WHERE collection.collection_type = ?
+			ORDER BY title;
+			`
+		rows, err := db.Query(q, collectionType)
+		if err != nil {
+			return out, err
+		}
+
+		for rows.Next() {
+			c := app.Collection{}
+			err = rows.Scan(&c.ID, &c.Type, &c.Title)
+			if err != nil {
+				return out, err
+			}
+			out = append(out, c)
+		}
+
+		return out, nil
 	}
 }
 

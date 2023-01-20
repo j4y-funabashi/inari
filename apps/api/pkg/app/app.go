@@ -13,9 +13,18 @@ import (
 	"go.uber.org/zap"
 )
 
+const (
+	CollectionTypeInbox         = "inbox"
+	CollectionTypeTimelineMonth = "timeline_month"
+	CollectionTypeTimelineDay   = "timeline_day"
+	CollectionTypePlacesCountry = "places_country"
+	CollectionTypePlacesRegion  = "places_region"
+)
+
 type Importer = func(backupFilename string) error
 type Thumbnailer = func(mediastoreKey string) error
-type ViewTimeline = func() (TimelineView, error)
+
+type CollectionLister func(collectionType string) ([]Collection, error)
 type ViewTimelineMonth = func(monthID string) (TimelineMonthView, error)
 type Resizer = func(imgFilename string) ([]string, error)
 type Downloader = func(backupFilename string) (string, error)
@@ -24,7 +33,6 @@ type Indexer = func(mediaMeta MediaMetadata) error
 type Notifier = func(mediaMeta MediaMetadata) error
 type FileLister = func() ([]string, error)
 type MetadataExtractor = func(mediaFile string) (MediaMetadata, error)
-type TimelineQuery = func() (TimelineView, error)
 type TimelineMonthQuery = func(monthID string) (TimelineMonthView, error)
 type MediaDetailQuery = func(mediaID string) (MediaDetailView, error)
 type Geocoder = func(lat, lng float64) (Location, error)
@@ -250,16 +258,6 @@ func NewThumbnailer(fetchMediaDetail MediaDetailQuery, downloadFromMediaStore Do
 		}
 
 		return nil
-	}
-}
-
-func NewTimelineView(timelineQuery TimelineQuery) ViewTimeline {
-	return func() (TimelineView, error) {
-		timelineView, err := timelineQuery()
-		if err != nil {
-			return TimelineView{}, err
-		}
-		return timelineView, nil
 	}
 }
 
