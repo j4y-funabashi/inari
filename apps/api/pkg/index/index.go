@@ -47,6 +47,12 @@ func CreateIndex(db *sql.DB) error {
 	return nil
 }
 
+func NewNullIndexer() app.Indexer {
+	return func(mediaMeta app.MediaMetadata) error {
+		return nil
+	}
+}
+
 func NewSqliteIndexer(db *sql.DB) app.Indexer {
 	return func(mediaMeta app.MediaMetadata) error {
 

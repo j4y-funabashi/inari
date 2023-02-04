@@ -21,6 +21,19 @@ const (
 	CollectionTypePlacesRegion  = "places_region"
 )
 
+type Logger interface {
+	Info(msg string, ctx ...interface{})
+	Error(msg string, ctx ...interface{})
+}
+type NullLogger struct{}
+
+func (NullLogger) Info(msg string, ctx ...interface{})  {}
+func (NullLogger) Error(msg string, ctx ...interface{}) {}
+
+func NewNullLogger() Logger {
+	return NullLogger{}
+}
+
 type Importer = func(backupFilename string) error
 type Thumbnailer = func(mediastoreKey string) error
 
@@ -169,7 +182,7 @@ func ImportDir(importFile Importer, logger log.Logger) Importer {
 	}
 }
 
-func NewImporter(logger log.Logger, downloadFromBackup Downloader, extractMetadata MetadataExtractor, uploadToMediaStore Uploader, indexMedia Indexer, notifyDownstream Notifier) Importer {
+func NewImporter(logger Logger, downloadFromBackup Downloader, extractMetadata MetadataExtractor, uploadToMediaStore Uploader, indexMedia Indexer, notifyDownstream Notifier) Importer {
 	return func(inputFilename string) error {
 
 		ext := strings.ToLower(filepath.Ext(inputFilename))

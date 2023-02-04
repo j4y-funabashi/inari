@@ -36,6 +36,12 @@ func NewDownloader(bucket string, downloader *s3manager.Downloader) app.Download
 	}
 }
 
+func NewNullDownloader() app.Downloader {
+	return func(srcFilename string) (string, error) {
+		return "test-temp-filename.jpg", nil
+	}
+}
+
 func NewLocalFSDownloader() app.Downloader {
 	return func(srcFilename string) (string, error) {
 		dstFilename := filepath.Join(os.TempDir(), filepath.Base(srcFilename))
@@ -57,6 +63,12 @@ func NewLocalFSDownloader() app.Downloader {
 		}
 
 		return dstFile.Name(), nil
+	}
+}
+
+func NewNullUploader() app.Uploader {
+	return func(srcFilename, dstFilename string) error {
+		return nil
 	}
 }
 

@@ -12,6 +12,12 @@ import (
 	"github.com/j4y_funabashi/inari/apps/api/pkg/app"
 )
 
+func NewNullExtractor() app.MetadataExtractor {
+	return func(mediaFile string) (app.MediaMetadata, error) {
+		return app.MediaMetadata{}, nil
+	}
+}
+
 func NewExtractor(exiftoolPath string) app.MetadataExtractor {
 	return func(mediaFile string) (app.MediaMetadata, error) {
 		mediaMetadata := app.MediaMetadata{}
