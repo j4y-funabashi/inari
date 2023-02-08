@@ -53,6 +53,28 @@ func NewNullIndexer() app.Indexer {
 	}
 }
 
+func NewQueryMediaDetail(db *sql.DB) app.QueryMediaDetail {
+	return func(mediaID string) (app.MediaMetadata, error) {
+
+		out := app.MediaMetadata{}
+
+		q := `SELECT
+			media_data
+			FROM media
+			WHERE id = ?;
+			`
+		row := db.QueryRow(q, mediaID)
+
+		jsonStr := ""
+		err := row.Scan(&jsonStr)
+		if err != nil {
+			return out, err
+		}
+		err = json.Unmarshal([]byte(jsonStr), &out)
+		return out, err
+	}
+}
+
 func NewSqliteIndexer(db *sql.DB) app.Indexer {
 	return func(mediaMeta app.MediaMetadata) error {
 

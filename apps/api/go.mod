@@ -8,8 +8,10 @@ require (
 	github.com/barasher/go-exiftool v1.7.0
 	github.com/disintegration/imaging v1.6.2
 	github.com/go-stack/stack v1.8.1 // indirect
+	github.com/google/uuid v1.3.0
 	github.com/inconshreveable/log15 v3.0.0-testing.5+incompatible
 	github.com/julienschmidt/httprouter v1.3.0
+	github.com/matryer/is v1.4.0
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/sirupsen/logrus v1.8.1

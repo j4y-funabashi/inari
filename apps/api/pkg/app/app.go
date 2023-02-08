@@ -36,6 +36,7 @@ func NewNullLogger() Logger {
 
 type Importer = func(backupFilename string) error
 type Thumbnailer = func(mediastoreKey string) error
+type QueryMediaDetail = func(mediaID string) (MediaMetadata, error)
 
 type CollectionLister func(collectionType string) ([]Collection, error)
 type ViewTimelineMonth = func(monthID string) (TimelineMonthView, error)
