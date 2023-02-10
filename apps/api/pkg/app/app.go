@@ -34,7 +34,7 @@ func NewNullLogger() Logger {
 	return NullLogger{}
 }
 
-type Importer = func(backupFilename string) error
+type Importer = func(backupFilename string) (MediaMetadata, error)
 type Thumbnailer = func(mediastoreKey string) error
 type QueryMediaDetail = func(mediaID string) (MediaMetadata, error)
 
@@ -157,14 +157,15 @@ func (mm MediaMetadata) ThumbnailKey() string {
 
 // ImportDir will check if backupFilename is a directory
 // if it is a directory we will import all files with media extensions
-func ImportDir(importFile Importer, logger log.Logger) Importer {
+func ImportDir(importFile Importer, logger log.Logger) func(backupFilename string) error {
 	return func(backupFilename string) error {
 		fInfo, err := os.Lstat(backupFilename)
 		if err != nil {
 			return err
 		}
 		if !fInfo.IsDir() {
-			return importFile(backupFilename)
+			_, err := importFile(backupFilename)
+			return err
 		}
 
 		filepath.Walk(
@@ -173,7 +174,7 @@ func ImportDir(importFile Importer, logger log.Logger) Importer {
 				if info.IsDir() {
 					return nil
 				}
-				iErr := importFile(path)
+				_, iErr := importFile(path)
 				if iErr != nil {
 					logger.Error("failed to import file", "err", iErr)
 				}
@@ -184,36 +185,37 @@ func ImportDir(importFile Importer, logger log.Logger) Importer {
 }
 
 func NewImporter(logger Logger, downloadFromBackup Downloader, extractMetadata MetadataExtractor, uploadToMediaStore Uploader, indexMedia Indexer, notifyDownstream Notifier) Importer {
-	return func(inputFilename string) error {
+	return func(inputFilename string) (MediaMetadata, error) {
+		mediaMeta := MediaMetadata{}
 
 		ext := strings.ToLower(filepath.Ext(inputFilename))
 		if _, extValid := mediaExtensions[ext]; !extValid {
-			return nil
+			return mediaMeta, nil
 		}
 
 		// download file from backup storage
 		tmpFilename, err := downloadFromBackup(inputFilename)
 		if err != nil {
-			return fmt.Errorf("failed to download media from backup: %w", err)
+			return mediaMeta, fmt.Errorf("failed to download media from backup: %w", err)
 		}
 		defer os.Remove(tmpFilename)
 
 		// extract metadata
-		mediaMeta, err := extractMetadata(tmpFilename)
+		mediaMeta, err = extractMetadata(tmpFilename)
 		if err != nil {
-			return fmt.Errorf("failed to extract media metadata: %w", err)
+			return mediaMeta, fmt.Errorf("failed to extract media metadata: %w", err)
 		}
 
 		// upload renamed file to media storage
 		err = uploadToMediaStore(tmpFilename, mediaMeta.NewFilename())
 		if err != nil {
-			return fmt.Errorf("failed to upload to media store: %w", err)
+			return mediaMeta, fmt.Errorf("failed to upload to media store: %w", err)
 		}
 
 		// index metadata in datastore
 		err = indexMedia(mediaMeta)
 		if err != nil {
-			return fmt.Errorf("failed to index media metadata: %w", err)
+			return mediaMeta, fmt.Errorf("failed to index media metadata: %w", err)
 		}
 
 		// add to queue
@@ -222,7 +224,7 @@ func NewImporter(logger Logger, downloadFromBackup Downloader, extractMetadata M
 			logger.Error("failed to notify downstream",
 				"err", err,
 				"backupFilename", inputFilename)
-			return nil
+			return mediaMeta, nil
 		}
 
 		logger.Info("imported media",
@@ -231,7 +233,7 @@ func NewImporter(logger Logger, downloadFromBackup Downloader, extractMetadata M
 			"mediaMeta", mediaMeta,
 			"newFilename", mediaMeta.NewFilename())
 
-		return nil
+		return mediaMeta, nil
 	}
 }
 

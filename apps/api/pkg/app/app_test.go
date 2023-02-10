@@ -8,6 +8,7 @@ import (
 	"github.com/j4y_funabashi/inari/apps/api/pkg/index"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/notify"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/storage"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestImport(t *testing.T) {
@@ -27,9 +28,15 @@ func TestImport(t *testing.T) {
 			uploader := storage.NewNullUploader()
 			indexer := index.NewNullIndexer()
 			notifier := notify.NewNoopNotifier()
-
 			importMedia := app.NewImporter(logger, downloader, extract, uploader, indexer, notifier)
-			importMedia("hellchicken!")
+
+			// act
+			actual, err := importMedia("hellchicken.jpg")
+
+			// assert
+			expected := exiftool.NullMediaMeta
+			assert.NoError(t, err)
+			assert.Equal(t, expected, actual)
 
 		})
 	}
