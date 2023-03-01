@@ -30,7 +30,7 @@ func TestImport(t *testing.T) {
 				MediaMetadata: app.MediaMetadata{
 					Hash:        "caf73e9785fa54300a051df95cfa2db9",
 					Location:    app.Location{},
-					Ext:         "JPG",
+					Ext:         "jpg",
 					MimeType:    "image/jpeg",
 					Width:       "2448",
 					Height:      "3264",
@@ -39,9 +39,6 @@ func TestImport(t *testing.T) {
 					Keywords:    "holiday",
 					Title:       "Ferry to Rotterdam",
 					Date:        time.Date(2014, time.March, 21, 8, 1, 18, 0, time.UTC),
-				},
-				Collections: []app.Collection{
-					{ID: "123"},
 				},
 			},
 		},

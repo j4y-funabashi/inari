@@ -28,7 +28,7 @@ var tests = []struct {
 					Lng: -1.561703,
 				},
 			},
-			Ext:         "JPG",
+			Ext:         "jpg",
 			MimeType:    "image/jpeg",
 			Width:       "100",
 			Height:      "133",
@@ -43,7 +43,7 @@ var tests = []struct {
 		expectedMeta: app.MediaMetadata{
 			Hash:     "1025f263450492c7a27bd44eb3a9d136",
 			Location: app.Location{},
-			Ext:      "MOV",
+			Ext:      "mov",
 			MimeType: "video/quicktime",
 			Width:    "640",
 			Height:   "480",
@@ -56,7 +56,7 @@ var tests = []struct {
 		expectedMeta: app.MediaMetadata{
 			Hash:        "caf73e9785fa54300a051df95cfa2db9",
 			Location:    app.Location{},
-			Ext:         "JPG",
+			Ext:         "jpg",
 			MimeType:    "image/jpeg",
 			Width:       "2448",
 			Height:      "3264",

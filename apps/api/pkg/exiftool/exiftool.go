@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"time"
 
 	exiftoolz "github.com/barasher/go-exiftool"
@@ -74,7 +75,7 @@ func NewExtractor(exiftoolPath string) app.MetadataExtractor {
 		mediaMetadata.Location.Coordinates = coordinates
 		mediaMetadata.Date = date
 		mediaMetadata.Hash = hash
-		mediaMetadata.Ext = ext
+		mediaMetadata.Ext = strings.ToLower(ext)
 		mediaMetadata.MimeType = mimeType
 		mediaMetadata.CameraModel = cameraModel
 		mediaMetadata.CameraMake = cameraMake
