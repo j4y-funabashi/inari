@@ -17,8 +17,8 @@ const ImgSizeLG = 1080
 const Landscape = "l"
 
 func NewResizer() app.Resizer {
-	return func(originalImgFilename string) ([]string, error) {
-		resizedFiles := []string{}
+	return func(originalImgFilename string) (app.MediaSrc, error) {
+		resizedFiles := app.MediaSrc{}
 
 		src, err := imaging.Open(originalImgFilename, imaging.AutoOrientation(true))
 		if err != nil {
@@ -38,7 +38,7 @@ func NewResizer() app.Resizer {
 		if err != nil {
 			return resizedFiles, err
 		}
-		resizedFiles = append(resizedFiles, generateFilename(ImgSizeLGPrefix, originalImgFilename))
+		resizedFiles.Large = generateFilename(ImgSizeLGPrefix, originalImgFilename)
 
 		// -- create sqmd image
 		if orientation == Landscape {
@@ -51,7 +51,7 @@ func NewResizer() app.Resizer {
 		if err != nil {
 			return resizedFiles, err
 		}
-		resizedFiles = append(resizedFiles, generateFilename("sqmd", originalImgFilename))
+		resizedFiles.Medium = generateFilename("sqmd", originalImgFilename)
 
 		// -- create sqsm image
 		src = imaging.Resize(src, ImgSizeSQSM, 0, imaging.Lanczos)
@@ -60,7 +60,7 @@ func NewResizer() app.Resizer {
 		if err != nil {
 			return resizedFiles, err
 		}
-		resizedFiles = append(resizedFiles, generateFilename("sqsm", originalImgFilename))
+		resizedFiles.Small = generateFilename("sqsm", originalImgFilename)
 
 		return resizedFiles, nil
 	}

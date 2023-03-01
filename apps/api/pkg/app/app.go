@@ -34,13 +34,13 @@ func NewNullLogger() Logger {
 	return NullLogger{}
 }
 
-type Importer = func(backupFilename string) (MediaMetadata, error)
+type Importer = func(backupFilename string) (Media, error)
 type Thumbnailer = func(mediastoreKey string) error
 type QueryMediaDetail = func(mediaID string) (MediaMetadata, error)
 
 type CollectionLister func(collectionType string) ([]Collection, error)
 type ViewTimelineMonth = func(monthID string) (TimelineMonthView, error)
-type Resizer = func(imgFilename string) ([]string, error)
+type Resizer = func(imgFilename string) (MediaSrc, error)
 type Downloader = func(backupFilename string) (string, error)
 type Uploader = func(localFilename, mediaStoreFilename string) error
 type Indexer = func(mediaMeta MediaMetadata) error
@@ -52,6 +52,11 @@ type MediaDetailQuery = func(mediaID string) (MediaDetailView, error)
 type Geocoder = func(lat, lng float64) (Location, error)
 type MediaGeocoder = func(mediaID string) (Location, error)
 type LocationPutter = func(mediaID string, location Location) error
+
+type Media struct {
+	MediaMetadata
+	Collections []Collection
+}
 
 // Collection types can be TIMELINE_MONTH
 type Collection struct {
@@ -185,37 +190,38 @@ func ImportDir(importFile Importer, logger log.Logger) func(backupFilename strin
 }
 
 func NewImporter(logger Logger, downloadFromBackup Downloader, extractMetadata MetadataExtractor, uploadToMediaStore Uploader, indexMedia Indexer, notifyDownstream Notifier) Importer {
-	return func(inputFilename string) (MediaMetadata, error) {
-		mediaMeta := MediaMetadata{}
+	return func(inputFilename string) (Media, error) {
+		media := Media{}
 
 		ext := strings.ToLower(filepath.Ext(inputFilename))
 		if _, extValid := mediaExtensions[ext]; !extValid {
-			return mediaMeta, nil
+			return media, nil
 		}
 
 		// download file from backup storage
 		tmpFilename, err := downloadFromBackup(inputFilename)
 		if err != nil {
-			return mediaMeta, fmt.Errorf("failed to download media from backup: %w", err)
+			return media, fmt.Errorf("failed to download media from backup: %w", err)
 		}
 		defer os.Remove(tmpFilename)
 
 		// extract metadata
-		mediaMeta, err = extractMetadata(tmpFilename)
+		mediaMeta, err := extractMetadata(tmpFilename)
 		if err != nil {
-			return mediaMeta, fmt.Errorf("failed to extract media metadata: %w", err)
+			return media, fmt.Errorf("failed to extract media metadata: %w", err)
 		}
+		media.MediaMetadata = mediaMeta
 
 		// upload renamed file to media storage
-		err = uploadToMediaStore(tmpFilename, mediaMeta.NewFilename())
+		err = uploadToMediaStore(tmpFilename, media.NewFilename())
 		if err != nil {
-			return mediaMeta, fmt.Errorf("failed to upload to media store: %w", err)
+			return media, fmt.Errorf("failed to upload to media store: %w", err)
 		}
 
 		// index metadata in datastore
 		err = indexMedia(mediaMeta)
 		if err != nil {
-			return mediaMeta, fmt.Errorf("failed to index media metadata: %w", err)
+			return media, fmt.Errorf("failed to index media metadata: %w", err)
 		}
 
 		// add to queue
@@ -224,16 +230,16 @@ func NewImporter(logger Logger, downloadFromBackup Downloader, extractMetadata M
 			logger.Error("failed to notify downstream",
 				"err", err,
 				"backupFilename", inputFilename)
-			return mediaMeta, nil
+			return media, nil
 		}
 
 		logger.Info("imported media",
 			"backupFilename", inputFilename,
 			"downloadedFilename", tmpFilename,
-			"mediaMeta", mediaMeta,
-			"newFilename", mediaMeta.NewFilename())
+			"mediaMeta", media,
+			"newFilename", media.NewFilename())
 
-		return mediaMeta, nil
+		return media, nil
 	}
 }
 
@@ -266,12 +272,12 @@ func NewThumbnailer(fetchMediaDetail MediaDetailQuery, downloadFromMediaStore Do
 			WithField("thumbnailFiles", thumbnailFiles).
 			Info("resized image")
 
-		for _, thumbnailFile := range thumbnailFiles {
-			err := uploadToThumbnailStore(thumbnailFile, "thmnb/"+filepath.Base(thumbnailFile))
-			if err != nil {
-				return err
-			}
-		}
+		// for _, thumbnailFile := range thumbnailFiles {
+		// 	err := uploadToThumbnailStore(thumbnailFile, "thmnb/"+filepath.Base(thumbnailFile))
+		// 	if err != nil {
+		// 		return err
+		// 	}
+		// }
 
 		return nil
 	}
