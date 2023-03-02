@@ -17,5 +17,5 @@ docker run -p 8080:80 --rm inari-web
 
 ```
 make build-cli
-docker run -v ~/Downloads:/inbox -it --rm inari-cli ./inari import /inbox/20210102_090011_7dd977376d76f24a949838807375d831.JPG
+docker run -v ~/photos/Camera:/inbox -v ~/photos_inari_mediastore:/mediastore -it --rm inari-cli ./inari import /inbox/IMG_20181229_140303.jpg
 ```

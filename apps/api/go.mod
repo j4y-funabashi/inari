@@ -3,9 +3,9 @@ module github.com/j4y_funabashi/inari/apps/api
 go 1.13
 
 require (
-	github.com/aws/aws-lambda-go v1.27.0
 	github.com/aws/aws-sdk-go v1.38.54
 	github.com/barasher/go-exiftool v1.7.0
+	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/disintegration/imaging v1.6.2
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/google/uuid v1.3.0

@@ -2,6 +2,8 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -43,7 +45,9 @@ func main() {
 	indexer := index.NewSqliteIndexer(db)
 	extractMetadata := exiftool.NewExtractor("/usr/bin/exiftool")
 	notifier := notify.NewNoopNotifier()
+
 	importMedia := app.ImportDir(app.NewImporter(logger, downloader, extractMetadata, uploader, indexer, notifier), logger)
+	listCollections := index.NewSqliteCollectionLister(db)
 
 	// app commands
 	app := &cli.App{
@@ -57,6 +61,17 @@ func main() {
 				Action: func(cCtx *cli.Context) error {
 					inputFilename := cCtx.Args().First()
 					err := importMedia(inputFilename)
+					return err
+				},
+			},
+			{
+				Name:  "collection",
+				Usage: "list collections",
+				Action: func(cCtx *cli.Context) error {
+					collectionType := cCtx.Args().First()
+					cols, err := listCollections(collectionType)
+					out, _ := json.Marshal(cols)
+					fmt.Printf("%s", string(out))
 					return err
 				},
 			},
