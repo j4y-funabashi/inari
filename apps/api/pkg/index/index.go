@@ -47,16 +47,10 @@ func CreateIndex(db *sql.DB) error {
 	return nil
 }
 
-func NewNullIndexer() app.Indexer {
-	return func(mediaMeta app.MediaMetadata) error {
-		return nil
-	}
-}
-
 func NewQueryMediaDetail(db *sql.DB) app.QueryMediaDetail {
-	return func(mediaID string) (app.MediaMetadata, error) {
+	return func(mediaID string) (app.Media, error) {
 
-		out := app.MediaMetadata{}
+		out := app.Media{}
 
 		q := `SELECT
 			media_data
@@ -76,11 +70,12 @@ func NewQueryMediaDetail(db *sql.DB) app.QueryMediaDetail {
 }
 
 func NewSqliteIndexer(db *sql.DB) app.Indexer {
-	return func(mediaMeta app.MediaMetadata) error {
+	return func(media app.Media) (app.Media, error) {
 
-		mediaData, err := json.Marshal(mediaMeta)
+		media.ID = media.Hash
+		mediaData, err := json.Marshal(media)
 		if err != nil {
-			return err
+			return app.Media{}, err
 		}
 
 		_, err = db.Exec(
@@ -88,50 +83,50 @@ func NewSqliteIndexer(db *sql.DB) app.Indexer {
 			media (id, date_created, media_data)
 			VALUES (?,?,?);
 			`,
-			mediaMeta.ID(),
-			mediaMeta.Date.Format(time.RFC3339),
+			media.ID,
+			media.Date.Format(time.RFC3339),
 			string(mediaData))
 		if err != nil {
-			return err
+			return app.Media{}, err
 		}
 
 		// inbox
 		err = addMediaToCollection(
 			db,
-			fmt.Sprintf("inbox_%s", mediaMeta.Date.Format("2006-01")),
+			fmt.Sprintf("inbox_%s", media.Date.Format("2006-01")),
 			app.CollectionTypeInbox,
-			fmt.Sprintf("inbox_%s", mediaMeta.Date.Format("2006-01")),
-			mediaMeta.ID(),
+			fmt.Sprintf("inbox_%s", media.Date.Format("2006-01")),
+			media.ID,
 		)
 		if err != nil {
-			return err
+			return app.Media{}, err
 		}
 
 		// month
 		err = addMediaToCollection(
 			db,
-			mediaMeta.Date.Format("2006-01"),
+			media.Date.Format("2006-01"),
 			app.CollectionTypeTimelineMonth,
-			mediaMeta.Date.Format("2006 January"),
-			mediaMeta.ID(),
+			media.Date.Format("2006 January"),
+			media.ID,
 		)
 		if err != nil {
-			return err
+			return app.Media{}, err
 		}
 
 		// day
 		err = addMediaToCollection(
 			db,
-			mediaMeta.Date.Format("2006-01-02"),
+			media.Date.Format("2006-01-02"),
 			app.CollectionTypeTimelineDay,
-			mediaMeta.Date.Format("Mon, 02 Jan 2006"),
-			mediaMeta.ID(),
+			media.Date.Format("Mon, 02 Jan 2006"),
+			media.ID,
 		)
 		if err != nil {
-			return err
+			return app.Media{}, err
 		}
 
-		return err
+		return media, nil
 	}
 }
 

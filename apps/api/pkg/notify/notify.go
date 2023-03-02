@@ -7,10 +7,10 @@ import (
 )
 
 func NewNotifier(snsClient *sns.SNS, topicARN string) app.Notifier {
-	return func(mediaMeta app.MediaMetadata) error {
+	return func(mediaMeta app.Media) error {
 
 		_, err := snsClient.Publish(&sns.PublishInput{
-			Message:  aws.String(mediaMeta.ID()),
+			Message:  aws.String(mediaMeta.ID),
 			TopicArn: &topicARN,
 		})
 
@@ -19,7 +19,7 @@ func NewNotifier(snsClient *sns.SNS, topicARN string) app.Notifier {
 }
 
 func NewNoopNotifier() app.Notifier {
-	return func(mediaMeta app.MediaMetadata) error {
+	return func(mediaMeta app.Media) error {
 		return nil
 	}
 }

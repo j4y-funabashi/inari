@@ -36,15 +36,15 @@ func NewNullLogger() Logger {
 
 type Importer = func(backupFilename string) (Media, error)
 type Thumbnailer = func(mediastoreKey string) error
-type QueryMediaDetail = func(mediaID string) (MediaMetadata, error)
+type QueryMediaDetail = func(mediaID string) (Media, error)
 
 type CollectionLister func(collectionType string) ([]Collection, error)
 type ViewTimelineMonth = func(monthID string) (TimelineMonthView, error)
 type Resizer = func(imgFilename string) (MediaSrc, error)
 type Downloader = func(backupFilename string) (string, error)
 type Uploader = func(localFilename, mediaStoreFilename string) error
-type Indexer = func(mediaMeta MediaMetadata) error
-type Notifier = func(mediaMeta MediaMetadata) error
+type Indexer = func(media Media) (Media, error)
+type Notifier = func(mediaMeta Media) error
 type FileLister = func() ([]string, error)
 type MetadataExtractor = func(mediaFile string) (MediaMetadata, error)
 type TimelineMonthQuery = func(monthID string) (TimelineMonthView, error)
@@ -54,6 +54,8 @@ type MediaGeocoder = func(mediaID string) (Location, error)
 type LocationPutter = func(mediaID string, location Location) error
 
 type Media struct {
+	ID       string
+	FilePath string
 	MediaMetadata
 	Collections []Collection
 }
@@ -135,27 +137,21 @@ var mediaExtensions = map[string]bool{
 	".avi": true,
 }
 
-func (mm MediaMetadata) ID() string {
-	return fmt.Sprintf(
-		"%s_%s",
-		mm.Date.Format("20060102_150405"),
-		mm.Hash,
-	)
-}
-
 func (mm MediaMetadata) NewFilename() string {
 	return fmt.Sprintf(
-		"%s/%s.%s",
+		"%s/%s_%s.%s",
 		mm.Date.Format("2006"),
-		mm.ID(),
+		mm.Date.Format("20060102_150405"),
+		mm.Hash,
 		mm.Ext,
 	)
 }
 
 func (mm MediaMetadata) ThumbnailKey() string {
 	return fmt.Sprintf(
-		"%s.%s",
-		mm.ID(),
+		"%s_%s.%s",
+		mm.Date.Format("20060102_150405"),
+		mm.Hash,
 		mm.Ext,
 	)
 }
@@ -217,15 +213,16 @@ func NewImporter(logger Logger, downloadFromBackup Downloader, extractMetadata M
 		if err != nil {
 			return media, fmt.Errorf("failed to upload to media store: %w", err)
 		}
+		media.FilePath = media.NewFilename()
 
 		// index metadata in datastore
-		err = indexMedia(mediaMeta)
+		media, err = indexMedia(media)
 		if err != nil {
 			return media, fmt.Errorf("failed to index media metadata: %w", err)
 		}
 
 		// add to queue
-		err = notifyDownstream(mediaMeta)
+		err = notifyDownstream(media)
 		if err != nil {
 			logger.Error("failed to notify downstream",
 				"err", err,

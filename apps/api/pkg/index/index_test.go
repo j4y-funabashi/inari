@@ -38,9 +38,11 @@ func TestIndex(t *testing.T) {
 			getMedia := index.NewQueryMediaDetail(db)
 
 			// act
-			media := app.MediaMetadata{
-				Hash: "test-hash",
-				Date: time.Now(),
+			media := app.Media{
+				MediaMetadata: app.MediaMetadata{
+					Hash: "test-hash",
+					Date: time.Now(),
+				},
 			}
 
 			err = index.CreateIndex(db)
@@ -48,18 +50,18 @@ func TestIndex(t *testing.T) {
 				t.Fatalf("%s", err)
 			}
 
-			err = indexMedia(media)
+			iMedia, err := indexMedia(media)
 			if err != nil {
 				t.Fatalf("%s", err)
 			}
 
-			actualMedia, err := getMedia(media.ID())
+			actualMedia, err := getMedia(iMedia.ID)
 			if err != nil {
 				t.Fatalf("%s", err)
 			}
 
 			// assert
-			is.Equal(media.ID(), actualMedia.ID())
+			is.Equal(iMedia.ID, actualMedia.ID)
 		})
 	}
 }

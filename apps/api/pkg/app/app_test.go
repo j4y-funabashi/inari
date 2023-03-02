@@ -24,9 +24,10 @@ func TestImport(t *testing.T) {
 		expected app.Media
 	}{
 		{
-			desc:     "photo with keywords and caption",
+			desc:     "it imports photo with keywords and caption",
 			filePath: "p20140321_080118.jpg",
 			expected: app.Media{
+				ID: "caf73e9785fa54300a051df95cfa2db9",
 				MediaMetadata: app.MediaMetadata{
 					Hash:        "caf73e9785fa54300a051df95cfa2db9",
 					Location:    app.Location{},
@@ -40,6 +41,7 @@ func TestImport(t *testing.T) {
 					Title:       "Ferry to Rotterdam",
 					Date:        time.Date(2014, time.March, 21, 8, 1, 18, 0, time.UTC),
 				},
+				FilePath: "2014/20140321_080118_caf73e9785fa54300a051df95cfa2db9.jpg",
 			},
 		},
 	}
@@ -57,13 +59,16 @@ func TestImport(t *testing.T) {
 
 			// arrange
 			importMedia := newImporter(testDir)
+			queryMediaDetail := newMediaDetailQuery(testDir)
 
 			// act
 			filePath := path.Join("./test_data", tC.filePath)
-			actual, err := importMedia(filePath)
+			iMedia, err := importMedia(filePath)
+			assert.NoError(t, err)
+			actual, err := queryMediaDetail(iMedia.ID)
+			assert.NoError(t, err)
 
 			// assert
-			assert.NoError(t, err)
 			assert.Equal(t, tC.expected, actual)
 
 		})
@@ -73,24 +78,11 @@ func TestImport(t *testing.T) {
 func newImporter(testDir string) app.Importer {
 
 	// conf
-	dbFileName := "inari-media-db.db"
-	dbFilepath := filepath.Join(testDir, filepath.Base(dbFileName))
 	mediaStorePath := testDir
 
 	// deps
+	db := newDB(testDir)
 	logger := app.NewNullLogger()
-	db, err := sql.Open("sqlite3", dbFilepath)
-	if err != nil {
-		logger.Error("failed to open db",
-			"err", err)
-		panic(err)
-	}
-	err = index.CreateIndex(db)
-	if err != nil {
-		logger.Error("failed to create index",
-			"err", err)
-		panic(err)
-	}
 	downloader := storage.NewLocalFSDownloader()
 	uploader := storage.NewLocalFSUploader(mediaStorePath)
 	indexer := index.NewSqliteIndexer(db)
@@ -98,4 +90,26 @@ func newImporter(testDir string) app.Importer {
 	notifier := notify.NewNoopNotifier()
 
 	return app.NewImporter(logger, downloader, extractMetadata, uploader, indexer, notifier)
+}
+
+func newMediaDetailQuery(testDir string) app.QueryMediaDetail {
+	db := newDB(testDir)
+
+	return index.NewQueryMediaDetail(db)
+}
+
+func newDB(testDir string) *sql.DB {
+	dbFileName := "inari-media-db.db"
+	dbFilepath := filepath.Join(testDir, filepath.Base(dbFileName))
+
+	db, err := sql.Open("sqlite3", dbFilepath)
+	if err != nil {
+		panic(err)
+	}
+	err = index.CreateIndex(db)
+	if err != nil {
+		panic(err)
+	}
+
+	return db
 }
