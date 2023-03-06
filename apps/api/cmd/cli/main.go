@@ -21,10 +21,15 @@ import (
 func main() {
 
 	// conf
-	baseDir := os.TempDir()
+	baseDir := filepath.Join(os.TempDir(), "inari")
 	mediaStorePath := filepath.Join(baseDir, "media")
 	thumbnailsPath := filepath.Join(baseDir, "thumbnails")
 	dbFilepath := filepath.Join(baseDir, "inari-media-db.db")
+
+	err := os.MkdirAll(baseDir, 0700)
+	if err != nil {
+		panic("failed to create root dir: " + err.Error())
+	}
 
 	// deps
 	logger := log.New()
