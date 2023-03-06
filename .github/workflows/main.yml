@@ -9,6 +9,7 @@ jobs:
   build-api:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
       - name: test
         run: ls -lhA;make test-api
 
