@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: test
-        run: make test-api
+        run: ls -lhA;make test-api
 
   build-ui:
     runs-on: ubuntu-latest
