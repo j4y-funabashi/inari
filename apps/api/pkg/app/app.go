@@ -9,7 +9,6 @@ import (
 	"time"
 
 	log "github.com/inconshreveable/log15"
-	"github.com/sirupsen/logrus"
 	"go.uber.org/zap"
 )
 
@@ -40,7 +39,7 @@ type QueryMediaDetail = func(mediaID string) (Media, error)
 
 type CollectionLister func(collectionType string) ([]Collection, error)
 type ViewTimelineMonth = func(monthID string) (TimelineMonthView, error)
-type Resizer = func(imgFilename string) (MediaSrc, error)
+type Resizer = func(in, out string) (MediaSrc, error)
 type Downloader = func(backupFilename string) (string, error)
 type Uploader = func(localFilename, mediaStoreFilename string) error
 type Indexer = func(media Media) (Media, error)
@@ -57,6 +56,7 @@ type Media struct {
 	ID       string
 	FilePath string
 	MediaMetadata
+	Thumbnails  MediaSrc
 	Collections []Collection
 }
 
@@ -185,7 +185,7 @@ func ImportDir(importFile Importer, logger log.Logger) func(backupFilename strin
 	}
 }
 
-func NewImporter(logger Logger, downloadFromBackup Downloader, extractMetadata MetadataExtractor, uploadToMediaStore Uploader, indexMedia Indexer, notifyDownstream Notifier) Importer {
+func NewImporter(logger Logger, downloadFromBackup Downloader, extractMetadata MetadataExtractor, uploadToMediaStore Uploader, indexMedia Indexer, createThumbnails Resizer, notifyDownstream Notifier) Importer {
 	return func(inputFilename string) (Media, error) {
 		media := Media{}
 
@@ -215,6 +215,13 @@ func NewImporter(logger Logger, downloadFromBackup Downloader, extractMetadata M
 		}
 		media.FilePath = media.NewFilename()
 
+		// create thumbnails
+		thumbnails, err := createThumbnails(tmpFilename, media.NewFilename())
+		if err != nil {
+			return media, fmt.Errorf("failed to create thumbnails: %w", err)
+		}
+		media.Thumbnails = thumbnails
+
 		// index metadata in datastore
 		media, err = indexMedia(media)
 		if err != nil {
@@ -237,46 +244,6 @@ func NewImporter(logger Logger, downloadFromBackup Downloader, extractMetadata M
 			"newFilename", media.NewFilename())
 
 		return media, nil
-	}
-}
-
-func NewThumbnailer(fetchMediaDetail MediaDetailQuery, downloadFromMediaStore Downloader, resizeImage Resizer, uploadToThumbnailStore Uploader) Thumbnailer {
-	return func(mediaID string) error {
-		media, err := fetchMediaDetail(mediaID)
-		if err != nil {
-			return fmt.Errorf("failed to fetch media detail: %w", err)
-		}
-		mediastoreKey := media.Media.MediaSrc.Key
-
-		// download file from media store
-		downloadedFilename, err := downloadFromMediaStore(mediastoreKey)
-		if err != nil {
-			return fmt.Errorf("failed to download media %s: %w", mediastoreKey, err)
-		}
-		defer os.Remove(downloadedFilename)
-		logrus.
-			WithField("mediastoreKey", mediastoreKey).
-			WithField("filename", downloadedFilename).
-			Info("downloaded media file from media store")
-
-		thumbnailFiles, err := resizeImage(downloadedFilename)
-		if err != nil {
-			return err
-		}
-		logrus.
-			WithField("mediastoreKey", mediastoreKey).
-			WithField("filename", downloadedFilename).
-			WithField("thumbnailFiles", thumbnailFiles).
-			Info("resized image")
-
-		// for _, thumbnailFile := range thumbnailFiles {
-		// 	err := uploadToThumbnailStore(thumbnailFile, "thmnb/"+filepath.Base(thumbnailFile))
-		// 	if err != nil {
-		// 		return err
-		// 	}
-		// }
-
-		return nil
 	}
 }
 

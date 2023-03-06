@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/app"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/exiftool"
+	"github.com/j4y_funabashi/inari/apps/api/pkg/imgresize"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/index"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/notify"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/storage"
@@ -42,6 +43,11 @@ func TestImport(t *testing.T) {
 					Date:        time.Date(2014, time.March, 21, 8, 1, 18, 0, time.UTC),
 				},
 				FilePath: "2014/20140321_080118_caf73e9785fa54300a051df95cfa2db9.jpg",
+				Thumbnails: app.MediaSrc{
+					Small:  "sqsm_20140321_080118_caf73e9785fa54300a051df95cfa2db9.jpg",
+					Medium: "sqmd_20140321_080118_caf73e9785fa54300a051df95cfa2db9.jpg",
+					Large:  "lg_20140321_080118_caf73e9785fa54300a051df95cfa2db9.jpg",
+				},
 			},
 		},
 	}
@@ -75,21 +81,22 @@ func TestImport(t *testing.T) {
 	}
 }
 
-func newImporter(testDir string) app.Importer {
+func newImporter(baseDir string) app.Importer {
 
 	// conf
-	mediaStorePath := testDir
+	mediaStorePath := baseDir
 
 	// deps
-	db := newDB(testDir)
+	db := newDB(baseDir)
 	logger := app.NewNullLogger()
 	downloader := storage.NewLocalFSDownloader()
 	uploader := storage.NewLocalFSUploader(mediaStorePath)
 	indexer := index.NewSqliteIndexer(db)
 	extractMetadata := exiftool.NewExtractor("/usr/bin/exiftool")
 	notifier := notify.NewNoopNotifier()
+	createThumbnails := imgresize.NewResizer(filepath.Join(baseDir, "thumbnails"))
 
-	return app.NewImporter(logger, downloader, extractMetadata, uploader, indexer, notifier)
+	return app.NewImporter(logger, downloader, extractMetadata, uploader, indexer, createThumbnails, notifier)
 }
 
 func newMediaDetailQuery(testDir string) app.QueryMediaDetail {

@@ -1,6 +1,7 @@
 package imgresize
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -16,13 +17,18 @@ const ImgSizeSQMD = 420
 const ImgSizeLG = 1080
 const Landscape = "l"
 
-func NewResizer() app.Resizer {
-	return func(originalImgFilename string) (app.MediaSrc, error) {
-		resizedFiles := app.MediaSrc{}
+func NewResizer(baseDir string) app.Resizer {
+	err := os.MkdirAll(baseDir, 0700)
+	if err != nil {
+		panic("failed to create thumbnails dir: " + err.Error())
+	}
 
-		src, err := imaging.Open(originalImgFilename, imaging.AutoOrientation(true))
+	return func(inPath, outPath string) (app.MediaSrc, error) {
+
+		thumbnails := app.MediaSrc{}
+		src, err := imaging.Open(inPath, imaging.AutoOrientation(true))
 		if err != nil {
-			return resizedFiles, err
+			return app.MediaSrc{}, err
 		}
 
 		// figure out landscape or portrait
@@ -34,11 +40,11 @@ func NewResizer() app.Resizer {
 		} else {
 			src = imaging.Resize(src, 0, ImgSizeLG, imaging.Lanczos)
 		}
-		err = imaging.Save(src, generateFilename(ImgSizeLGPrefix, originalImgFilename))
+		err = imaging.Save(src, filepath.Join(baseDir, generateFilename(ImgSizeLGPrefix, outPath)))
 		if err != nil {
-			return resizedFiles, err
+			return app.MediaSrc{}, err
 		}
-		resizedFiles.Large = generateFilename(ImgSizeLGPrefix, originalImgFilename)
+		thumbnails.Large = generateFilename(ImgSizeLGPrefix, outPath)
 
 		// -- create sqmd image
 		if orientation == Landscape {
@@ -47,27 +53,27 @@ func NewResizer() app.Resizer {
 			src = imaging.Resize(src, ImgSizeSQMD, 0, imaging.Lanczos)
 		}
 		src = imaging.CropAnchor(src, ImgSizeSQMD, ImgSizeSQMD, imaging.Center)
-		err = imaging.Save(src, generateFilename("sqmd", originalImgFilename))
+		err = imaging.Save(src, filepath.Join(baseDir, generateFilename("sqmd", outPath)))
 		if err != nil {
-			return resizedFiles, err
+			return app.MediaSrc{}, err
 		}
-		resizedFiles.Medium = generateFilename("sqmd", originalImgFilename)
+		thumbnails.Medium = generateFilename("sqmd", outPath)
 
 		// -- create sqsm image
 		src = imaging.Resize(src, ImgSizeSQSM, 0, imaging.Lanczos)
 		src = imaging.CropAnchor(src, ImgSizeSQSM, ImgSizeSQSM, imaging.Center)
-		err = imaging.Save(src, generateFilename("sqsm", originalImgFilename))
+		err = imaging.Save(src, filepath.Join(baseDir, generateFilename("sqsm", outPath)))
 		if err != nil {
-			return resizedFiles, err
+			return app.MediaSrc{}, err
 		}
-		resizedFiles.Small = generateFilename("sqsm", originalImgFilename)
+		thumbnails.Small = generateFilename("sqsm", outPath)
 
-		return resizedFiles, nil
+		return thumbnails, nil
 	}
 }
 
 func generateFilename(prefix, originalImgFilename string) string {
-	return filepath.Join(os.TempDir(), prefix+"_"+filepath.Base(originalImgFilename))
+	return fmt.Sprintf("%s_%s", prefix, filepath.Base(originalImgFilename))
 }
 
 func orientation(w, h int) string {

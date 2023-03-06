@@ -10,6 +10,7 @@ import (
 	log "github.com/inconshreveable/log15"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/app"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/exiftool"
+	"github.com/j4y_funabashi/inari/apps/api/pkg/imgresize"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/index"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/notify"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/storage"
@@ -20,9 +21,10 @@ import (
 func main() {
 
 	// conf
-	dbFileName := "inari-media-db.db"
-	dbFilepath := filepath.Join(os.TempDir(), filepath.Base(dbFileName))
-	mediaStorePath := os.TempDir()
+	baseDir := os.TempDir()
+	mediaStorePath := filepath.Join(baseDir, "media")
+	thumbnailsPath := filepath.Join(baseDir, "thumbnails")
+	dbFilepath := filepath.Join(baseDir, "inari-media-db.db")
 
 	// deps
 	logger := log.New()
@@ -45,8 +47,9 @@ func main() {
 	indexer := index.NewSqliteIndexer(db)
 	extractMetadata := exiftool.NewExtractor("/usr/bin/exiftool")
 	notifier := notify.NewNoopNotifier()
+	resizer := imgresize.NewResizer(thumbnailsPath)
 
-	importMedia := app.ImportDir(app.NewImporter(logger, downloader, extractMetadata, uploader, indexer, notifier), logger)
+	importMedia := app.ImportDir(app.NewImporter(logger, downloader, extractMetadata, uploader, indexer, resizer, notifier), logger)
 	listCollections := index.NewSqliteCollectionLister(db)
 
 	// app commands
