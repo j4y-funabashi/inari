@@ -8,17 +8,9 @@ on:
 jobs:
   build-api:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./apps/api
     steps:
-      - uses: actions/checkout@v3
-      - name: Setup Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: '1.19.x'
       - name: test
-        run: go test ./...
+        run: make test-api
 
   build-ui:
     runs-on: ubuntu-latest
