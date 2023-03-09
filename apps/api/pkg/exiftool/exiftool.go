@@ -13,31 +13,6 @@ import (
 	"github.com/j4y_funabashi/inari/apps/api/pkg/app"
 )
 
-var NullMediaMeta = app.MediaMetadata{
-	Hash: "123-test",
-	Date: time.Date(1984, time.January, 28, 10, 0, 0, 0, time.UTC),
-	Location: app.Location{
-		Coordinates: app.Coordinates{
-			Lat: 1,
-			Lng: 2,
-		},
-	},
-	Ext:         ".jpg",
-	MimeType:    "image/jpeg",
-	CameraModel: "test-model",
-	CameraMake:  "test-make",
-	Width:       "1024",
-	Height:      "768",
-	Keywords:    "test keywords",
-	Title:       "test-title",
-}
-
-func NewNullExtractor() app.MetadataExtractor {
-	return func(mediaFile string) (app.MediaMetadata, error) {
-		return NullMediaMeta, nil
-	}
-}
-
 func NewExtractor(exiftoolPath string) app.MetadataExtractor {
 	return func(mediaFile string) (app.MediaMetadata, error) {
 		mediaMetadata := app.MediaMetadata{}
@@ -72,7 +47,7 @@ func NewExtractor(exiftoolPath string) app.MetadataExtractor {
 			return mediaMetadata, err
 		}
 
-		mediaMetadata.Location.Coordinates = coordinates
+		mediaMetadata.Coordinates = coordinates
 		mediaMetadata.Date = date
 		mediaMetadata.Hash = hash
 		mediaMetadata.Ext = strings.ToLower(ext)

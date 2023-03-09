@@ -31,7 +31,7 @@ func TestImport(t *testing.T) {
 				ID: "caf73e9785fa54300a051df95cfa2db9",
 				MediaMetadata: app.MediaMetadata{
 					Hash:        "caf73e9785fa54300a051df95cfa2db9",
-					Location:    app.Location{},
+					Coordinates: app.Coordinates{},
 					Ext:         "jpg",
 					MimeType:    "image/jpeg",
 					Width:       "2448",
@@ -47,6 +47,39 @@ func TestImport(t *testing.T) {
 					Small:  "sqsm_20140321_080118_caf73e9785fa54300a051df95cfa2db9.jpg",
 					Medium: "sqmd_20140321_080118_caf73e9785fa54300a051df95cfa2db9.jpg",
 					Large:  "lg_20140321_080118_caf73e9785fa54300a051df95cfa2db9.jpg",
+				},
+			},
+		},
+		{
+			desc:     "photo with location",
+			filePath: "IMG_20220103_134540.jpg",
+			expected: app.Media{
+				ID: "9b3f4e51bd961cb321ca234a0b4703f9",
+				MediaMetadata: app.MediaMetadata{
+					Hash: "9b3f4e51bd961cb321ca234a0b4703f9",
+					Coordinates: app.Coordinates{
+						Lat: 53.8700189722222,
+						Lng: -1.561703,
+					},
+					Ext:         "jpg",
+					MimeType:    "image/jpeg",
+					Width:       "100",
+					Height:      "133",
+					Date:        time.Date(2022, time.January, 3, 13, 45, 40, 0, time.UTC),
+					CameraMake:  "Fairphone",
+					CameraModel: "FP3",
+				},
+				FilePath: "2022/20220103_134540_9b3f4e51bd961cb321ca234a0b4703f9.jpg",
+				Thumbnails: app.MediaSrc{
+					Small:  "sqsm_20220103_134540_9b3f4e51bd961cb321ca234a0b4703f9.jpg",
+					Medium: "sqmd_20220103_134540_9b3f4e51bd961cb321ca234a0b4703f9.jpg",
+					Large:  "lg_20220103_134540_9b3f4e51bd961cb321ca234a0b4703f9.jpg",
+				},
+				Location: app.Location{
+					Coordinates: app.Coordinates{
+						Lat: 53.8700189722222,
+						Lng: -1.561703,
+					},
 				},
 			},
 		},

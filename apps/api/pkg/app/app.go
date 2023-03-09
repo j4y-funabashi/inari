@@ -9,7 +9,6 @@ import (
 	"time"
 
 	log "github.com/inconshreveable/log15"
-	"go.uber.org/zap"
 )
 
 const (
@@ -57,6 +56,7 @@ type Media struct {
 	FilePath string
 	MediaMetadata
 	Thumbnails  MediaSrc
+	Location    Location
 	Collections []Collection
 }
 
@@ -116,17 +116,17 @@ type Country struct {
 	Long  string `json:"long"`
 }
 type MediaMetadata struct {
-	Hash        string    `json:"hash"`
-	Date        time.Time `json:"date"`
-	Location    Location  `json:"location"`
-	Ext         string    `json:"ext"`
-	MimeType    string    `json:"mime_type"`
-	Width       string    `json:"width"`
-	Height      string    `json:"height"`
-	CameraMake  string    `json:"camera_make"`
-	CameraModel string    `json:"camera_model"`
-	Keywords    string    `json:"keywords"`
-	Title       string    `json:"title"`
+	Hash        string      `json:"hash"`
+	Date        time.Time   `json:"date"`
+	Coordinates Coordinates `json:"coordinates"`
+	Ext         string      `json:"ext"`
+	MimeType    string      `json:"mime_type"`
+	Width       string      `json:"width"`
+	Height      string      `json:"height"`
+	CameraMake  string      `json:"camera_make"`
+	CameraModel string      `json:"camera_model"`
+	Keywords    string      `json:"keywords"`
+	Title       string      `json:"title"`
 }
 
 // file extensions inari will import
@@ -254,31 +254,5 @@ func NewTimelineMonthView(timelineQuery TimelineMonthQuery) ViewTimelineMonth {
 			return TimelineMonthView{}, err
 		}
 		return timelineView, nil
-	}
-}
-
-func NewGeocoder(logger *zap.SugaredLogger, reverseGeocode Geocoder, fetchMediaDetail MediaDetailQuery, saveLocation LocationPutter) MediaGeocoder {
-	return func(mediaID string) (Location, error) {
-		media, err := fetchMediaDetail(mediaID)
-		if err != nil {
-			return Location{}, fmt.Errorf("failed to fetch media detail: %w", err)
-		}
-
-		if media.Media.Location.Lat == 0 && media.Media.Location.Lng == 0 {
-			return Location{}, nil
-		}
-
-		loc, err := reverseGeocode(
-			media.Media.Location.Lat,
-			media.Media.Location.Lng)
-		if err != nil {
-			return Location{}, fmt.Errorf("failed to geocode location: %w", err)
-		}
-
-		err = saveLocation(mediaID, loc)
-		if err != nil {
-			return Location{}, fmt.Errorf("failed to save media location: %w", err)
-		}
-		return loc, err
 	}
 }

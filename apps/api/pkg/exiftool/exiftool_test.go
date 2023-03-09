@@ -22,11 +22,9 @@ var tests = []struct {
 		backupFilename: "IMG_20220103_134540.jpg",
 		expectedMeta: app.MediaMetadata{
 			Hash: "9b3f4e51bd961cb321ca234a0b4703f9",
-			Location: app.Location{
-				Coordinates: app.Coordinates{
-					Lat: 53.8700189722222,
-					Lng: -1.561703,
-				},
+			Coordinates: app.Coordinates{
+				Lat: 53.8700189722222,
+				Lng: -1.561703,
 			},
 			Ext:         "jpg",
 			MimeType:    "image/jpeg",
@@ -41,13 +39,13 @@ var tests = []struct {
 		name:           "mov video",
 		backupFilename: "P1160866.MOV",
 		expectedMeta: app.MediaMetadata{
-			Hash:     "1025f263450492c7a27bd44eb3a9d136",
-			Location: app.Location{},
-			Ext:      "mov",
-			MimeType: "video/quicktime",
-			Width:    "640",
-			Height:   "480",
-			Date:     time.Date(2017, time.March, 20, 21, 16, 36, 0, time.UTC),
+			Hash:        "1025f263450492c7a27bd44eb3a9d136",
+			Coordinates: app.Coordinates{},
+			Ext:         "mov",
+			MimeType:    "video/quicktime",
+			Width:       "640",
+			Height:      "480",
+			Date:        time.Date(2017, time.March, 20, 21, 16, 36, 0, time.UTC),
 		},
 	},
 	{
@@ -55,7 +53,7 @@ var tests = []struct {
 		backupFilename: "p20140321_080118.jpg",
 		expectedMeta: app.MediaMetadata{
 			Hash:        "caf73e9785fa54300a051df95cfa2db9",
-			Location:    app.Location{},
+			Coordinates: app.Coordinates{},
 			Ext:         "jpg",
 			MimeType:    "image/jpeg",
 			Width:       "2448",
