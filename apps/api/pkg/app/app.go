@@ -185,7 +185,7 @@ func ImportDir(importFile Importer, logger log.Logger) func(backupFilename strin
 	}
 }
 
-func NewImporter(logger Logger, downloadFromBackup Downloader, extractMetadata MetadataExtractor, uploadToMediaStore Uploader, indexMedia Indexer, createThumbnails Resizer, notifyDownstream Notifier) Importer {
+func NewImporter(logger Logger, downloadFromBackup Downloader, extractMetadata MetadataExtractor, uploadToMediaStore Uploader, indexMedia Indexer, createThumbnails Resizer, geocode Geocoder, notifyDownstream Notifier) Importer {
 	return func(inputFilename string) (Media, error) {
 		media := Media{}
 
@@ -221,6 +221,13 @@ func NewImporter(logger Logger, downloadFromBackup Downloader, extractMetadata M
 			return media, fmt.Errorf("failed to create thumbnails: %w", err)
 		}
 		media.Thumbnails = thumbnails
+
+		// geocode
+		loc, err := geocode(media.Coordinates.Lat, media.Coordinates.Lng)
+		if err != nil {
+			return media, fmt.Errorf("failed to geocode: %w", err)
+		}
+		media.Location = loc
 
 		// index metadata in datastore
 		media, err = indexMedia(media)

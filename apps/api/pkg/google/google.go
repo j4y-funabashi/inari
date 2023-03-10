@@ -13,6 +13,10 @@ import (
 func NewGeocoder(apiKey, baseURL string) app.Geocoder {
 	return func(lat, lng float64) (app.Location, error) {
 
+		if lat == 0 && lng == 0 {
+			return app.Location{}, nil
+		}
+
 		// fetch reverse geocode
 		geocodeURL := buildURL(lat, lng, baseURL, apiKey)
 		res, err := http.Get(geocodeURL)
@@ -35,7 +39,7 @@ func NewGeocoder(apiKey, baseURL string) app.Geocoder {
 		}
 
 		if len(results.Results) == 0 {
-			return app.Location{}, fmt.Errorf("no geocode results found")
+			return app.Location{}, fmt.Errorf("no geocode results found: %s", body)
 		}
 
 		// create Location
