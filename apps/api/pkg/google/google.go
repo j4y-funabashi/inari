@@ -10,6 +10,28 @@ import (
 	"github.com/j4y_funabashi/inari/apps/api/pkg/app"
 )
 
+func NewNullGeocoder() app.Geocoder {
+	return func(lat, lng float64) (app.Location, error) {
+
+		if lat == 0 && lng == 0 {
+			return app.Location{}, nil
+		}
+
+		return app.Location{
+			Country: app.Country{
+				Long:  "United Kingdom",
+				Short: "GB",
+			},
+			Region:   "West Yorkshire",
+			Locality: "Leeds",
+			Coordinates: app.Coordinates{
+				Lat: 53.8700189722222,
+				Lng: -1.561703,
+			},
+		}, nil
+	}
+}
+
 func NewGeocoder(apiKey, baseURL string) app.Geocoder {
 	return func(lat, lng float64) (app.Location, error) {
 

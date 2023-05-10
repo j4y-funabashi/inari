@@ -73,11 +73,47 @@ func NewSqliteIndexer(db *sql.DB) app.Indexer {
 	return func(media app.Media) (app.Media, error) {
 
 		media.ID = media.Hash
-		mediaData, err := json.Marshal(media)
+
+		// inbox
+		media, err := addMediaToCollection(
+			db,
+			fmt.Sprintf("inbox_%s", media.Date.Format("2006-01")),
+			app.CollectionTypeInbox,
+			fmt.Sprintf("inbox_%s", media.Date.Format("2006-01")),
+			media,
+		)
 		if err != nil {
 			return app.Media{}, err
 		}
 
+		// month
+		media, err = addMediaToCollection(
+			db,
+			media.Date.Format("2006-01"),
+			app.CollectionTypeTimelineMonth,
+			media.Date.Format("2006 January"),
+			media,
+		)
+		if err != nil {
+			return app.Media{}, err
+		}
+
+		// day
+		media, err = addMediaToCollection(
+			db,
+			media.Date.Format("2006-01-02"),
+			app.CollectionTypeTimelineDay,
+			media.Date.Format("Mon, 02 Jan 2006"),
+			media,
+		)
+		if err != nil {
+			return app.Media{}, err
+		}
+
+		mediaData, err := json.Marshal(media)
+		if err != nil {
+			return app.Media{}, err
+		}
 		_, err = db.Exec(
 			`INSERT OR IGNORE INTO
 			media (id, date_created, media_data)
@@ -86,42 +122,6 @@ func NewSqliteIndexer(db *sql.DB) app.Indexer {
 			media.ID,
 			media.Date.Format(time.RFC3339),
 			string(mediaData))
-		if err != nil {
-			return app.Media{}, err
-		}
-
-		// inbox
-		err = addMediaToCollection(
-			db,
-			fmt.Sprintf("inbox_%s", media.Date.Format("2006-01")),
-			app.CollectionTypeInbox,
-			fmt.Sprintf("inbox_%s", media.Date.Format("2006-01")),
-			media.ID,
-		)
-		if err != nil {
-			return app.Media{}, err
-		}
-
-		// month
-		err = addMediaToCollection(
-			db,
-			media.Date.Format("2006-01"),
-			app.CollectionTypeTimelineMonth,
-			media.Date.Format("2006 January"),
-			media.ID,
-		)
-		if err != nil {
-			return app.Media{}, err
-		}
-
-		// day
-		err = addMediaToCollection(
-			db,
-			media.Date.Format("2006-01-02"),
-			app.CollectionTypeTimelineDay,
-			media.Date.Format("Mon, 02 Jan 2006"),
-			media.ID,
-		)
 		if err != nil {
 			return app.Media{}, err
 		}
@@ -158,7 +158,7 @@ func NewSqliteCollectionLister(db *sql.DB) app.CollectionLister {
 	}
 }
 
-func addMediaToCollection(db *sql.DB, collectionID, collectionType, collectionTitle, mediaID string) error {
+func addMediaToCollection(db *sql.DB, collectionID, collectionType, collectionTitle string, media app.Media) (app.Media, error) {
 
 	_, err := db.Exec(
 		`INSERT OR IGNORE INTO
@@ -169,7 +169,7 @@ func addMediaToCollection(db *sql.DB, collectionID, collectionType, collectionTi
 		collectionType,
 		collectionTitle)
 	if err != nil {
-		return err
+		return media, err
 	}
 
 	_, err = db.Exec(
@@ -177,8 +177,17 @@ func addMediaToCollection(db *sql.DB, collectionID, collectionType, collectionTi
 		media_collection (media_id, collection_id)
 		VALUES (?,?);
 		`,
-		mediaID,
+		media.ID,
 		collectionID)
 
-	return err
+	media.Collections = append(
+		media.Collections,
+		app.Collection{
+			ID:    collectionID,
+			Title: collectionTitle,
+			Type:  collectionType,
+		},
+	)
+
+	return media, err
 }

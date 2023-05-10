@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/app"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/exiftool"
+	"github.com/j4y_funabashi/inari/apps/api/pkg/google"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/imgresize"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/index"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/notify"
@@ -48,6 +49,23 @@ func TestImport(t *testing.T) {
 					Medium: "sqmd_20140321_080118_caf73e9785fa54300a051df95cfa2db9.jpg",
 					Large:  "lg_20140321_080118_caf73e9785fa54300a051df95cfa2db9.jpg",
 				},
+				Collections: []app.Collection{
+					{
+						ID:    "inbox_2014-03",
+						Title: "inbox_2014-03",
+						Type:  app.CollectionTypeInbox,
+					},
+					{
+						ID:    "2014-03",
+						Title: "2014 March",
+						Type:  app.CollectionTypeTimelineMonth,
+					},
+					{
+						ID:    "2014-03-21",
+						Title: "Fri, 21 Mar 2014",
+						Type:  app.CollectionTypeTimelineDay,
+					},
+				},
 			},
 		},
 		{
@@ -75,7 +93,30 @@ func TestImport(t *testing.T) {
 					Medium: "sqmd_20220103_134540_9b3f4e51bd961cb321ca234a0b4703f9.jpg",
 					Large:  "lg_20220103_134540_9b3f4e51bd961cb321ca234a0b4703f9.jpg",
 				},
+				Collections: []app.Collection{
+					{
+						ID:    "inbox_2022-01",
+						Title: "inbox_2022-01",
+						Type:  app.CollectionTypeInbox,
+					},
+					{
+						ID:    "2022-01",
+						Title: "2022 January",
+						Type:  app.CollectionTypeTimelineMonth,
+					},
+					{
+						ID:    "2022-01-03",
+						Title: "Mon, 03 Jan 2022",
+						Type:  app.CollectionTypeTimelineDay,
+					},
+				},
 				Location: app.Location{
+					Country: app.Country{
+						Long:  "United Kingdom",
+						Short: "GB",
+					},
+					Region:   "West Yorkshire",
+					Locality: "Leeds",
 					Coordinates: app.Coordinates{
 						Lat: 53.8700189722222,
 						Lng: -1.561703,
@@ -129,7 +170,9 @@ func newImporter(baseDir string) app.Importer {
 	notifier := notify.NewNoopNotifier()
 	createThumbnails := imgresize.NewResizer(filepath.Join(baseDir, "thumbnails"))
 
-	return app.NewImporter(logger, downloader, extractMetadata, uploader, indexer, createThumbnails, notifier)
+	geo := google.NewNullGeocoder()
+
+	return app.NewImporter(logger, downloader, extractMetadata, uploader, indexer, createThumbnails, geo, notifier)
 }
 
 func newMediaDetailQuery(testDir string) app.QueryMediaDetail {
