@@ -177,7 +177,7 @@ func ImportDir(importFile Importer, logger log.Logger) func(backupFilename strin
 				}
 				_, iErr := importFile(path)
 				if iErr != nil {
-					logger.Error("failed to import file", "err", iErr)
+					logger.Error("failed to import file", "err", iErr, "path", path)
 				}
 				return nil
 			})
