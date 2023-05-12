@@ -1,5 +1,10 @@
-import { API } from "aws-amplify";
+import axios from "axios";
 import { formatISO } from "date-fns";
+
+const httpClient = axios.create({
+	baseURL: "/api/",
+	timeout: 1000,
+});
 
 export interface timelineResponse {
 	months: mediaMonth[];
@@ -58,10 +63,10 @@ export type MediaDetailQuery = (
 
 export const fetchTimeline: TimelineQuery =
 	async (): Promise<timelineResponse> => {
-		const res = await API.get("photosAPIdev", "/months", {});
+		const { data: res } = await httpClient.get<timelineResponse>("/months");
 		console.log(res);
 
-		return res as timelineResponse;
+		return res;
 	};
 
 export const mockFetchTimeline: TimelineQuery =
@@ -83,10 +88,12 @@ export const mockFetchTimeline: TimelineQuery =
 export const fetchTimelineMonth: TimelineMonthQuery = async (
 	monthID: string,
 ): Promise<timelineMonthResponse> => {
-	const res = await API.get("photosAPIdev", `/month/${monthID}`, {});
+	const { data: res } = await httpClient.get<timelineMonthResponse>(
+		`/month/${monthID}`,
+	);
 	console.log(res);
 
-	return res as timelineMonthResponse;
+	return res;
 };
 export const mockFetchTimelineMonth: TimelineMonthQuery = async (
 	monthID: string,
@@ -116,10 +123,12 @@ export const mockFetchTimelineMonth: TimelineMonthQuery = async (
 export const fetchMediaDetail: MediaDetailQuery = async (
 	mediaID: string,
 ): Promise<mediaDetailResponse> => {
-	const res = await API.get("photosAPIdev", `/media/${mediaID}`, {});
+	const { data: res } = await httpClient.get<mediaDetailResponse>(
+		`/media/${mediaID}`,
+	);
 	console.log(res);
 
-	return res as mediaDetailResponse;
+	return res;
 };
 
 export const mockFetchMediaDetail: MediaDetailQuery = async (

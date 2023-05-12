@@ -9,6 +9,7 @@ photo management system
 ```
 make build-web
 docker run -p 8080:80 --rm inari-web
+http://localhost:8080/
 ```
 
 ## cli

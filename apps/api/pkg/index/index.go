@@ -138,7 +138,7 @@ func NewSqliteCollectionLister(db *sql.DB) app.CollectionLister {
 			id, collection_type, title
 			FROM collection
 			WHERE collection.collection_type = ?
-			ORDER BY title;
+			ORDER BY id DESC;
 			`
 		rows, err := db.Query(q, collectionType)
 		if err != nil {

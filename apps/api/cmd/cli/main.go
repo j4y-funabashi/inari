@@ -77,8 +77,9 @@ func main() {
 				},
 			},
 			{
-				Name:  "collection",
-				Usage: "list collections",
+				Name:    "collection",
+				Aliases: []string{"lsc"},
+				Usage:   "list collections",
 				Action: func(cCtx *cli.Context) error {
 					collectionType := cCtx.Args().First()
 					cols, err := listCollections(collectionType)

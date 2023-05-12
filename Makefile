@@ -1,3 +1,5 @@
+build: build-cli build-web
+
 build-cli:
 	docker build -t inari-cli --file ./apps/api/Dockerfile-cli ./apps/api
 
