@@ -6,10 +6,9 @@ const httpClient = axios.create({
 	timeout: 1000,
 });
 
-export interface timelineResponse {
-	months: mediaMonth[];
-}
-export interface mediaMonth {
+export interface collectionsResponse extends Array<collection> { }
+
+export interface collection {
 	id: string;
 	title: string;
 	type: string;
@@ -46,14 +45,14 @@ interface coordinates {
 }
 
 export interface timelineMonthResponse {
-	collection_meta: mediaMonth;
+	collection_meta: collection;
 	media: media[];
 }
 export interface mediaDetailResponse {
 	media: media;
 }
 
-export type TimelineQuery = () => Promise<timelineResponse>;
+export type TimelineQuery = () => Promise<collectionsResponse>;
 export type TimelineMonthQuery = (
 	monthID: string,
 ) => Promise<timelineMonthResponse>;
@@ -62,25 +61,23 @@ export type MediaDetailQuery = (
 ) => Promise<mediaDetailResponse>;
 
 export const fetchTimeline: TimelineQuery =
-	async (): Promise<timelineResponse> => {
-		const { data: res } = await httpClient.get<timelineResponse>("/months");
+	async (): Promise<collectionsResponse> => {
+		const { data: res } = await httpClient.get<collectionsResponse>("/timeline/months");
 		console.log(res);
 
 		return res;
 	};
 
 export const mockFetchTimeline: TimelineQuery =
-	async (): Promise<timelineResponse> => {
-		const mockRes: timelineResponse = {
-			months: [
-				{
-					id: "2020-01",
-					title: "2020 Jan",
-					type: "test-type",
-					media_count: 1,
-				},
-			],
-		};
+	async (): Promise<collectionsResponse> => {
+		const mockRes: collectionsResponse = [
+			{
+				id: "2020-01",
+				title: "2020 Jan",
+				type: "test-type",
+				media_count: 1,
+			},
+		]
 
 		return mockRes;
 	};

@@ -1,5 +1,5 @@
 import React from 'react';
-import { TimelineQuery, timelineResponse } from '../apiClient';
+import { TimelineQuery, collectionsResponse } from '../apiClient';
 import MediaTimeline from './MediaTimeline';
 
 interface MediaTimelinePageProps {
@@ -7,7 +7,7 @@ interface MediaTimelinePageProps {
 }
 
 const MediaTimelinePage: React.FunctionComponent<React.PropsWithChildren<MediaTimelinePageProps>> = (props: MediaTimelinePageProps) => {
-  const [timelineData, setTimelineData] = React.useState<timelineResponse>({ months: [] });
+  const [timelineData, setTimelineData] = React.useState<collectionsResponse>([]);
 
   React.useEffect(() => {
     (async () => {
