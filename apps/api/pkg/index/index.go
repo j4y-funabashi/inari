@@ -12,10 +12,10 @@ import (
 
 func CreateIndex(db *sql.DB) error {
 	q := `CREATE TABLE IF NOT EXISTS media (
-  id TEXT NOT NULL PRIMARY KEY,
-  date_created DATETIME NOT NULL,
-  media_data TEXT
-  );`
+			id TEXT NOT NULL PRIMARY KEY,
+			date_created DATETIME NOT NULL,
+			media_data TEXT
+		);`
 	if _, err := db.Exec(q); err != nil {
 		return err
 	}
@@ -135,10 +135,13 @@ func NewSqliteCollectionLister(db *sql.DB) app.CollectionLister {
 		out := []app.Collection{}
 
 		q := `SELECT
-			id, collection_type, title
-			FROM collection
-			WHERE collection.collection_type = ?
-			ORDER BY id DESC;
+			c.id, c.collection_type, c.title, count(*) as media_count
+			FROM collection AS c
+			INNER JOIN media_collection ON media_collection.collection_id = c.id
+			INNER JOIN media ON media_collection.media_id = media.id
+			WHERE c.collection_type = ?
+			GROUP BY c.id
+			ORDER BY c.id DESC;
 			`
 		rows, err := db.Query(q, collectionType)
 		if err != nil {
@@ -147,7 +150,7 @@ func NewSqliteCollectionLister(db *sql.DB) app.CollectionLister {
 
 		for rows.Next() {
 			c := app.Collection{}
-			err = rows.Scan(&c.ID, &c.Type, &c.Title)
+			err = rows.Scan(&c.ID, &c.Type, &c.Title, &c.MediaCount)
 			if err != nil {
 				return out, err
 			}
