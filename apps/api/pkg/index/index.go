@@ -161,6 +161,80 @@ func NewSqliteCollectionLister(db *sql.DB) app.CollectionLister {
 	}
 }
 
+func NewSqliteCollectionDetail(db *sql.DB) app.CollectionDetailQuery {
+	return func(collectionID string) (app.CollectionDetail, error) {
+		out := app.CollectionDetail{}
+
+		c, err := fetchCollectionByID(db, collectionID)
+		if err != nil {
+			return out, err
+		}
+		out.CollectionMeta = c
+
+		media, err := fetchMediaByCollectionID(db, collectionID)
+		if err != nil {
+			return out, err
+		}
+		out.Media = media
+
+		return out, nil
+	}
+}
+
+func fetchMediaByCollectionID(db *sql.DB, collectionID string) ([]app.Media, error) {
+	out := []app.Media{}
+
+	q := `SELECT
+			media_data
+			FROM collection AS c
+			INNER JOIN media_collection ON media_collection.collection_id = c.id
+			INNER JOIN media ON media_collection.media_id = media.id
+			WHERE c.id = ?
+			ORDER BY media.id DESC;
+			`
+	rows, err := db.Query(q, collectionID)
+	if err != nil {
+		return out, err
+	}
+
+	for rows.Next() {
+		m := app.Media{}
+		jsonStr := ""
+		err = rows.Scan(&jsonStr)
+		if err != nil {
+			return out, err
+		}
+		err = json.Unmarshal([]byte(jsonStr), &m)
+		if err != nil {
+			return out, err
+		}
+		m.FormattedDate = m.MediaMetadata.Date.Format(time.RFC3339Nano)
+		out = append(out, m)
+	}
+
+	return out, nil
+}
+
+func fetchCollectionByID(db *sql.DB, collectionID string) (app.Collection, error) {
+	q := `SELECT
+			c.id, c.collection_type, c.title, count(*) as media_count
+			FROM collection AS c
+			INNER JOIN media_collection ON media_collection.collection_id = c.id
+			INNER JOIN media ON media_collection.media_id = media.id
+			WHERE c.id = ?
+			GROUP BY c.id
+			ORDER BY c.id DESC;
+			`
+
+	c := app.Collection{}
+	err := db.QueryRow(q, collectionID).Scan(&c.ID, &c.Type, &c.Title, &c.MediaCount)
+	if err != nil {
+		return c, err
+	}
+
+	return c, nil
+}
+
 func addMediaToCollection(db *sql.DB, collectionID, collectionType, collectionTitle string, media app.Media) (app.Media, error) {
 
 	_, err := db.Exec(

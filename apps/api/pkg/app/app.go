@@ -37,7 +37,7 @@ type Thumbnailer = func(mediastoreKey string) error
 type QueryMediaDetail = func(mediaID string) (Media, error)
 
 type CollectionLister func(collectionType string) ([]Collection, error)
-type ViewTimelineMonth = func(monthID string) (TimelineMonthView, error)
+type CollectionDetailQuery = func(collectionID string) (CollectionDetail, error)
 type Resizer = func(in, out string) (MediaSrc, error)
 type Downloader = func(backupFilename string) (string, error)
 type Uploader = func(localFilename, mediaStoreFilename string) error
@@ -45,19 +45,19 @@ type Indexer = func(media Media) (Media, error)
 type Notifier = func(mediaMeta Media) error
 type FileLister = func() ([]string, error)
 type MetadataExtractor = func(mediaFile string) (MediaMetadata, error)
-type TimelineMonthQuery = func(monthID string) (TimelineMonthView, error)
 type MediaDetailQuery = func(mediaID string) (MediaDetailView, error)
 type Geocoder = func(lat, lng float64) (Location, error)
 type MediaGeocoder = func(mediaID string) (Location, error)
 type LocationPutter = func(mediaID string, location Location) error
 
 type Media struct {
-	ID       string
-	FilePath string
-	MediaMetadata
-	Thumbnails  MediaSrc
-	Location    Location
-	Collections []Collection
+	ID            string `json:"id,omitempty"`
+	FilePath      string `json:"file_path,omitempty"`
+	MediaMetadata `json:"media_metadata,omitempty"`
+	Thumbnails    MediaSrc     `json:"thumbnails,omitempty"`
+	Location      Location     `json:"location,omitempty"`
+	Collections   []Collection `json:"collections,omitempty"`
+	FormattedDate string       `json:"date,omitempty"`
 }
 
 // Collection types can be TIMELINE_MONTH
@@ -68,17 +68,9 @@ type Collection struct {
 	MediaCount int    `json:"media_count,omitempty"`
 }
 
-type MediaMonth struct {
-	ID         string
-	Date       string `json:"date"`
-	MediaCount int    `json:"media_count"`
-}
-type TimelineView struct {
-	Months []Collection `json:"months"`
-}
-type TimelineMonthView struct {
-	CollectionMeta Collection            `json:"collection_meta"`
-	Media          []MediaCollectionItem `json:"media"`
+type CollectionDetail struct {
+	CollectionMeta Collection `json:"collection_meta"`
+	Media          []Media    `json:"media"`
 }
 
 type MediaDetailView struct {
@@ -251,15 +243,5 @@ func NewImporter(logger Logger, downloadFromBackup Downloader, extractMetadata M
 			"newFilename", media.NewFilename())
 
 		return media, nil
-	}
-}
-
-func NewTimelineMonthView(timelineQuery TimelineMonthQuery) ViewTimelineMonth {
-	return func(monthID string) (TimelineMonthView, error) {
-		timelineView, err := timelineQuery(monthID)
-		if err != nil {
-			return TimelineMonthView{}, err
-		}
-		return timelineView, nil
 	}
 }

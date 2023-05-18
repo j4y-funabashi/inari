@@ -6,7 +6,7 @@ const httpClient = axios.create({
 	timeout: 1000,
 });
 
-export interface collectionsResponse extends Array<collection> { }
+export type collectionsResponse = collection[]
 
 export interface collection {
 	id: string;
@@ -17,13 +17,18 @@ export interface collection {
 
 export interface media {
 	id: string;
-	media_src: mediaSrc;
+	thumbnails: thumbnails;
+	media_metadata: MediaMetadata;
 	date: string;
 	location: location;
 	caption: string;
 }
 
-interface mediaSrc {
+interface MediaMetadata {
+	date: string;
+}
+
+interface thumbnails {
 	small: string;
 	medium: string;
 	large: string;
@@ -86,7 +91,7 @@ export const fetchTimelineMonth: TimelineMonthQuery = async (
 	monthID: string,
 ): Promise<timelineMonthResponse> => {
 	const { data: res } = await httpClient.get<timelineMonthResponse>(
-		`/month/${monthID}`,
+		`/timeline/month/${monthID}`,
 	);
 	console.log(res);
 
@@ -141,10 +146,13 @@ export const mockFetchMediaDetail: MediaDetailQuery = async (
 export const mockMedia = (dat: Date): media => {
 	return {
 		id: crypto.randomUUID(),
-		media_src: {
+		thumbnails: {
 			small: "https://via.placeholder.com/92",
 			medium: "https://via.placeholder.com/420",
 			large: "https://via.placeholder.com/1080",
+		},
+		media_metadata: {
+			date: formatISO(dat),
 		},
 		date: formatISO(dat),
 		location: mockLocation(),

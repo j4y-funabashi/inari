@@ -30,6 +30,23 @@ func newMonthsHandler(listCollections app.CollectionLister, logger app.Logger) h
 
 }
 
+func newCollectionDetailHandler(queryCollectionDetail app.CollectionDetailQuery, logger app.Logger) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		collectionID := ps.ByName("collectionid")
+		out, err := queryCollectionDetail(collectionID)
+		if err != nil {
+			logger.Error("failed to query collection detail",
+				"err", err)
+			panic(err)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(out)
+	}
+
+}
+
 func main() {
 	// conf
 	baseDir := filepath.Join(os.TempDir(), "inari")
@@ -51,10 +68,11 @@ func main() {
 	}
 
 	listCollections := index.NewSqliteCollectionLister(db)
+	collectionDetail := index.NewSqliteCollectionDetail(db)
 
 	router := httprouter.New()
-
 	router.GET("/api/timeline/months", newMonthsHandler(listCollections, logger))
+	router.GET("/api/timeline/month/:collectionid", newCollectionDetailHandler(collectionDetail, logger))
 
 	http.ListenAndServe(":8090", router)
 }
