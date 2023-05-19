@@ -4,7 +4,10 @@ build-cli:
 	docker build -t inari-cli --file ./apps/api/Dockerfile-cli ./apps/api
 
 build-web:
-	docker build -t inari-web .
+	docker compose build inari-web
+
+up:
+	docker compose up
 
 test: test-ui test-api
 

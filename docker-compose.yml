@@ -1,38 +1,11 @@
 version: '3.7'
 
 services:
-        deployer:
+        inari-web:
                 build:
                         dockerfile: Dockerfile
-                        context: apps/deployer
-                working_dir: /app
                 volumes:
-                        - ./apps:/app/apps:rw
-                environment:
-                        PROJECT_NAME: inari
-                        CURRENT_ENV: dev
-                        AWS_REGION: ${AWS_REGION}
-                        AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
-                        AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-                        AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-
-        api:
-                build:
-                        dockerfile: Dockerfile
-                        context: apps/api
-                working_dir: /app
-                volumes:
-                        - ./apps/api:/app:rw
-
-        ui:
-                build:
-                        dockerfile: Dockerfile
-                        context: apps/ui
-                working_dir: /app
-                volumes:
-                        - ./apps/ui:/app:rw
-
-        acceptance:
-                image: testcafe/testcafe
-                volumes:
-                        - ./apps/acceptance-tests/tests:/tests:rw
+                        - ~/photos_inari_mediastore:/tmp/inari
+                        - ~/photos_inari_mediastore/thumbnails:/var/media/thumbnails
+                ports:
+                        - 8080:80
