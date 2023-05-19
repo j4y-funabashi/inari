@@ -14,13 +14,14 @@ const Media: React.FunctionComponent<React.PropsWithChildren<MediaProps>> = (
 
 	const dat = new Date(media.date);
 	const datKey = format(dat, "eee, do MMM yyyy - HH:mm");
+	const thumbnailLink = "/thumbnails/" + media.thumbnails.medium
 	// const location = `${media.location.locality}, ${media.location.region}, ${media.location.country.long}`;
 	// const caption = media.caption;
 
 	return (
 		<article>
 			<div>
-				<img src={`${media.thumbnails.medium}`} alt="" />
+				<img src={thumbnailLink} alt="" />
 			</div>
 			<div>
 				{/* <p>{caption}</p> */}
