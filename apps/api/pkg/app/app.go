@@ -58,6 +58,7 @@ type Media struct {
 	Location      Location     `json:"location,omitempty"`
 	Collections   []Collection `json:"collections,omitempty"`
 	FormattedDate string       `json:"date,omitempty"`
+	Caption       string       `json:"caption,omitempty"`
 }
 
 // Collection types can be TIMELINE_MONTH
@@ -199,6 +200,7 @@ func NewImporter(logger Logger, downloadFromBackup Downloader, extractMetadata M
 			return media, fmt.Errorf("failed to extract media metadata: %w", err)
 		}
 		media.MediaMetadata = mediaMeta
+		media.Caption = mediaMeta.Title
 
 		// upload renamed file to media storage
 		err = uploadToMediaStore(tmpFilename, media.NewFilename())

@@ -16,7 +16,7 @@ const Media: React.FunctionComponent<React.PropsWithChildren<MediaProps>> = (
 	const datKey = format(dat, "eee, do MMM yyyy - HH:mm");
 	const thumbnailLink = "/thumbnails/" + media.thumbnails.medium
 	// const location = `${media.location.locality}, ${media.location.region}, ${media.location.country.long}`;
-	// const caption = media.caption;
+	const caption = media.caption;
 
 	return (
 		<article>
@@ -24,7 +24,7 @@ const Media: React.FunctionComponent<React.PropsWithChildren<MediaProps>> = (
 				<img src={thumbnailLink} alt="" />
 			</div>
 			<div>
-				{/* <p>{caption}</p> */}
+				<p>{caption}</p>
 				<p>{datKey}</p>
 				{/* <p>{location}</p> */}
 			</div>

@@ -208,7 +208,9 @@ func fetchMediaByCollectionID(db *sql.DB, collectionID string) ([]app.Media, err
 		if err != nil {
 			return out, err
 		}
+
 		m.FormattedDate = m.MediaMetadata.Date.Format(time.RFC3339Nano)
+
 		out = append(out, m)
 	}
 
