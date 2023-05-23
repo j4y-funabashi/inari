@@ -22,6 +22,7 @@ export interface media {
 	date: string;
 	location: location;
 	caption: string;
+	collections: collection[]
 }
 
 interface MediaMetadata {
@@ -157,6 +158,7 @@ export const mockMedia = (dat: Date): media => {
 		date: formatISO(dat),
 		location: mockLocation(),
 		caption: "hello this is a good media!",
+		collections: []
 	};
 };
 const mockLocation = (): location => {

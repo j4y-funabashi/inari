@@ -17,6 +17,14 @@ const Media: React.FunctionComponent<React.PropsWithChildren<MediaProps>> = (
 	const thumbnailLink = "/thumbnails/" + media.thumbnails.medium
 	// const location = `${media.location.locality}, ${media.location.region}, ${media.location.country.long}`;
 	const caption = media.caption;
+	const collectionLinks = media.collections.map(
+		(c) => {
+			const url = "/collection/" + c.type + "/" + c.id
+			return (
+				<a href={url}>{c.title}</a>
+			)
+		}
+	)
 
 	return (
 		<article>
@@ -28,6 +36,7 @@ const Media: React.FunctionComponent<React.PropsWithChildren<MediaProps>> = (
 				<p>{datKey}</p>
 				{/* <p>{location}</p> */}
 			</div>
+			<div>{collectionLinks}</div>
 			<div>
 				<button type="submit">Add Caption</button>
 				<button type="submit">Add Location</button>

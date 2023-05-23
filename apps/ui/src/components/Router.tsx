@@ -49,7 +49,7 @@ const Router: React.FunctionComponent<React.PropsWithChildren<RouterProps>> = (
 			element: <MediaTimelinePage fetchTimeline={timelineQuery} />,
 		},
 		{
-			path: "/time/month/:monthid",
+			path: "/collection/:collection_type/:collection_id",
 			element: (
 				<MediaTimelineMonthPage fetchTimelineMonth={timelineMonthQuery} />
 			),

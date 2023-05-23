@@ -20,15 +20,15 @@ const MediaTimelineMonthPage: React.FunctionComponent<
 		},
 	);
 
-	const { monthid } = useParams<urlParams>();
-	console.log(monthid);
+	const { monthid: collection_id } = useParams<urlParams>();
+	console.log(collection_id);
 
 	React.useEffect(() => {
 		(async () => {
-			const timelineResponse = await props.fetchTimelineMonth(monthid!);
+			const timelineResponse = await props.fetchTimelineMonth(collection_id!);
 			setTimelineData(timelineResponse);
 		})();
-	}, [setTimelineData, monthid, props]);
+	}, [setTimelineData, collection_id, props]);
 
 	console.log(timelineData);
 

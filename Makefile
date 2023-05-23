@@ -7,7 +7,7 @@ build-web:
 	docker compose build inari-web
 
 up:
-	docker compose up
+	docker compose up --remove-orphans
 
 test: test-ui test-api
 
