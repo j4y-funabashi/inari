@@ -15,7 +15,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className="macchiato">
+        <div className="bg-base text-pink">
+          {children}
+          </div>
+          </body>
     </html>
   )
 }

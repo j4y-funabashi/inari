@@ -26,5 +26,5 @@ RUN apk update && \
 WORKDIR /
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY --from=buildAPI /api/inari /inari
-COPY --from=buildUI --chmod=555 /ui/build/ /var/www/html
+COPY --from=buildUI --chmod=555 /ui/out/ /var/www/html
 COPY apps/api/start.sh /docker-entrypoint.d/start-inari-web.sh
