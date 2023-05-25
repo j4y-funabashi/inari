@@ -15,7 +15,7 @@ import {
 } from "../apiClient";
 
 import MediaDetailPage from "./MediaDetailPage";
-import MediaTimelineMonthPage from "./MediaTimelineMonthPage";
+import CollectionDetailPage from "./CollectionDetailPage";
 import MediaTimelinePage from "./MediaTimelinePage";
 
 interface RouterProps {
@@ -51,7 +51,7 @@ const Router: React.FunctionComponent<React.PropsWithChildren<RouterProps>> = (
 		{
 			path: "/collection/:collection_type/:collection_id",
 			element: (
-				<MediaTimelineMonthPage fetchTimelineMonth={timelineMonthQuery} />
+				<CollectionDetailPage fetchTimelineMonth={timelineMonthQuery} />
 			),
 		},
 		{

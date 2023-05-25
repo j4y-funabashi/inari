@@ -1,16 +1,17 @@
 import React from "react";
 import { TimelineMonthQuery, timelineMonthResponse } from "../apiClient";
 import { useParams } from "react-router-dom";
-import MediaTimelineMonth from "./MediaTimelineMonth";
+import CollectionDetail from "./CollectionDetail";
 
 type urlParams = {
-	monthid: string;
+	collection_type: string
+	collection_id: string;
 };
 interface MediaTimelineMonthPageProps {
 	fetchTimelineMonth: TimelineMonthQuery;
 }
 
-const MediaTimelineMonthPage: React.FunctionComponent<
+const CollectionDetailPage: React.FunctionComponent<
 	React.PropsWithChildren<MediaTimelineMonthPageProps>
 > = (props: MediaTimelineMonthPageProps) => {
 	const [timelineData, setTimelineData] = React.useState<timelineMonthResponse>(
@@ -20,7 +21,7 @@ const MediaTimelineMonthPage: React.FunctionComponent<
 		},
 	);
 
-	const { monthid: collection_id } = useParams<urlParams>();
+	const { collection_id: collection_id } = useParams<urlParams>();
 	console.log(collection_id);
 
 	React.useEffect(() => {
@@ -32,7 +33,7 @@ const MediaTimelineMonthPage: React.FunctionComponent<
 
 	console.log(timelineData);
 
-	return <MediaTimelineMonth mediaTimeline={timelineData} />;
+	return <CollectionDetail mediaTimeline={timelineData} />;
 };
 
-export default MediaTimelineMonthPage;
+export default CollectionDetailPage;

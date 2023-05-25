@@ -12,7 +12,7 @@ interface currentMedia {
 	media: media;
 }
 
-const MediaTimelineMonth: React.FunctionComponent<
+const CollectionDetail: React.FunctionComponent<
 	React.PropsWithChildren<MediaTimelineMonthProps>
 > = (props: MediaTimelineMonthProps) => {
 	const { mediaTimeline } = props;
@@ -117,4 +117,4 @@ const MediaTimelineMonth: React.FunctionComponent<
 	);
 };
 
-export default MediaTimelineMonth;
+export default CollectionDetail;
