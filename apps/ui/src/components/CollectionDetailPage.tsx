@@ -21,7 +21,7 @@ const CollectionDetailPage: React.FunctionComponent<
 		},
 	);
 
-	const { collection_id: collection_id } = useParams<urlParams>();
+	const { collection_id } = useParams<urlParams>();
 	console.log(collection_id);
 
 	React.useEffect(() => {
