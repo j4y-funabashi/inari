@@ -15,11 +15,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="macchiato">
-        <div className="bg-base text-pink">
-          {children}
-          </div>
-          </body>
+      <body className="macchiato bg-base text-pink">
+        {children}
+      </body>
     </html>
   )
 }

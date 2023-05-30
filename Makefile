@@ -1,10 +1,13 @@
-build: build-cli build-web
+build: build-api build-ui
 
 build-cli:
 	docker build -t inari-cli --file ./apps/api/Dockerfile-cli ./apps/api
 
-build-web:
-	docker compose build inari-web
+build-ui:
+	docker compose build inari-ui
+
+build-api:
+	docker compose build inari-api
 
 up:
 	docker compose up --remove-orphans

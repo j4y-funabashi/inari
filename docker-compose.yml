@@ -1,11 +1,17 @@
 version: '3.7'
 
 services:
-        inari-web:
+        inari-api:
                 build:
-                        dockerfile: Dockerfile
+                        dockerfile: ./apps/api/Dockerfile
                 volumes:
                         - ~/photos_inari_mediastore:/tmp/inari
                         - ~/photos_inari_mediastore/thumbnails:/var/media/thumbnails
                 ports:
-                        - 8080:80
+                        - 80:80
+
+        inari-ui:
+                build:
+                        context: ./apps/ui
+                ports:
+                        - 3000:3000
