@@ -1,12 +1,6 @@
 'use client';
-import useSWR, { Fetcher } from 'swr';
-
-interface Collection {
-  id: string
-  title: string
-  media_count: number
-  type: string
-}
+import useSWR from 'swr';
+import { collectionListFetcher } from './apiClient';
 
 export default function Home() {
 
@@ -14,8 +8,6 @@ export default function Home() {
     <CollectionList />
   )
 }
-
-const collectionListFetcher: Fetcher<Collection[], string> = (type) => getCollectionsByType(type)
 
 const CollectionList = function () {
 
@@ -39,11 +31,4 @@ const CollectionList = function () {
       {collections}
     </div>
   )
-}
-
-const getCollectionsByType = async function (type: string): Promise<Collection[]> {
-  const res = await fetch("/api/timeline/months")
-  console.log(res)
-
-  return res.json()
 }
