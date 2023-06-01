@@ -47,6 +47,21 @@ func newCollectionDetailHandler(queryCollectionDetail app.CollectionDetailQuery,
 
 }
 
+func newDeleteMediaHandler(deleteMedia app.DeleteMedia, logger app.Logger) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		mediaID := ps.ByName("mediaid")
+		err := deleteMedia(mediaID)
+		if err != nil {
+			logger.Error("failed to delete media",
+				"err", err)
+			panic(err)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+	}
+}
+
 func main() {
 	// conf
 	baseDir := filepath.Join(os.TempDir(), "inari")
@@ -69,10 +84,12 @@ func main() {
 
 	listCollections := index.NewSqliteCollectionLister(db)
 	collectionDetail := index.NewSqliteCollectionDetail(db)
+	deleteMedia := index.NewDeleteMedia(db)
 
 	router := httprouter.New()
 	router.GET("/api/timeline/months", newMonthsHandler(listCollections, logger))
 	router.GET("/api/timeline/month/:collectionid", newCollectionDetailHandler(collectionDetail, logger))
+	router.DELETE("/api/media/:mediaid", newDeleteMediaHandler(deleteMedia, logger))
 
 	http.ListenAndServe(":8090", router)
 }

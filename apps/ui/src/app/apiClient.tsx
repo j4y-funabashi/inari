@@ -3,6 +3,8 @@ import { Fetcher } from "swr";
 interface Media {
     id: string
     thumbnails: Thumbnails
+    collections: Collection[]
+    date: string
 }
 interface Thumbnails {
     medium: string
@@ -16,7 +18,7 @@ interface Collection {
     type: string;
 }
 
-interface CollectionDetail {
+export interface CollectionDetail {
     collection_meta: Collection;
     media: Media[]
 }
@@ -34,6 +36,15 @@ const getCollectionDetail = async function (id: string): Promise<CollectionDetai
     console.log(res)
 
     return res.json()
+}
+
+export const deleteMedia = async function (id: string) {
+    const requestOptions: RequestInit = {
+        method: "DELETE",
+        headers: { 'Content-Type': 'application/json' }
+    }
+    const res = await fetch("/api/media/" + id, requestOptions)
+    console.log(res)
 }
 
 export const collectionListFetcher: Fetcher<Collection[], string> = (type) => getCollectionsByType(type)

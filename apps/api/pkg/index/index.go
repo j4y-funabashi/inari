@@ -14,6 +14,7 @@ func CreateIndex(db *sql.DB) error {
 	q := `CREATE TABLE IF NOT EXISTS media (
 			id TEXT NOT NULL PRIMARY KEY,
 			date_created DATETIME NOT NULL,
+			date_deleted DATETIME,
 			media_data TEXT
 		);`
 	if _, err := db.Exec(q); err != nil {
@@ -66,6 +67,21 @@ func NewQueryMediaDetail(db *sql.DB) app.QueryMediaDetail {
 		}
 		err = json.Unmarshal([]byte(jsonStr), &out)
 		return out, err
+	}
+}
+
+func NewDeleteMedia(db *sql.DB) app.DeleteMedia {
+	return func(mediaID string) error {
+
+		now := time.Now().Format(time.RFC3339Nano)
+		q := `UPDATE media SET date_deleted = ? WHERE id = ?;`
+		pq, err := db.Prepare(q)
+		if err != nil {
+			return err
+		}
+		_, err = pq.Exec(now, mediaID)
+		return err
+
 	}
 }
 
