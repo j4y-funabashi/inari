@@ -5,8 +5,8 @@ services:
                 build:
                         dockerfile: ./apps/api/Dockerfile
                 volumes:
-                        - ~/photos_inari_mediastore:/tmp/inari
-                        - ~/photos_inari_mediastore/thumbnails:/var/media/thumbnails
+                        - /mnt/data/backup/jayr/inari_mediastore:/tmp/inari
+                        - /mnt/data/backup/jayr/inari_mediastore/thumbnails:/var/media/thumbnails
                 ports:
                         - 8010:80
 

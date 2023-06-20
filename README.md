@@ -20,6 +20,9 @@ http://localhost:8080/
 ```
 make build-cli
 docker run --env GOOGLE_API_KEY=${GOOGLE_API_KEY} -v ~/Downloads/jayr-phone-camera:/inbox -v ~/photos_inari_mediastore:/tmp/inari -it --rm inari-cli ./inari import /inbox/
+docker run --env GOOGLE_API_KEY=${GOOGLE_API_KEY} -v /mnt/data/backup/jayr/phone/Camera/:/inbox -v /mnt/data/backup/jayr/inari_mediastore:/tmp/inari -it --rm inari-cli ./inari import /inbox/
+
+docker run --env GOOGLE_API_KEY=${GOOGLE_API_KEY} -v /mnt/data/backup/jayr/phone/Camera/:/inbox -v /mnt/data/backup/jayr/inari_mediastore:/tmp/inari -it --rm inari-cli ./inari import /inbox/
 ```
 
 # Roadmap
