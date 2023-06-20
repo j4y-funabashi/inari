@@ -7,7 +7,7 @@ interface MediaCardProps {
     handleDelete: () => void
 }
 export const MediaCard = function ({ m, handleDelete }: MediaCardProps) {
-    const srcUrl = "/thumbnails/" + m.thumbnails.large
+    const srcUrl = "/thumbnails/" + m.thumbnails.medium
 
     const caption = (m.caption ? m.caption.trim() : "")
     const dat = format(new Date(m.date), "eee, do LLL y HH:mm:ss")

@@ -94,7 +94,7 @@ func NewSqliteIndexer(db *sql.DB) app.Indexer {
 		// inbox
 		media, err := addMediaToCollection(
 			db,
-			fmt.Sprintf("inbox_%s", media.Date.Format("2006-01")),
+			media.Date.Format("2006-01"),
 			app.CollectionTypeInbox,
 			fmt.Sprintf("inbox %s", media.Date.Format("Jan 2006")),
 			media,
