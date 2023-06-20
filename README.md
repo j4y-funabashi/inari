@@ -29,7 +29,14 @@ docker run --env GOOGLE_API_KEY=${GOOGLE_API_KEY} -v ~/Downloads/jayr-phone-came
 - import media
 - list collections
 - view collection detail
-- view media detail
-- update media caption
 - delete media
+
+## future
+
+- full text search captions
+- update media caption
+- download original media file
+- publish public photos (micropub?)
+- search for and add location to media
 - mark as read / remove from inbox / remove from collection?
+- view media detail

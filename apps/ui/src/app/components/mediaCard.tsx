@@ -15,22 +15,37 @@ export const MediaCard = function ({ m, handleDelete }: MediaCardProps) {
     const collections = m.collections.map(
         (m => {
             const collectionLink = "/collection/" + m.id
-            return <li key={m.id}><Link href={collectionLink}>{m.title}</Link></li>
+            return <li key={m.id}><Link className="text-white bg-gray text-xs" href={collectionLink}>{m.title}</Link></li>
         })
     )
     const location = formatLocation(m)
 
     return (
         <div>
-            <img src={srcUrl} />
-            <p>{dat}</p>
-            {caption !== "" && <p>{caption}</p>}
-            {location !== "" && <p>{location}</p>}
-            <ul>{collections}</ul>
-            <div>
-                <button className="bg-red text-white font-bold py-2 px-4 rounded" onClick={handleDelete}>
-                    Delete
-                </button>
+            <div
+                className="my-8 rounded bg-gray-800">
+                <figure>
+                    <img src={srcUrl} className="rounded-t w-full" />
+
+                    <figcaption className="p-4">
+                        <small className="text-blue text-xs">{dat}</small>
+                        {caption !== "" &&
+                            <small className="leading-5 text-gray-500 dark:text-gray-400">
+                                {caption}
+                            </small>
+                        }
+
+                        <ul>{collections}</ul>
+                        {location !== "" &&
+                            <p>{location}</p>
+                        }
+                    </figcaption>
+                </figure>
+                <div>
+                    <button className="bg-red text-white font-bold py-1 px-2 rounded" onClick={handleDelete}>
+                        Delete
+                    </button>
+                </div>
             </div>
         </div>
     )

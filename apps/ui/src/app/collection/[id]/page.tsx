@@ -26,7 +26,6 @@ export default function CollectionDetailPage({ params }: CollectionDetailParams)
 
     return (
         <div>
-            <h1>{collectionID}</h1>
             <MediaList data={data} />
         </div>
     )
@@ -66,14 +65,18 @@ const MediaList = function ({ data }: MediaListProps) {
             }
 
             return (
-                <li key={m.id}>
-                    <MediaCard m={m} handleDelete={handleDelete} />
-                </li>
+                <MediaCard key={m.id} m={m} handleDelete={handleDelete} />
             )
         }
     )
 
     return (
-        <ul>{mediaList}</ul>
+        <div>
+            <h1 className="text-lg mb-4 font-bold leading-relaxed text-gray-300">{data.collection_meta.title}</h1>
+            <div
+                className="grid grid-flow-row gap-8 text-neutral-600 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {mediaList}
+            </div>
+        </div >
     )
 }
