@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/gosimple/slug"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/app"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -95,7 +96,7 @@ func NewSqliteIndexer(db *sql.DB) app.Indexer {
 			db,
 			fmt.Sprintf("inbox_%s", media.Date.Format("2006-01")),
 			app.CollectionTypeInbox,
-			fmt.Sprintf("inbox_%s", media.Date.Format("2006-01")),
+			fmt.Sprintf("inbox %s", media.Date.Format("Jan 2006")),
 			media,
 		)
 		if err != nil {
@@ -124,6 +125,33 @@ func NewSqliteIndexer(db *sql.DB) app.Indexer {
 		)
 		if err != nil {
 			return app.Media{}, err
+		}
+
+		if media.Location.Country.Long != "" {
+			// country
+			media, err = addMediaToCollection(
+				db,
+				media.Location.Country.Long,
+				app.CollectionTypePlacesCountry,
+				media.Location.Country.Long,
+				media,
+			)
+			if err != nil {
+				return app.Media{}, err
+			}
+		}
+		if media.Location.Region != "" && media.Location.Country.Long != "" {
+			// region
+			media, err = addMediaToCollection(
+				db,
+				fmt.Sprintf("%s, %s", media.Location.Region, media.Location.Country.Long),
+				app.CollectionTypePlacesRegion,
+				fmt.Sprintf("%s, %s", media.Location.Region, media.Location.Country.Long),
+				media,
+			)
+			if err != nil {
+				return app.Media{}, err
+			}
 		}
 
 		mediaData, err := json.Marshal(media)
@@ -155,7 +183,7 @@ func NewSqliteCollectionLister(db *sql.DB) app.CollectionLister {
 			FROM collection AS c
 			INNER JOIN media_collection ON media_collection.collection_id = c.id
 			INNER JOIN media ON media_collection.media_id = media.id
-			WHERE c.collection_type = ?
+			WHERE c.collection_type = ? AND media.date_deleted IS NULL
 			GROUP BY c.id
 			ORDER BY c.id DESC;
 			`
@@ -205,7 +233,7 @@ func fetchMediaByCollectionID(db *sql.DB, collectionID string) ([]app.Media, err
 			FROM collection AS c
 			INNER JOIN media_collection ON media_collection.collection_id = c.id
 			INNER JOIN media ON media_collection.media_id = media.id
-			WHERE c.id = ?
+			WHERE c.id = ? AND media.date_deleted IS NULL
 			ORDER BY media.id DESC;
 			`
 	rows, err := db.Query(q, collectionID)
@@ -239,7 +267,7 @@ func fetchCollectionByID(db *sql.DB, collectionID string) (app.Collection, error
 			FROM collection AS c
 			INNER JOIN media_collection ON media_collection.collection_id = c.id
 			INNER JOIN media ON media_collection.media_id = media.id
-			WHERE c.id = ?
+			WHERE c.id = ? AND media.date_deleted IS NULL
 			GROUP BY c.id
 			ORDER BY c.id DESC;
 			`
@@ -254,6 +282,8 @@ func fetchCollectionByID(db *sql.DB, collectionID string) (app.Collection, error
 }
 
 func addMediaToCollection(db *sql.DB, collectionID, collectionType, collectionTitle string, media app.Media) (app.Media, error) {
+
+	collectionID = slug.Make(fmt.Sprintf("%s__%s", collectionType, collectionID))
 
 	_, err := db.Exec(
 		`INSERT OR IGNORE INTO
