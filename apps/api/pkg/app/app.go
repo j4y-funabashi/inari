@@ -95,14 +95,14 @@ type MediaCollectionItem struct {
 }
 
 type Coordinates struct {
-	Lat float64 `json:"lat"`
-	Lng float64 `json:"lng"`
+	Lat float64 `json:"lat,omitempty"`
+	Lng float64 `json:"lng,omitempty"`
 }
 type Location struct {
-	Country     Country `json:"country"`
-	Region      string  `json:"region"`
-	Locality    string  `json:"locality"`
-	Coordinates `json:"coordinates"`
+	Country     Country `json:"country,omitempty"`
+	Region      string  `json:"region,omitempty"`
+	Locality    string  `json:"locality,omitempty"`
+	Coordinates `json:"coordinates,omitempty"`
 }
 
 type Country struct {

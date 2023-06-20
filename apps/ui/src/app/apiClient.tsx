@@ -1,10 +1,12 @@
 import { Fetcher } from "swr";
 
-interface Media {
+export interface Media {
     id: string
     thumbnails: Thumbnails
     collections: Collection[]
     date: string
+    location?: Location
+    caption?: string
 }
 interface Thumbnails {
     medium: string
@@ -16,6 +18,16 @@ interface Collection {
     title: string;
     media_count: number;
     type: string;
+}
+
+interface Location {
+    country: Country
+    region: string
+    locality: string
+}
+interface Country {
+    short: string
+    long: string
 }
 
 export interface CollectionDetail {

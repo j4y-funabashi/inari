@@ -1,6 +1,8 @@
 'use client';
 
-import { CollectionDetail, collectionDetailFetcher, deleteMedia } from "@/app/apiClient";
+import { CollectionDetail, Media, collectionDetailFetcher, deleteMedia } from "@/app/apiClient";
+import { MediaCard } from "@/app/components/mediaCard";
+import { useState } from "react";
 import useSWR from "swr";
 
 interface CollectionDetailParams {
@@ -35,30 +37,37 @@ interface MediaListProps {
 }
 
 const MediaList = function ({ data }: MediaListProps) {
-    const media = data.media.sort(
 
+    const sortedMedia = data.media.sort(
+        (a, b) => {
+            if (a.date === b.date) {
+                return 0
+            }
+            if (a.date < b.date) {
+                return -1
+            }
+            return 1
+        }
     )
-    const mediaList = data?.media.map(
+
+    const [media, setMedia] = useState<Media[]>(sortedMedia)
+
+    const mediaList = media.map(
         (m) => {
-            const srcUrl = "/thumbnails/" + m.thumbnails.medium
-            const handleDeleteMedia = async function () {
-                const newList = data.media.filter(
+
+            const handleDelete = async function () {
+                const newList = media.filter(
                     (nm) => {
                         return nm.id !== m.id
                     }
                 )
                 await deleteMedia(m.id)
-                data.media = newList
+                setMedia(newList)
             }
 
             return (
                 <li key={m.id}>
-                    <img src={srcUrl} />
-                    <div>
-                        <button className="bg-red text-white font-bold py-2 px-4 rounded" onClick={handleDeleteMedia}>
-                            Delete
-                        </button>
-                    </div>
+                    <MediaCard m={m} handleDelete={handleDelete} />
                 </li>
             )
         }

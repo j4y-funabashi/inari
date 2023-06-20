@@ -1,6 +1,7 @@
 'use client';
 import useSWR from 'swr';
 import { collectionListFetcher } from './apiClient';
+import Link from 'next/link';
 
 export default function Home() {
 
@@ -21,7 +22,7 @@ const CollectionList = function () {
   const collections = data?.map(
     (c) => {
       const collectionLink = "/collection/" + c.id
-      return <li key={c.id}><a href={collectionLink}>{c.title}</a> ({c.media_count})</li>
+      return <li key={c.id}><Link href={collectionLink}>{c.title}</Link> ({c.media_count})</li>
     }
   )
 
