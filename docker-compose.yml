@@ -8,10 +8,8 @@ services:
                         - ~/photos_inari_mediastore:/tmp/inari
                         - ~/photos_inari_mediastore/thumbnails:/var/media/thumbnails
                 ports:
-                        - 80:80
+                        - 8010:80
 
         inari-ui:
                 build:
                         context: ./apps/ui
-                ports:
-                        - 3000:3000

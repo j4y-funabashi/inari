@@ -28,8 +28,8 @@ docker run -v ~/photos/Camera:/inbox -v ~/photos_inari_mediastore:/mediastore -i
 
 - import media
 - list collections
-- list collection media / view collection detail
+- view collection detail
 - view media detail
-- update media comment
+- update media caption
 - delete media
 - mark as read / remove from inbox / remove from collection?
