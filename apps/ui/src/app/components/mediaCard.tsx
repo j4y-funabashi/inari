@@ -28,12 +28,12 @@ export const MediaCard = function ({ m, handleDelete }: MediaCardProps) {
                     <img src={srcUrl} className="rounded-t w-full" />
 
                     <figcaption className="p-4">
-                        <small className="text-blue text-xs">{dat}</small>
                         {caption !== "" &&
-                            <small className="leading-5 text-gray-500 dark:text-gray-400">
+                            <p className="leading-5 text-gray-500 dark:text-gray-400">
                                 {caption}
-                            </small>
+                            </p>
                         }
+                        <small className="text-blue text-xs">{dat}</small>
 
                         <ul>{collections}</ul>
                         {location !== "" &&
