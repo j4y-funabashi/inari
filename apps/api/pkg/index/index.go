@@ -103,6 +103,18 @@ func NewSqliteIndexer(db *sql.DB) app.Indexer {
 			return app.Media{}, err
 		}
 
+		// camera
+		media, err = addMediaToCollection(
+			db,
+			fmt.Sprintf("%s %s", media.CameraMake, media.CameraModel),
+			app.CollectionTypeCamera,
+			fmt.Sprintf("%s %s", media.CameraMake, media.CameraModel),
+			media,
+		)
+		if err != nil {
+			return app.Media{}, err
+		}
+
 		// month
 		media, err = addMediaToCollection(
 			db,

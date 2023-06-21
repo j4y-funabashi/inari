@@ -13,6 +13,7 @@ import (
 
 const (
 	CollectionTypeInbox         = "inbox"
+	CollectionTypeCamera        = "camera"
 	CollectionTypeTimelineMonth = "timeline_month"
 	CollectionTypeTimelineDay   = "timeline_day"
 	CollectionTypePlacesCountry = "places_country"
