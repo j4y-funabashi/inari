@@ -224,6 +224,11 @@ func NewImporter(fetchMediaDetail QueryMediaDetail, logger Logger, downloadFromB
 
 		existingMedia, _ := fetchMediaDetail(media.Hash)
 		if existingMedia.Hash == media.Hash {
+			logger.Info("skipping existing media",
+				"path", inputFilename,
+				"elapsedTime", time.Since(startTime),
+			)
+
 			return existingMedia, nil
 		}
 
@@ -263,10 +268,9 @@ func NewImporter(fetchMediaDetail QueryMediaDetail, logger Logger, downloadFromB
 			return media, nil
 		}
 
-		elapsed := time.Since(startTime)
 		logger.Info("imported media",
 			"path", inputFilename,
-			"elapsedTime", elapsed,
+			"elapsedTime", time.Since(startTime),
 		)
 
 		return media, nil
