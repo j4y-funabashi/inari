@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 	"time"
 
 	log "github.com/inconshreveable/log15"
@@ -165,19 +164,21 @@ func ImportDir(importFile Importer, logger log.Logger) func(backupFilename strin
 			return err
 		}
 
-		var wg sync.WaitGroup
-		workerCount := 50
-		jobs := make(chan string)
-		results := make(chan Media)
-		for w := 1; w <= workerCount; w++ {
-			wg.Add(1)
-			w := w
-			go func() {
-				defer wg.Done()
-				worker(importFile, logger, w, jobs, results)
-			}()
-		}
-		go processResults(logger, results)
+		// approx count files
+		fileCount := 0
+		filepath.Walk(
+			backupFilename,
+			func(path string, info fs.FileInfo, err error) error {
+				if info.IsDir() {
+					return nil
+				}
+				fileCount++
+				return nil
+			})
+		logger.Info("importing files",
+			"dir", backupFilename,
+			"approx-count", fileCount,
+		)
 
 		filepath.Walk(
 			backupFilename,
@@ -185,37 +186,20 @@ func ImportDir(importFile Importer, logger log.Logger) func(backupFilename strin
 				if info.IsDir() {
 					return nil
 				}
-				jobs <- path
+				_, iErr := importFile(path)
+				if iErr != nil {
+					logger.Error("failed to import file", "err", iErr, "path", path)
+				}
 				return nil
 			})
-		close(jobs)
-
-		wg.Wait()
 
 		return nil
 	}
 }
 
-func worker(importFile Importer, logger log.Logger, id int, jobs <-chan string, results chan<- Media) {
-	for path := range jobs {
-		media, iErr := importFile(path)
-		if iErr != nil {
-			logger.Error("failed to import file", "err", iErr, "path", path)
-		}
-		results <- media
-	}
-}
-
-func processResults(logger log.Logger, results <-chan Media) {
-	for media := range results {
-		logger.Info("imported media",
-			"media", media.ID,
-			"newFilename", media.NewFilename())
-	}
-}
-
 func NewImporter(logger Logger, downloadFromBackup Downloader, extractMetadata MetadataExtractor, uploadToMediaStore Uploader, indexMedia Indexer, createThumbnails Resizer, geocode Geocoder, notifyDownstream Notifier) Importer {
 	return func(inputFilename string) (Media, error) {
+		startTime := time.Now()
 		media := Media{}
 
 		ext := strings.ToLower(filepath.Ext(inputFilename))
@@ -273,6 +257,12 @@ func NewImporter(logger Logger, downloadFromBackup Downloader, extractMetadata M
 				"backupFilename", inputFilename)
 			return media, nil
 		}
+
+		elapsed := time.Since(startTime)
+		logger.Info("imported media",
+			"path", inputFilename,
+			"elapsedTime", elapsed,
+		)
 
 		return media, nil
 	}
