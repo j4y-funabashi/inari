@@ -1,7 +1,9 @@
 package app
 
 import (
+	"crypto/md5"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -207,6 +209,21 @@ func NewImporter(fetchMediaDetail QueryMediaDetail, logger Logger, downloadFromB
 			return media, nil
 		}
 
+		// check media exists
+		hash, err := parseHash(inputFilename)
+		if err != nil {
+			return media, fmt.Errorf("failed to parse media hash: %w", err)
+		}
+		existingMedia, _ := fetchMediaDetail(hash)
+		if existingMedia.Hash == hash {
+			logger.Info("skipping existing media",
+				"path", inputFilename,
+				"elapsedTime", time.Since(startTime),
+			)
+
+			return existingMedia, nil
+		}
+
 		// download file from backup storage
 		tmpFilename, err := downloadFromBackup(inputFilename)
 		if err != nil {
@@ -221,16 +238,6 @@ func NewImporter(fetchMediaDetail QueryMediaDetail, logger Logger, downloadFromB
 		}
 		media.MediaMetadata = mediaMeta
 		media.Caption = mediaMeta.Title
-
-		existingMedia, _ := fetchMediaDetail(media.Hash)
-		if existingMedia.Hash == media.Hash {
-			logger.Info("skipping existing media",
-				"path", inputFilename,
-				"elapsedTime", time.Since(startTime),
-			)
-
-			return existingMedia, nil
-		}
 
 		// upload renamed file to media storage
 		err = uploadToMediaStore(tmpFilename, media.NewFilename())
@@ -275,4 +282,19 @@ func NewImporter(fetchMediaDetail QueryMediaDetail, logger Logger, downloadFromB
 
 		return media, nil
 	}
+}
+
+func parseHash(filePath string) (string, error) {
+	f, err := os.Open(filePath)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+
+	h := md5.New()
+	if _, err := io.Copy(h, f); err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%x", h.Sum(nil)), nil
 }
