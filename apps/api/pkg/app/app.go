@@ -197,7 +197,7 @@ func ImportDir(importFile Importer, logger log.Logger) func(backupFilename strin
 	}
 }
 
-func NewImporter(logger Logger, downloadFromBackup Downloader, extractMetadata MetadataExtractor, uploadToMediaStore Uploader, indexMedia Indexer, createThumbnails Resizer, geocode Geocoder, notifyDownstream Notifier) Importer {
+func NewImporter(fetchMediaDetail QueryMediaDetail, logger Logger, downloadFromBackup Downloader, extractMetadata MetadataExtractor, uploadToMediaStore Uploader, indexMedia Indexer, createThumbnails Resizer, geocode Geocoder, notifyDownstream Notifier) Importer {
 	return func(inputFilename string) (Media, error) {
 		startTime := time.Now()
 		media := Media{}
@@ -221,6 +221,11 @@ func NewImporter(logger Logger, downloadFromBackup Downloader, extractMetadata M
 		}
 		media.MediaMetadata = mediaMeta
 		media.Caption = mediaMeta.Title
+
+		existingMedia, _ := fetchMediaDetail(media.Hash)
+		if existingMedia.Hash == media.Hash {
+			return existingMedia, nil
+		}
 
 		// upload renamed file to media storage
 		err = uploadToMediaStore(tmpFilename, media.NewFilename())

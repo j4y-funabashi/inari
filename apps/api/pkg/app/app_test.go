@@ -162,6 +162,7 @@ func newImporter(baseDir string) app.Importer {
 
 	// deps
 	db := newDB(baseDir)
+	mediaDetail := index.NewQueryMediaDetail(db)
 	logger := app.NewNullLogger()
 	downloader := storage.NewLocalFSDownloader()
 	uploader := storage.NewLocalFSUploader(mediaStorePath)
@@ -172,7 +173,7 @@ func newImporter(baseDir string) app.Importer {
 
 	geo := google.NewNullGeocoder()
 
-	return app.NewImporter(logger, downloader, extractMetadata, uploader, indexer, createThumbnails, geo, notifier)
+	return app.NewImporter(mediaDetail, logger, downloader, extractMetadata, uploader, indexer, createThumbnails, geo, notifier)
 }
 
 func newMediaDetailQuery(testDir string) app.QueryMediaDetail {

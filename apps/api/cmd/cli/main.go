@@ -50,6 +50,7 @@ func main() {
 		panic(err)
 	}
 
+	mediaDetail := index.NewQueryMediaDetail(db)
 	downloader := storage.NewLocalFSDownloader()
 	uploader := storage.NewLocalFSUploader(mediaStorePath)
 	indexer := index.NewSqliteIndexer(db)
@@ -58,7 +59,7 @@ func main() {
 	resizer := imgresize.NewResizer(thumbnailsPath)
 	geo := google.NewGeocoder(apiKey, baseURL)
 
-	importMedia := app.ImportDir(app.NewImporter(logger, downloader, extractMetadata, uploader, indexer, resizer, geo, notifier), logger)
+	importMedia := app.ImportDir(app.NewImporter(mediaDetail, logger, downloader, extractMetadata, uploader, indexer, resizer, geo, notifier), logger)
 	listCollections := index.NewSqliteCollectionLister(db)
 
 	// app commands
