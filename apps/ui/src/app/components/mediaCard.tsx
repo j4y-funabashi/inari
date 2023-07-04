@@ -25,22 +25,23 @@ export const MediaCard = function ({ m, handleDelete }: MediaCardProps) {
             <div
                 className="my-8 rounded bg-gray-800">
                 <figure>
-                    <img src={srcUrl} className="rounded-t w-full" />
+                    <img src={srcUrl} className="rounded-t w-full" alt={caption} />
 
                     <figcaption className="p-4">
+                        <small className="text-blue text-xs">{dat}</small>
+
                         {caption !== "" &&
                             <p className="leading-5 text-gray-500 dark:text-gray-400">
                                 {caption}
                             </p>
                         }
-                        <small className="text-blue text-xs">{dat}</small>
 
-                        <ul>{collections}</ul>
                         {location !== "" &&
                             <p>{location}</p>
                         }
                     </figcaption>
                 </figure>
+                <ul>{collections}</ul>
                 <div>
                     <button className="bg-red text-white font-bold py-1 px-2 rounded" onClick={handleDelete}>
                         Delete
