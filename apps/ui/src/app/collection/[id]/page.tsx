@@ -1,6 +1,6 @@
 'use client';
 
-import { CollectionDetail, Media, collectionDetailFetcher, deleteMedia } from "@/app/apiClient";
+import { CollectionDetail, Media, collectionDetailFetcher, deleteMedia, updateMediaCaption } from "@/app/apiClient";
 import { MediaCard } from "@/app/components/mediaCard";
 import { useState } from "react";
 import useSWR from "swr";
@@ -64,8 +64,13 @@ const MediaGallery = function ({ data }: MediaListProps) {
                 setMedia(newList)
             }
 
+            const saveCaption = async (id: string, caption: string) => {
+                console.log(caption)
+                await updateMediaCaption(id, caption)
+            }
+
             return (
-                <MediaCard key={m.id} m={m} handleDelete={handleDelete} />
+                <MediaCard key={m.id} m={m} handleDelete={handleDelete} saveCaption={saveCaption} />
             )
         }
     )
@@ -73,10 +78,11 @@ const MediaGallery = function ({ data }: MediaListProps) {
     return (
         <section>
             <h1 className="text-lg mb-4 font-bold leading-relaxed text-gray-300">{data.collection_meta.title}</h1>
-            <div
+            <div>{mediaList}</div>
+            {/* <div
                 className="grid grid-flow-row gap-1 text-neutral-600 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {mediaList}
-            </div>
+            </div> */}
         </section>
     )
 }

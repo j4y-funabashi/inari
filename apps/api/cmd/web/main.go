@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -62,6 +63,27 @@ func newDeleteMediaHandler(deleteMedia app.DeleteMedia, logger app.Logger) httpr
 	}
 }
 
+func newUpdateMediaCaptionHandler(updateMediaCaption app.UpdateMediaCaption, logger app.Logger) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		mediaID := ps.ByName("mediaid")
+		newCaption, err := io.ReadAll(r.Body)
+		if err != nil {
+			logger.Error("failed to update media caption",
+				"err", err)
+			panic(err)
+		}
+		err = updateMediaCaption(mediaID, string(newCaption))
+		if err != nil {
+			logger.Error("failed to update media caption",
+				"err", err)
+			panic(err)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+	}
+}
+
 func main() {
 	// conf
 	baseDir := filepath.Join(os.TempDir(), "inari")
@@ -85,11 +107,13 @@ func main() {
 	listCollections := index.NewSqliteCollectionLister(db)
 	collectionDetail := index.NewSqliteCollectionDetail(db)
 	deleteMedia := index.NewDeleteMedia(db)
+	updateMediaCaption := index.NewUpdateMediaCaption(db)
 
 	router := httprouter.New()
 	router.GET("/api/timeline/months", newMonthsHandler(listCollections, logger))
 	router.GET("/api/timeline/month/:collectionid", newCollectionDetailHandler(collectionDetail, logger))
 	router.DELETE("/api/media/:mediaid", newDeleteMediaHandler(deleteMedia, logger))
+	router.POST("/api/media/:mediaid/caption", newUpdateMediaCaptionHandler(updateMediaCaption, logger))
 
 	http.ListenAndServe(":8090", router)
 }

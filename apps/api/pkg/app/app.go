@@ -39,6 +39,7 @@ type Importer = func(backupFilename string) (Media, error)
 type Thumbnailer = func(mediastoreKey string) error
 type QueryMediaDetail = func(mediaID string) (Media, error)
 type DeleteMedia = func(mediaID string) error
+type UpdateMediaCaption = func(mediaID, caption string) error
 
 type CollectionLister func(collectionType string) ([]Collection, error)
 type CollectionDetailQuery = func(collectionID string) (CollectionDetail, error)

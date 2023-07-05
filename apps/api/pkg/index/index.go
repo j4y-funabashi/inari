@@ -51,24 +51,28 @@ func CreateIndex(db *sql.DB) error {
 
 func NewQueryMediaDetail(db *sql.DB) app.QueryMediaDetail {
 	return func(mediaID string) (app.Media, error) {
+		return fetchMediaByID(db, mediaID)
+	}
+}
 
-		out := app.Media{}
+func fetchMediaByID(db *sql.DB, mediaID string) (app.Media, error) {
+	out := app.Media{}
 
-		q := `SELECT
+	q := `SELECT
 			media_data
 			FROM media
 			WHERE id = ?;
 			`
-		row := db.QueryRow(q, mediaID)
+	row := db.QueryRow(q, mediaID)
 
-		jsonStr := ""
-		err := row.Scan(&jsonStr)
-		if err != nil {
-			return out, err
-		}
-		err = json.Unmarshal([]byte(jsonStr), &out)
+	jsonStr := ""
+	err := row.Scan(&jsonStr)
+	if err != nil {
 		return out, err
 	}
+	err = json.Unmarshal([]byte(jsonStr), &out)
+	return out, err
+
 }
 
 func NewDeleteMedia(db *sql.DB) app.DeleteMedia {
@@ -84,6 +88,32 @@ func NewDeleteMedia(db *sql.DB) app.DeleteMedia {
 		return err
 
 	}
+}
+
+func NewUpdateMediaCaption(db *sql.DB) app.UpdateMediaCaption {
+	return func(mediaID, newCaption string) error {
+		media, err := fetchMediaByID(db, mediaID)
+		if err != nil {
+			return err
+		}
+
+		media.Caption = newCaption
+
+		return updateMediaDataByID(db, media)
+	}
+}
+
+func updateMediaDataByID(db *sql.DB, media app.Media) error {
+	mediaData, err := json.Marshal(media)
+	if err != nil {
+		return err
+	}
+	_, err = db.Exec(
+		`UPDATE media SET media_data = ? WHERE id = ?;`,
+		string(mediaData),
+		media.ID)
+
+	return err
 }
 
 func NewSqliteIndexer(db *sql.DB) app.Indexer {

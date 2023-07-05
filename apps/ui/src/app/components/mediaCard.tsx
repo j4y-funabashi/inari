@@ -1,13 +1,15 @@
 import Link from "next/link"
 import { Media } from "../apiClient"
 import { format } from "date-fns"
+import { useState } from "react"
 
 interface MediaCardProps {
     m: Media
     handleDelete: () => void
+    saveCaption: (id: string, newCaption: string) => Promise<void>
 }
-export const MediaCard = function ({ m, handleDelete }: MediaCardProps) {
-    const srcUrl = "/thumbnails/" + m.thumbnails.medium
+export const MediaCard = function ({ m, handleDelete, saveCaption }: MediaCardProps) {
+    const srcUrl = "/thumbnails/" + m.thumbnails.large
 
     const caption = (m.caption ? m.caption.trim() : "")
     const dat = m.date
@@ -21,12 +23,20 @@ export const MediaCard = function ({ m, handleDelete }: MediaCardProps) {
     )
     const location = formatLocation(m)
 
+
+    const [newCaption, setNewCaption] = useState(caption);
+
+    const handleCaptionSubmit = async function (event: React.FormEvent<HTMLFormElement>) {
+        event.preventDefault()
+        await saveCaption(m.id, newCaption)
+    }
+
     return (
         <div>
             <div
                 className="my-8 rounded bg-gray-800">
                 <figure>
-                    <img src={srcUrl} className="rounded-t w-full" alt={caption} />
+                    <img src={srcUrl} className="rounded-t" alt={caption} />
 
                     <figcaption className="p-4">
                         <time dateTime={dat} className="text-blue text-xs">{fdat}</time>
@@ -36,6 +46,17 @@ export const MediaCard = function ({ m, handleDelete }: MediaCardProps) {
                                 {caption}
                             </p>
                         }
+                        <form onSubmit={handleCaptionSubmit}>
+                            <label>
+                                Caption:
+                                <textarea
+                                    name="newCaption"
+                                    value={newCaption}
+                                    onChange={e => setNewCaption(e.target.value)}
+                                />
+                            </label>
+                            <input type="submit" value="save" />
+                        </form>
 
                         {location !== "" &&
                             <p>{location}</p>

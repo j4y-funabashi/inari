@@ -59,5 +59,15 @@ export const deleteMedia = async function (id: string) {
     console.log(res)
 }
 
+export const updateMediaCaption = async function (id: string, caption: string) {
+    const requestOptions: RequestInit = {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        body: caption
+    }
+    const res = await fetch("/api/media/" + id + "/caption", requestOptions)
+    console.log(res)
+}
+
 export const collectionListFetcher: Fetcher<Collection[], string> = (type) => getCollectionsByType(type)
 export const collectionDetailFetcher: Fetcher<CollectionDetail, string> = (id) => getCollectionDetail(id)
