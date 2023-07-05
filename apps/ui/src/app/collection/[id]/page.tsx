@@ -26,7 +26,7 @@ export default function CollectionDetailPage({ params }: CollectionDetailParams)
 
     return (
         <div>
-            <MediaList data={data} />
+            <MediaGallery data={data} />
         </div>
     )
 }
@@ -35,7 +35,7 @@ interface MediaListProps {
     data: CollectionDetail
 }
 
-const MediaList = function ({ data }: MediaListProps) {
+const MediaGallery = function ({ data }: MediaListProps) {
 
     const sortedMedia = data.media.sort(
         (a, b) => {
@@ -71,12 +71,12 @@ const MediaList = function ({ data }: MediaListProps) {
     )
 
     return (
-        <div>
+        <section>
             <h1 className="text-lg mb-4 font-bold leading-relaxed text-gray-300">{data.collection_meta.title}</h1>
             <div
-                className="grid grid-flow-row gap-8 text-neutral-600 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                className="grid grid-flow-row gap-1 text-neutral-600 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {mediaList}
             </div>
-        </div >
+        </section>
     )
 }

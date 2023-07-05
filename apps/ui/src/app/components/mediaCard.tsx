@@ -10,7 +10,8 @@ export const MediaCard = function ({ m, handleDelete }: MediaCardProps) {
     const srcUrl = "/thumbnails/" + m.thumbnails.medium
 
     const caption = (m.caption ? m.caption.trim() : "")
-    const dat = format(new Date(m.date), "eee, do LLL y HH:mm:ss")
+    const dat = m.date
+    const fdat = format(new Date(m.date), "eee, do LLL y HH:mm:ss")
 
     const collections = m.collections.map(
         (m => {
@@ -28,7 +29,7 @@ export const MediaCard = function ({ m, handleDelete }: MediaCardProps) {
                     <img src={srcUrl} className="rounded-t w-full" alt={caption} />
 
                     <figcaption className="p-4">
-                        <small className="text-blue text-xs">{dat}</small>
+                        <time dateTime={dat} className="text-blue text-xs">{fdat}</time>
 
                         {caption !== "" &&
                             <p className="leading-5 text-gray-500 dark:text-gray-400">
