@@ -1,0 +1,9 @@
+FROM golang:alpine as build
+
+RUN apk update && \
+    apk add \
+    build-base \
+    bash \
+    exiftool
+
+WORKDIR /inari

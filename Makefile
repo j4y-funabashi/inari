@@ -15,7 +15,7 @@ up:
 test: test-ui test-api
 
 test-api:
-	docker compose run --rm api ./test.sh
+	docker compose run --rm inari-api-test ./test.sh
 
 test-ui:
 	docker compose run --rm ui ./test.sh

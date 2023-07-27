@@ -51,21 +51,27 @@ func TestImport(t *testing.T) {
 				},
 				Collections: []app.Collection{
 					{
-						ID:    "inbox_2014-03",
-						Title: "inbox_2014-03",
+						ID:    "inbox__2014-03",
+						Title: "inbox Mar 2014",
 						Type:  app.CollectionTypeInbox,
 					},
 					{
-						ID:    "2014-03",
+						ID:    "camera__samsung-gt-i9100",
+						Title: "Samsung GT-I9100",
+						Type:  app.CollectionTypeCamera,
+					},
+					{
+						ID:    "timeline_month__2014-03",
 						Title: "2014 March",
 						Type:  app.CollectionTypeTimelineMonth,
 					},
 					{
-						ID:    "2014-03-21",
+						ID:    "timeline_day__2014-03-21",
 						Title: "Fri, 21 Mar 2014",
 						Type:  app.CollectionTypeTimelineDay,
 					},
 				},
+				Caption: "Ferry to Rotterdam",
 			},
 		},
 		{
@@ -95,19 +101,34 @@ func TestImport(t *testing.T) {
 				},
 				Collections: []app.Collection{
 					{
-						ID:    "inbox_2022-01",
-						Title: "inbox_2022-01",
+						ID:    "inbox__2022-01",
+						Title: "inbox Jan 2022",
 						Type:  app.CollectionTypeInbox,
 					},
 					{
-						ID:    "2022-01",
+						ID:    "camera__fairphone-fp3",
+						Title: "Fairphone FP3",
+						Type:  app.CollectionTypeCamera,
+					},
+					{
+						ID:    "timeline_month__2022-01",
 						Title: "2022 January",
 						Type:  app.CollectionTypeTimelineMonth,
 					},
 					{
-						ID:    "2022-01-03",
+						ID:    "timeline_day__2022-01-03",
 						Title: "Mon, 03 Jan 2022",
 						Type:  app.CollectionTypeTimelineDay,
+					},
+					{
+						ID:    "places_country__united-kingdom",
+						Title: "United Kingdom",
+						Type:  app.CollectionTypePlacesCountry,
+					},
+					{
+						ID:    "places_region__west-yorkshire-united-kingdom",
+						Title: "West Yorkshire, United Kingdom",
+						Type:  app.CollectionTypePlacesRegion,
 					},
 				},
 				Location: app.Location{

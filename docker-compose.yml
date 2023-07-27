@@ -13,3 +13,10 @@ services:
         inari-ui:
                 build:
                         context: ./apps/ui
+
+        inari-api-test:
+                build:
+                        dockerfile: ./apps/api/Dockerfile-test
+                volumes:
+                        - ./apps/api:/inari
+                        - $GOPATH/pkg/mod:/go/pkg/mod
