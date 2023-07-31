@@ -20,3 +20,9 @@ services:
                 volumes:
                         - ./apps/api:/inari
                         - $GOPATH/pkg/mod:/go/pkg/mod
+
+        inari-ui-test:
+                build:
+                        dockerfile: ./apps/ui/Dockerfile-test
+                volumes:
+                        - ./apps/ui:/app
