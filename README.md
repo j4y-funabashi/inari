@@ -29,17 +29,23 @@ docker run --env GOOGLE_API_KEY=${GOOGLE_API_KEY} -v /mnt/data/backup/jayr/phone
 
 ## version 1
 
-- import media
-- list collections
-- view collection detail
-- delete media
+- [x] import media
+- [x] list collections
+- [X] view collection detail
+- [x] delete media
+- [x] update media caption
 
 ## future
 
+- add media hashtag/person tag
+- search for and add location to media
 - full text search captions
-- update media caption
 - download original media file
 - publish public photos (micropub?)
-- search for and add location to media
 - mark as read / remove from inbox / remove from collection?
-- view media detail
+- change collection view to current media + thumbnails
+- import geo xml files
+    - use imported locations to add lat/lng on import
+- gpx viewer
+    - list of days
+    - gpx day detail: map (leaflet?), stats etc
