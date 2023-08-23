@@ -69,13 +69,15 @@ func TestIndex(t *testing.T) {
 
 func TestFindNearestGPX(t *testing.T) {
 	testCases := []struct {
-		desc        string
-		points      []gpx.GPXPoint
-		currentTime time.Time
-		expectedGPX app.GPXPoint
+		desc          string
+		points        []gpx.GPXPoint
+		currentTime   time.Time
+		expectedGPX   app.GPXPoint
+		hoursBoundary int
 	}{
 		{
-			desc: "nearest is in the future",
+			desc:          "nearest is in the future",
+			hoursBoundary: 5,
 			points: []gpx.GPXPoint{
 				{
 					Timestamp: time.Date(2022, time.January, 28, 13, 0, 0, 0, time.UTC),
@@ -109,7 +111,8 @@ func TestFindNearestGPX(t *testing.T) {
 			},
 		},
 		{
-			desc: "nearest is in the past",
+			desc:          "nearest is in the past",
+			hoursBoundary: 5,
 			points: []gpx.GPXPoint{
 				{
 					Timestamp: time.Date(2022, time.January, 28, 15, 0, 0, 0, time.UTC),
@@ -149,6 +152,36 @@ func TestFindNearestGPX(t *testing.T) {
 				},
 			},
 		},
+		{
+			desc:          "does not fetch future points over the hours boundary",
+			hoursBoundary: 2,
+			points: []gpx.GPXPoint{
+				{
+					Timestamp: time.Date(2022, time.January, 28, 15, 0, 0, 0, time.UTC),
+					Point: gpx.Point{
+						Latitude:  10,
+						Longitude: 20,
+					},
+				},
+			},
+			currentTime: time.Date(2022, time.January, 28, 12, 0, 0, 0, time.UTC),
+			expectedGPX: app.GPXPoint{},
+		},
+		{
+			desc:          "does not fetch past points over the hours boundary",
+			hoursBoundary: 2,
+			points: []gpx.GPXPoint{
+				{
+					Timestamp: time.Date(2022, time.January, 28, 9, 0, 0, 0, time.UTC),
+					Point: gpx.Point{
+						Latitude:  10,
+						Longitude: 20,
+					},
+				},
+			},
+			currentTime: time.Date(2022, time.January, 28, 12, 0, 0, 0, time.UTC),
+			expectedGPX: app.GPXPoint{},
+		},
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
@@ -166,11 +199,13 @@ func TestFindNearestGPX(t *testing.T) {
 			if err != nil {
 				t.Fatalf("%s", err)
 			}
+			fetchNearestPoint := index.NewQueryNearestGPX(db, tC.hoursBoundary)
 
 			// act
-			_, err = index.InsertGPXPoints(db, tC.points)
+			numPoints, err := index.InsertGPXPoints(db, tC.points)
+			t.Logf("points inserted: %d", numPoints)
 			is.NoErr(err)
-			nearestPoint, err := index.FetchNearestGPXPoint(db, tC.currentTime)
+			nearestPoint, err := fetchNearestPoint(tC.currentTime)
 			is.NoErr(err)
 
 			// assert

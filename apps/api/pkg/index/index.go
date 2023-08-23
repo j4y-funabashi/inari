@@ -402,37 +402,45 @@ func InsertGPXPoints(db *sql.DB, points []gpx.GPXPoint) (int, error) {
 	return pointCount, err
 }
 
-func FetchNearestGPXPoint(db *sql.DB, cTime time.Time) (app.GPXPoint, error) {
-	out := app.GPXPoint{}
+func NewQueryNearestGPX(db *sql.DB, hoursBoundary int) app.QueryNearestGPX {
+	return func(cTime time.Time) (app.GPXPoint, error) {
+		out := app.GPXPoint{}
 
-	fPoint, err := fetchFuturePoint(db, cTime)
-	if err != nil {
-		return out, err
-	}
-	pPoint, err := fetchPastPoint(db, cTime)
-	if err != nil {
-		return out, err
+		fPoint, err := fetchFuturePoint(db, cTime, hoursBoundary)
+		if err != nil {
+			return out, err
+		}
+		pPoint, err := fetchPastPoint(db, cTime, hoursBoundary)
+		if err != nil {
+			return out, err
+		}
+
+		if !fPoint.Timestamp.IsZero() && (fPoint.Timestamp.Unix()-cTime.Unix()) <= (cTime.Unix()-pPoint.Timestamp.Unix()) {
+			return fPoint, nil
+		}
+
+		return pPoint, err
 	}
 
-	if (fPoint.Timestamp.Unix() - cTime.Unix()) <= (cTime.Unix() - pPoint.Timestamp.Unix()) {
-		return fPoint, nil
-	}
-
-	return pPoint, err
 }
 
-func fetchFuturePoint(db *sql.DB, cTime time.Time) (app.GPXPoint, error) {
+func fetchFuturePoint(db *sql.DB, cTime time.Time, hoursBoundary int) (app.GPXPoint, error) {
 	out := app.GPXPoint{}
+	upperBound := cTime.Add(time.Duration(hoursBoundary) * time.Hour)
 	tsString := ""
 	q := `SELECT
 			timestamp, lat, lng
 			FROM gpx
 			WHERE timestamp >= ?
+			AND timestamp <= ?
 			ORDER BY timestamp ASC
 			LIMIT 1
 			`
-	err := db.QueryRow(q, cTime.Format(time.RFC3339)).Scan(&tsString, &out.Lat, &out.Lng)
+	err := db.QueryRow(q, cTime.Format(time.RFC3339), upperBound.Format(time.RFC3339)).Scan(&tsString, &out.Lat, &out.Lng)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return out, nil
+		}
 		return out, err
 	}
 	out.Timestamp, err = time.Parse(time.RFC3339, tsString)
@@ -440,18 +448,23 @@ func fetchFuturePoint(db *sql.DB, cTime time.Time) (app.GPXPoint, error) {
 	return out, err
 }
 
-func fetchPastPoint(db *sql.DB, cTime time.Time) (app.GPXPoint, error) {
+func fetchPastPoint(db *sql.DB, cTime time.Time, hoursBoundary int) (app.GPXPoint, error) {
 	out := app.GPXPoint{}
+	upperBound := cTime.Add(time.Duration(-hoursBoundary) * time.Hour)
 	tsString := ""
 	q := `SELECT
 			timestamp, lat, lng
 			FROM gpx
 			WHERE timestamp <= ?
+			AND timestamp >= ?
 			ORDER BY timestamp DESC
 			LIMIT 1
 			`
-	err := db.QueryRow(q, cTime.Format(time.RFC3339)).Scan(&tsString, &out.Lat, &out.Lng)
+	err := db.QueryRow(q, cTime.Format(time.RFC3339), upperBound.Format(time.RFC3339)).Scan(&tsString, &out.Lat, &out.Lng)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return out, nil
+		}
 		return out, err
 	}
 	out.Timestamp, err = time.Parse(time.RFC3339, tsString)

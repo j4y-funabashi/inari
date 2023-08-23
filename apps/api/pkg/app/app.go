@@ -40,6 +40,7 @@ type Thumbnailer = func(mediastoreKey string) error
 type QueryMediaDetail = func(mediaID string) (Media, error)
 type DeleteMedia = func(mediaID string) error
 type UpdateMediaCaption = func(mediaID, caption string) error
+type QueryNearestGPX = func(cTime time.Time) (GPXPoint, error)
 
 type CollectionLister func(collectionType string) ([]Collection, error)
 type CollectionDetailQuery = func(collectionID string) (CollectionDetail, error)
@@ -51,7 +52,7 @@ type Notifier = func(mediaMeta Media) error
 type FileLister = func() ([]string, error)
 type MetadataExtractor = func(mediaFile string) (MediaMetadata, error)
 type MediaDetailQuery = func(mediaID string) (MediaDetailView, error)
-type Geocoder = func(lat, lng float64) (Location, error)
+type Geocoder = func(lat, lng float64, cTime time.Time) (Location, error)
 type MediaGeocoder = func(mediaID string) (Location, error)
 type LocationPutter = func(mediaID string, location Location) error
 
@@ -72,6 +73,11 @@ type Collection struct {
 	Title      string `json:"title,omitempty"`
 	Type       string `json:"type,omitempty"`
 	MediaCount int    `json:"media_count,omitempty"`
+}
+
+type GPXPoint struct {
+	Timestamp time.Time
+	Coordinates
 }
 
 type CollectionDetail struct {
@@ -255,7 +261,7 @@ func NewImporter(fetchMediaDetail QueryMediaDetail, logger Logger, downloadFromB
 		media.Thumbnails = thumbnails
 
 		// geocode
-		loc, err := geocode(media.Coordinates.Lat, media.Coordinates.Lng)
+		loc, err := geocode(media.Coordinates.Lat, media.Coordinates.Lng, media.Date)
 		if err != nil {
 			return media, fmt.Errorf("failed to geocode: %w", err)
 		}

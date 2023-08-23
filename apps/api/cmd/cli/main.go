@@ -58,7 +58,8 @@ func main() {
 	extractMetadata := exiftool.NewExtractor("/usr/bin/exiftool")
 	notifier := notify.NewNoopNotifier()
 	resizer := imgresize.NewResizer(thumbnailsPath)
-	geo := google.NewGeocoder(apiKey, baseURL)
+	queryNearestGPX := index.NewQueryNearestGPX(db, 8)
+	geo := google.NewGeocoder(queryNearestGPX, logger, apiKey, baseURL)
 
 	importMedia := app.ImportDir(app.NewImporter(mediaDetail, logger, downloader, extractMetadata, uploader, indexer, resizer, geo, notifier), logger)
 	listCollections := index.NewSqliteCollectionLister(db)

@@ -3,15 +3,16 @@ package google
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/j4y_funabashi/inari/apps/api/pkg/app"
 )
 
 func NewNullGeocoder() app.Geocoder {
-	return func(lat, lng float64) (app.Location, error) {
+	return func(lat, lng float64, cTime time.Time) (app.Location, error) {
 
 		if lat == 0 && lng == 0 {
 			return app.Location{}, nil
@@ -32,8 +33,21 @@ func NewNullGeocoder() app.Geocoder {
 	}
 }
 
-func NewGeocoder(apiKey, baseURL string) app.Geocoder {
-	return func(lat, lng float64) (app.Location, error) {
+func NewGeocoder(queryNearestGPX app.QueryNearestGPX, logger app.Logger, apiKey, baseURL string) app.Geocoder {
+	return func(lat, lng float64, cTime time.Time) (app.Location, error) {
+
+		if lat == 0 && lng == 0 {
+			nearestGPX, err := queryNearestGPX(cTime)
+			if err != nil {
+				return app.Location{}, err
+			}
+			lat = nearestGPX.Lat
+			lng = nearestGPX.Lng
+			logger.Info("nearest gpx point found",
+				"cTime", cTime,
+				"nearestGPXTime", nearestGPX.Timestamp,
+				"time diff", cTime.Sub(nearestGPX.Timestamp))
+		}
 
 		if lat == 0 && lng == 0 {
 			return app.Location{}, nil
@@ -48,7 +62,7 @@ func NewGeocoder(apiKey, baseURL string) app.Geocoder {
 		if res.Body != nil {
 			defer res.Body.Close()
 		}
-		body, err := ioutil.ReadAll(res.Body)
+		body, err := io.ReadAll(res.Body)
 		if err != nil {
 			return app.Location{}, err
 		}
