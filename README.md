@@ -34,14 +34,16 @@ docker run --env GOOGLE_API_KEY=${GOOGLE_API_KEY} -v /mnt/data/backup/jayr/phone
 - [X] view collection detail
 - [x] delete media
 - [x] update media caption
-- [ ] import geo xml files
-- [ ] use imported locations to add lat/lng on import
+- [x] import geo xml files
+- [x] use imported locations to add lat/lng on import
 - [ ] add media hashtag/person tag
 - [ ] search for and add location to media
 - [ ] search for and add venue to media
+- [ ] import movie files
 
 ## future
 
+- add sizes to thumbnail objects?
 - full text search captions
 - download original media file
 - publish public photos (micropub?)
