@@ -43,6 +43,7 @@ docker run --env GOOGLE_API_KEY=${GOOGLE_API_KEY} -v /mnt/data/backup/jayr/phone
 
 ## future
 
+- sort out homepage, list other collection types?
 - add sizes to thumbnail objects?
 - full text search captions
 - download original media file
