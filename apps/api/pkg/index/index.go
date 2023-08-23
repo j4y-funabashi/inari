@@ -9,6 +9,7 @@ import (
 	"github.com/gosimple/slug"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/app"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/tkrajina/gpxgo/gpx"
 )
 
 func CreateIndex(db *sql.DB) error {
@@ -41,6 +42,19 @@ func CreateIndex(db *sql.DB) error {
 		);
 		CREATE UNIQUE INDEX IF NOT EXISTS
 		idx_media_collections ON media_collection (media_id, collection_id);
+  `
+	if _, err := db.Exec(q); err != nil {
+		return err
+	}
+
+	q = `CREATE TABLE IF NOT EXISTS
+		gpx (
+			timestamp TEXT NOT NULL,
+			lat TEXT NOT NULL,
+			lng TEXT NOT NULL
+		);
+		CREATE UNIQUE INDEX IF NOT EXISTS
+		idx_gpx ON gpx (timestamp, lat, lng);
   `
 	if _, err := db.Exec(q); err != nil {
 		return err
@@ -357,4 +371,90 @@ func addMediaToCollection(db *sql.DB, collectionID, collectionType, collectionTi
 	)
 
 	return media, err
+}
+
+func InsertGPXPoints(db *sql.DB, points []gpx.GPXPoint) (int, error) {
+	pointCount := 0
+	tx, err := db.Begin()
+	if err != nil {
+		return pointCount, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	insertStmt, err := tx.Prepare(`INSERT OR IGNORE INTO gpx (timestamp, lat, lng) VALUES (?,?,?);`)
+	if err != nil {
+		return pointCount, fmt.Errorf("failed to prepare statement: %w", err)
+	}
+	for _, point := range points {
+
+		_, err = insertStmt.Exec(
+			point.Timestamp.Format(time.RFC3339),
+			fmt.Sprintf("%f", point.Latitude),
+			fmt.Sprintf("%f", point.Longitude),
+		)
+		if err != nil {
+			return pointCount, fmt.Errorf("failed to save gpx point: %w", err)
+		}
+
+		pointCount++
+	}
+
+	err = tx.Commit()
+
+	return pointCount, err
+}
+
+func FetchNearestGPXPoint(db *sql.DB, cTime time.Time) (app.GPXPoint, error) {
+	out := app.GPXPoint{}
+
+	fPoint, err := fetchFuturePoint(db, cTime)
+	if err != nil {
+		return out, err
+	}
+	pPoint, err := fetchPastPoint(db, cTime)
+	if err != nil {
+		return out, err
+	}
+
+	if (fPoint.Timestamp.Unix() - cTime.Unix()) <= (cTime.Unix() - pPoint.Timestamp.Unix()) {
+		return fPoint, nil
+	}
+
+	return pPoint, err
+}
+
+func fetchFuturePoint(db *sql.DB, cTime time.Time) (app.GPXPoint, error) {
+	out := app.GPXPoint{}
+	tsString := ""
+	q := `SELECT
+			timestamp, lat, lng
+			FROM gpx
+			WHERE timestamp >= ?
+			ORDER BY timestamp ASC
+			LIMIT 1
+			`
+	err := db.QueryRow(q, cTime.Format(time.RFC3339)).Scan(&tsString, &out.Lat, &out.Lng)
+	if err != nil {
+		return out, err
+	}
+	out.Timestamp, err = time.Parse(time.RFC3339, tsString)
+
+	return out, err
+}
+
+func fetchPastPoint(db *sql.DB, cTime time.Time) (app.GPXPoint, error) {
+	out := app.GPXPoint{}
+	tsString := ""
+	q := `SELECT
+			timestamp, lat, lng
+			FROM gpx
+			WHERE timestamp <= ?
+			ORDER BY timestamp DESC
+			LIMIT 1
+			`
+	err := db.QueryRow(q, cTime.Format(time.RFC3339)).Scan(&tsString, &out.Lat, &out.Lng)
+	if err != nil {
+		return out, err
+	}
+	out.Timestamp, err = time.Parse(time.RFC3339, tsString)
+
+	return out, err
 }

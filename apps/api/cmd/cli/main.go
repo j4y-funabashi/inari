@@ -11,6 +11,7 @@ import (
 	"github.com/j4y_funabashi/inari/apps/api/pkg/app"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/exiftool"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/google"
+	"github.com/j4y_funabashi/inari/apps/api/pkg/gpx"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/imgresize"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/index"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/notify"
@@ -61,6 +62,7 @@ func main() {
 
 	importMedia := app.ImportDir(app.NewImporter(mediaDetail, logger, downloader, extractMetadata, uploader, indexer, resizer, geo, notifier), logger)
 	listCollections := index.NewSqliteCollectionLister(db)
+	importGPX := app.ImportDir(gpx.NewGpxImporter(logger, db), logger)
 
 	// app commands
 	app := &cli.App{
@@ -74,6 +76,15 @@ func main() {
 				Action: func(cCtx *cli.Context) error {
 					inputFilename := cCtx.Args().First()
 					err := importMedia(inputFilename)
+					return err
+				},
+			},
+			{
+				Name:  "igpx",
+				Usage: "import gpx data",
+				Action: func(cCtx *cli.Context) error {
+					inputFilename := cCtx.Args().First()
+					err := importGPX(inputFilename)
 					return err
 				},
 			},
