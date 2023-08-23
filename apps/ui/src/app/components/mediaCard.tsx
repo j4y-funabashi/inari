@@ -76,6 +76,11 @@ export const MediaCard = function ({ m, handleDelete, saveCaption }: MediaCardPr
 
 const formatLocation = (m: Media): string => {
     const loc = []
+    if (m.location?.coordinates?.lat) {
+        const latlng = `(${m.location.coordinates.lat}, ${m.location.coordinates.lng})`
+        loc.push(latlng)
+
+    }
     if (m.location?.locality && m.location.locality != "") {
         loc.push(m.location.locality)
     }

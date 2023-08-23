@@ -24,10 +24,15 @@ interface Location {
     country: Country
     region: string
     locality: string
+    coordinates?: Coordinates
 }
 interface Country {
     short: string
     long: string
+}
+interface Coordinates {
+    lat: number
+    lng: number
 }
 
 export interface CollectionDetail {
