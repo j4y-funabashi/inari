@@ -1,4 +1,4 @@
-build: build-api build-ui
+build: build-api build-ui build-cli
 
 build-cli:
 	docker build -t inari-cli --file ./apps/api/Dockerfile-cli ./apps/api
