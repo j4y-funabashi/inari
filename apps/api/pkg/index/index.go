@@ -387,8 +387,8 @@ func InsertGPXPoints(db *sql.DB, points []gpx.GPXPoint) (int, error) {
 
 		_, err = insertStmt.Exec(
 			point.Timestamp.Format(time.RFC3339),
-			fmt.Sprintf("%f", point.Latitude),
-			fmt.Sprintf("%f", point.Longitude),
+			strconv.FormatFloat(point.Latitude, 'f', -1, 64),
+			strconv.FormatFloat(point.Longitude, 'f', -1, 64),
 		)
 		if err != nil {
 			return pointCount, fmt.Errorf("failed to save gpx point: %w", err)
