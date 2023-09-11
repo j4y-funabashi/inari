@@ -43,10 +43,6 @@ func NewGeocoder(queryNearestGPX app.QueryNearestGPX, logger app.Logger, apiKey,
 			}
 			lat = nearestGPX.Lat
 			lng = nearestGPX.Lng
-			logger.Info("nearest gpx point found",
-				"cTime", cTime,
-				"nearestGPXTime", nearestGPX.Timestamp,
-				"time diff", cTime.Sub(nearestGPX.Timestamp))
 		}
 
 		if lat == 0 && lng == 0 {

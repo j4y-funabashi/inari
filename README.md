@@ -23,6 +23,9 @@ docker run --env GOOGLE_API_KEY=${GOOGLE_API_KEY} -v ~/Downloads/jayr-phone-came
 docker run --env GOOGLE_API_KEY=${GOOGLE_API_KEY} -v /mnt/data/backup/jayr/phone/Camera/:/inbox -v /mnt/data/backup/jayr/inari_mediastore:/tmp/inari -it --rm inari-cli ./inari import /inbox/
 
 docker run --env GOOGLE_API_KEY=${GOOGLE_API_KEY} -v /mnt/data/backup/jayr/phone/Camera/:/inbox -v /mnt/data/backup/jayr/inari_mediastore:/tmp/inari -it --rm inari-cli ./inari import /inbox/
+
+
+docker run --env GOOGLE_API_KEY=${GOOGLE_API_KEY} -v /mnt/data/backup/jayr/phone/Camera/:/inbox/phone -v /mnt/data/backup/jayr/camera/:/inbox/camera -v /mnt/data/backup/jayr/j4y.co/:/inbox/j4y  -v /mnt/data/backup/jayr/inari_mediastore:/tmp/inari -it --rm inari-cli ./inari import /inbox/
 ```
 
 # Roadmap
@@ -44,6 +47,8 @@ docker run --env GOOGLE_API_KEY=${GOOGLE_API_KEY} -v /mnt/data/backup/jayr/phone
 ## future
 
 - sort out homepage, list other collection types?
+- generate static map when geocoding
+- record import errors?
 - add sizes to thumbnail objects?
 - full text search captions
 - download original media file

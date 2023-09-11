@@ -105,7 +105,29 @@ func NewDeleteMedia(db *sql.DB) app.DeleteMedia {
 	}
 }
 
-func NewUpdateMediaCaption(db *sql.DB) app.UpdateMediaCaption {
+func NewUpdateMediaTag(db *sql.DB) app.UpdateMediaTextProperty {
+	return func(mediaID, newTag string) error {
+		media, err := fetchMediaByID(db, mediaID)
+		if err != nil {
+			return err
+		}
+
+		media, err = addMediaToCollection(
+			db,
+			newTag,
+			app.CollectionTypeHashTag,
+			newTag,
+			media,
+		)
+		if err != nil {
+			return err
+		}
+
+		return updateMediaDataByID(db, media)
+	}
+}
+
+func NewUpdateMediaCaption(db *sql.DB) app.UpdateMediaTextProperty {
 	return func(mediaID, newCaption string) error {
 		media, err := fetchMediaByID(db, mediaID)
 		if err != nil {
@@ -211,24 +233,25 @@ func NewSqliteIndexer(db *sql.DB) app.Indexer {
 			}
 		}
 
-		mediaData, err := json.Marshal(media)
-		if err != nil {
-			return app.Media{}, err
-		}
-		_, err = db.Exec(
-			`INSERT OR IGNORE INTO
+		return InsertMedia(db, media)
+	}
+}
+
+func InsertMedia(db *sql.DB, media app.Media) (app.Media, error) {
+	mediaData, err := json.Marshal(media)
+	if err != nil {
+		return media, err
+	}
+	_, err = db.Exec(
+		`INSERT OR IGNORE INTO
 			media (id, date_created, media_data)
 			VALUES (?,?,?);
 			`,
-			media.ID,
-			media.Date.Format(time.RFC3339),
-			string(mediaData))
-		if err != nil {
-			return app.Media{}, err
-		}
+		media.ID,
+		media.Date.Format(time.RFC3339),
+		string(mediaData))
 
-		return media, nil
-	}
+	return media, err
 }
 
 func NewSqliteCollectionLister(db *sql.DB) app.CollectionLister {
@@ -362,14 +385,23 @@ func addMediaToCollection(db *sql.DB, collectionID, collectionType, collectionTi
 		media.ID,
 		collectionID)
 
-	media.Collections = append(
-		media.Collections,
-		app.Collection{
-			ID:    collectionID,
-			Title: collectionTitle,
-			Type:  collectionType,
-		},
-	)
+	colExists := false
+	for _, m := range media.Collections {
+		if m.ID == collectionID {
+			colExists = true
+		}
+	}
+
+	if !colExists {
+		media.Collections = append(
+			media.Collections,
+			app.Collection{
+				ID:    collectionID,
+				Title: collectionTitle,
+				Type:  collectionType,
+			},
+		)
+	}
 
 	return media, err
 }

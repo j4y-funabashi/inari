@@ -13,6 +13,7 @@ import (
 	"github.com/j4y_funabashi/inari/apps/api/pkg/index"
 	"github.com/matryer/is"
 	"github.com/tkrajina/gpxgo/gpx"
+	"gotest.tools/v3/assert"
 )
 
 func TestIndex(t *testing.T) {
@@ -210,6 +211,87 @@ func TestFindNearestGPX(t *testing.T) {
 
 			// assert
 			is.Equal(nearestPoint, tC.expectedGPX)
+		})
+	}
+}
+
+func TestUpdateMediaTags(t *testing.T) {
+	testCases := []struct {
+		desc          string
+		media         app.Media
+		expectedMedia app.Media
+		newTags       []string
+	}{
+		{
+			desc: "it adds multiple sligified tags",
+			media: app.Media{
+				ID: "test-id-1",
+				MediaMetadata: app.MediaMetadata{
+					Date: time.Date(2022, time.January, 28, 12, 0, 0, 0, time.UTC),
+				},
+			},
+			newTags: []string{"tEst tag 1", "tesTtag*2"},
+			expectedMedia: app.Media{
+				ID: "test-id-1",
+				MediaMetadata: app.MediaMetadata{
+					Date: time.Date(2022, time.January, 28, 12, 0, 0, 0, time.UTC),
+				},
+				Collections: []app.Collection{
+					{ID: "hashtag__test-tag-1", Title: "tEst tag 1", Type: "hashtag"},
+					{ID: "hashtag__testtag-2", Title: "tesTtag*2", Type: "hashtag"},
+				},
+			},
+		},
+		{
+			desc: "it de dupes tags",
+			media: app.Media{
+				ID: "test-id-1",
+				MediaMetadata: app.MediaMetadata{
+					Date: time.Date(2022, time.January, 28, 12, 0, 0, 0, time.UTC),
+				},
+			},
+			newTags: []string{"tEst tag 1", "tEst tag 1"},
+			expectedMedia: app.Media{
+				ID: "test-id-1",
+				MediaMetadata: app.MediaMetadata{
+					Date: time.Date(2022, time.January, 28, 12, 0, 0, 0, time.UTC),
+				},
+				Collections: []app.Collection{
+					{ID: "hashtag__test-tag-1", Title: "tEst tag 1", Type: "hashtag"},
+				},
+			},
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.desc, func(t *testing.T) {
+
+			// arrange
+			dbFilepath := filepath.Join(os.TempDir(), fmt.Sprintf("inari-test-db-%s", uuid.New().String()))
+			db, err := sql.Open("sqlite3", dbFilepath)
+			if err != nil {
+				t.Fatalf("failed to open sqlite db: %s", err)
+			}
+			err = index.CreateIndex(db)
+			if err != nil {
+				t.Fatalf("%s", err)
+			}
+
+			updateTags := index.NewUpdateMediaTag(db)
+			getMedia := index.NewQueryMediaDetail(db)
+
+			// act
+			_, err = index.InsertMedia(db, tC.media)
+			assert.NilError(t, err)
+
+			for _, tag := range tC.newTags {
+				err := updateTags(tC.media.ID, tag)
+				assert.NilError(t, err)
+			}
+
+			newMedia, err := getMedia(tC.media.ID)
+			assert.NilError(t, err)
+			assert.DeepEqual(t, tC.expectedMedia, newMedia)
+
 		})
 	}
 }
