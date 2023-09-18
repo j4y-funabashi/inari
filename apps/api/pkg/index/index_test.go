@@ -11,8 +11,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/app"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/index"
-	"github.com/matryer/is"
-	"github.com/tkrajina/gpxgo/gpx"
 	"gotest.tools/v3/assert"
 )
 
@@ -26,8 +24,6 @@ func TestIndex(t *testing.T) {
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-
-			is := is.New(t)
 
 			// arrange
 			dbFilepath := filepath.Join(os.TempDir(), fmt.Sprintf("inari-test-db-%s", uuid.New().String()))
@@ -63,7 +59,7 @@ func TestIndex(t *testing.T) {
 			}
 
 			// assert
-			is.Equal(iMedia.ID, actualMedia.ID)
+			assert.Equal(t, iMedia.ID, actualMedia.ID)
 		})
 	}
 }
@@ -71,7 +67,7 @@ func TestIndex(t *testing.T) {
 func TestFindNearestGPX(t *testing.T) {
 	testCases := []struct {
 		desc          string
-		points        []gpx.GPXPoint
+		points        []app.GPXPoint
 		currentTime   time.Time
 		expectedGPX   app.GPXPoint
 		hoursBoundary int
@@ -79,26 +75,26 @@ func TestFindNearestGPX(t *testing.T) {
 		{
 			desc:          "nearest is in the future",
 			hoursBoundary: 5,
-			points: []gpx.GPXPoint{
+			points: []app.GPXPoint{
 				{
 					Timestamp: time.Date(2022, time.January, 28, 13, 0, 0, 0, time.UTC),
-					Point: gpx.Point{
-						Latitude:  10,
-						Longitude: 20,
+					Coordinates: app.Coordinates{
+						Lat: 54.26073423586785793304443359375,
+						Lng: -4.46283244527876377105712890625,
 					},
 				},
 				{
 					Timestamp: time.Date(2022, time.January, 28, 14, 0, 0, 0, time.UTC),
-					Point: gpx.Point{
-						Latitude:  10,
-						Longitude: 20,
+					Coordinates: app.Coordinates{
+						Lat: 10,
+						Lng: 20,
 					},
 				},
 				{
 					Timestamp: time.Date(2022, time.January, 28, 10, 0, 0, 0, time.UTC),
-					Point: gpx.Point{
-						Latitude:  10,
-						Longitude: 20,
+					Coordinates: app.Coordinates{
+						Lat: 10,
+						Lng: 20,
 					},
 				},
 			},
@@ -106,41 +102,41 @@ func TestFindNearestGPX(t *testing.T) {
 			expectedGPX: app.GPXPoint{
 				Timestamp: time.Date(2022, time.January, 28, 13, 0, 0, 0, time.UTC),
 				Coordinates: app.Coordinates{
-					Lat: 10,
-					Lng: 20,
+					Lat: 54.26073423586786,
+					Lng: -4.462832445278764,
 				},
 			},
 		},
 		{
 			desc:          "nearest is in the past",
 			hoursBoundary: 5,
-			points: []gpx.GPXPoint{
+			points: []app.GPXPoint{
 				{
 					Timestamp: time.Date(2022, time.January, 28, 15, 0, 0, 0, time.UTC),
-					Point: gpx.Point{
-						Latitude:  10,
-						Longitude: 20,
+					Coordinates: app.Coordinates{
+						Lat: 10,
+						Lng: 20,
 					},
 				},
 				{
 					Timestamp: time.Date(2022, time.January, 28, 14, 0, 0, 0, time.UTC),
-					Point: gpx.Point{
-						Latitude:  10,
-						Longitude: 20,
+					Coordinates: app.Coordinates{
+						Lat: 10,
+						Lng: 20,
 					},
 				},
 				{
 					Timestamp: time.Date(2022, time.January, 28, 11, 0, 0, 0, time.UTC),
-					Point: gpx.Point{
-						Latitude:  10,
-						Longitude: 20,
+					Coordinates: app.Coordinates{
+						Lat: 10,
+						Lng: 20,
 					},
 				},
 				{
 					Timestamp: time.Date(2022, time.January, 28, 10, 0, 0, 0, time.UTC),
-					Point: gpx.Point{
-						Latitude:  10,
-						Longitude: 20,
+					Coordinates: app.Coordinates{
+						Lat: 10,
+						Lng: 20,
 					},
 				},
 			},
@@ -156,12 +152,12 @@ func TestFindNearestGPX(t *testing.T) {
 		{
 			desc:          "does not fetch future points over the hours boundary",
 			hoursBoundary: 2,
-			points: []gpx.GPXPoint{
+			points: []app.GPXPoint{
 				{
 					Timestamp: time.Date(2022, time.January, 28, 15, 0, 0, 0, time.UTC),
-					Point: gpx.Point{
-						Latitude:  10,
-						Longitude: 20,
+					Coordinates: app.Coordinates{
+						Lat: 10,
+						Lng: 20,
 					},
 				},
 			},
@@ -171,12 +167,12 @@ func TestFindNearestGPX(t *testing.T) {
 		{
 			desc:          "does not fetch past points over the hours boundary",
 			hoursBoundary: 2,
-			points: []gpx.GPXPoint{
+			points: []app.GPXPoint{
 				{
 					Timestamp: time.Date(2022, time.January, 28, 9, 0, 0, 0, time.UTC),
-					Point: gpx.Point{
-						Latitude:  10,
-						Longitude: 20,
+					Coordinates: app.Coordinates{
+						Lat: 10,
+						Lng: 20,
 					},
 				},
 			},
@@ -186,8 +182,6 @@ func TestFindNearestGPX(t *testing.T) {
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-
-			is := is.New(t)
 
 			// arrange
 			dbFilepath := filepath.Join(os.TempDir(), fmt.Sprintf("inari-test-db-%s", uuid.New().String()))
@@ -205,12 +199,12 @@ func TestFindNearestGPX(t *testing.T) {
 			// act
 			numPoints, err := index.InsertGPXPoints(db, tC.points)
 			t.Logf("points inserted: %d", numPoints)
-			is.NoErr(err)
+			assert.NilError(t, err)
 			nearestPoint, err := fetchNearestPoint(tC.currentTime)
-			is.NoErr(err)
+			assert.NilError(t, err)
 
 			// assert
-			is.Equal(nearestPoint, tC.expectedGPX)
+			assert.Equal(t, nearestPoint, tC.expectedGPX)
 		})
 	}
 }
@@ -223,7 +217,7 @@ func TestUpdateMediaTags(t *testing.T) {
 		newTags       []string
 	}{
 		{
-			desc: "it adds multiple sligified tags",
+			desc: "it adds multiple slugified tags",
 			media: app.Media{
 				ID: "test-id-1",
 				MediaMetadata: app.MediaMetadata{

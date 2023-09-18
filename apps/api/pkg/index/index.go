@@ -10,7 +10,6 @@ import (
 	"github.com/gosimple/slug"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/app"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/tkrajina/gpxgo/gpx"
 )
 
 func CreateIndex(db *sql.DB) error {
@@ -406,7 +405,7 @@ func addMediaToCollection(db *sql.DB, collectionID, collectionType, collectionTi
 	return media, err
 }
 
-func InsertGPXPoints(db *sql.DB, points []gpx.GPXPoint) (int, error) {
+func InsertGPXPoints(db *sql.DB, points []app.GPXPoint) (int, error) {
 	pointCount := 0
 	tx, err := db.Begin()
 	if err != nil {
@@ -420,8 +419,8 @@ func InsertGPXPoints(db *sql.DB, points []gpx.GPXPoint) (int, error) {
 
 		_, err = insertStmt.Exec(
 			point.Timestamp.Format(time.RFC3339),
-			strconv.FormatFloat(point.Latitude, 'f', -1, 64),
-			strconv.FormatFloat(point.Longitude, 'f', -1, 64),
+			strconv.FormatFloat(point.Lat, 'f', -1, 64),
+			strconv.FormatFloat(point.Lng, 'f', -1, 64),
 		)
 		if err != nil {
 			return pointCount, fmt.Errorf("failed to save gpx point: %w", err)
