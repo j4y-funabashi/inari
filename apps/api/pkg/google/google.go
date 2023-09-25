@@ -1,6 +1,7 @@
 package google
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -9,13 +10,54 @@ import (
 	"time"
 
 	"github.com/j4y_funabashi/inari/apps/api/pkg/app"
+	"googlemaps.github.io/maps"
 )
+
+var SpainCoordinates = app.Coordinates{
+	Lat: 11.2222222222,
+	Lng: -1.2222222222,
+}
+var LusakaCoordinates = app.Coordinates{
+	Lat: 22.2222222222,
+	Lng: -3.2222222222,
+}
 
 func NewNullGeocoder() app.Geocoder {
 	return func(lat, lng float64, cTime time.Time) (app.Location, error) {
 
 		if lat == 0 && lng == 0 {
 			return app.Location{}, nil
+		}
+
+		if lat == SpainCoordinates.Lat && lng == SpainCoordinates.Lng {
+			return app.Location{
+				Country: app.Country{
+					Long:  "United Kingdom",
+					Short: "GB",
+				},
+				Region:   "West Yorkshire",
+				Locality: "Leeds",
+				Coordinates: app.Coordinates{
+					Lat: 53.8700189722222,
+					Lng: -1.561703,
+				},
+				Timezone: "Europe/Madrid",
+			}, nil
+		}
+		if lat == LusakaCoordinates.Lat && lng == LusakaCoordinates.Lng {
+			return app.Location{
+				Country: app.Country{
+					Long:  "United Kingdom",
+					Short: "GB",
+				},
+				Region:   "West Yorkshire",
+				Locality: "Leeds",
+				Coordinates: app.Coordinates{
+					Lat: 53.8700189722222,
+					Lng: -1.561703,
+				},
+				Timezone: "Africa/Lusaka",
+			}, nil
 		}
 
 		return app.Location{
@@ -29,11 +71,50 @@ func NewNullGeocoder() app.Geocoder {
 				Lat: 53.8700189722222,
 				Lng: -1.561703,
 			},
+			Timezone: "Europe/London",
 		}, nil
 	}
 }
 
-func NewGeocoder(queryNearestGPX app.QueryNearestGPX, logger app.Logger, apiKey, baseURL string) app.Geocoder {
+func NewNullLookupTimezone() app.LookupTimezone {
+	return func(lat, lng float64, cTime time.Time) (string, error) {
+
+		if lat == SpainCoordinates.Lat && lng == SpainCoordinates.Lng {
+			return "Europe/Madrid", nil
+		}
+		if lat == LusakaCoordinates.Lat && lng == LusakaCoordinates.Lng {
+			return "Africa/Lusaka", nil
+		}
+
+		return "Europe/London", nil
+	}
+}
+
+func NewLookupTimezone(apiKey string) app.LookupTimezone {
+	return func(lat, lng float64, cTime time.Time) (string, error) {
+
+		c, err := maps.NewClient(maps.WithAPIKey(apiKey))
+		if err != nil {
+			return "", fmt.Errorf("failed to create maps client: %w", err)
+		}
+
+		req := maps.TimezoneRequest{
+			Location: &maps.LatLng{
+				Lat: lat,
+				Lng: lng,
+			},
+			Timestamp: cTime,
+		}
+		res, err := c.Timezone(context.Background(), &req)
+		if err != nil {
+			return "", fmt.Errorf("failed to request timezone: %w", err)
+		}
+
+		return res.TimeZoneID, nil
+	}
+}
+
+func NewMediaGeocoder(queryNearestGPX app.QueryNearestGPX, lookupTimezone app.LookupTimezone, logger app.Logger, apiKey, baseURL string) app.Geocoder {
 	return func(lat, lng float64, cTime time.Time) (app.Location, error) {
 
 		if lat == 0 && lng == 0 {
@@ -45,10 +126,10 @@ func NewGeocoder(queryNearestGPX app.QueryNearestGPX, logger app.Logger, apiKey,
 			lng = nearestGPX.Lng
 		}
 
+		// --- ReverseGeocoder
 		if lat == 0 && lng == 0 {
 			return app.Location{}, nil
 		}
-
 		// fetch reverse geocode
 		geocodeURL := buildURL(lat, lng, baseURL, apiKey)
 		res, err := http.Get(geocodeURL)
@@ -62,7 +143,6 @@ func NewGeocoder(queryNearestGPX app.QueryNearestGPX, logger app.Logger, apiKey,
 		if err != nil {
 			return app.Location{}, err
 		}
-
 		// parse results
 		results := geocodeRes{}
 		err = json.Unmarshal(body, &results)
@@ -73,10 +153,13 @@ func NewGeocoder(queryNearestGPX app.QueryNearestGPX, logger app.Logger, apiKey,
 		if len(results.Results) == 0 {
 			return app.Location{}, fmt.Errorf("no geocode results found: %s", body)
 		}
-
 		// create Location
 		address := getAddress(results.Results)
-		// fmt.Printf("\n\n%+v\n\n", address)
+
+		timezoneID, err := lookupTimezone(lat, lng, cTime)
+		if err != nil {
+			return app.Location{}, err
+		}
 
 		return app.Location{
 			Coordinates: app.Coordinates{
@@ -86,6 +169,7 @@ func NewGeocoder(queryNearestGPX app.QueryNearestGPX, logger app.Logger, apiKey,
 			Country:  getCountry(address),
 			Region:   getRegion(address),
 			Locality: getLocality(address),
+			Timezone: timezoneID,
 		}, nil
 	}
 }

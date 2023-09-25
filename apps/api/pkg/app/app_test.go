@@ -16,7 +16,7 @@ import (
 	"github.com/j4y_funabashi/inari/apps/api/pkg/index"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/notify"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/storage"
-	"github.com/stretchr/testify/assert"
+	"gotest.tools/v3/assert"
 )
 
 func TestImport(t *testing.T) {
@@ -142,6 +142,7 @@ func TestImport(t *testing.T) {
 						Lat: 53.8700189722222,
 						Lng: -1.561703,
 					},
+					Timezone: "Europe/London",
 				},
 			},
 		},
@@ -165,12 +166,12 @@ func TestImport(t *testing.T) {
 			// act
 			filePath := path.Join("./test_data", tC.filePath)
 			iMedia, err := importMedia(filePath)
-			assert.NoError(t, err)
+			assert.NilError(t, err)
 			actual, err := queryMediaDetail(iMedia.ID)
-			assert.NoError(t, err)
+			assert.NilError(t, err)
 
 			// assert
-			assert.Equal(t, tC.expected, actual)
+			assert.DeepEqual(t, tC.expected, actual)
 
 		})
 	}

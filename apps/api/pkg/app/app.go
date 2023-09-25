@@ -54,6 +54,7 @@ type FileLister = func() ([]string, error)
 type MetadataExtractor = func(mediaFile string) (MediaMetadata, error)
 type MediaDetailQuery = func(mediaID string) (MediaDetailView, error)
 type Geocoder = func(lat, lng float64, cTime time.Time) (Location, error)
+type LookupTimezone = func(lat, lng float64, cTime time.Time) (string, error)
 type MediaGeocoder = func(mediaID string) (Location, error)
 type LocationPutter = func(mediaID string, location Location) error
 
@@ -78,7 +79,7 @@ type Collection struct {
 
 type GPXPoint struct {
 	Timestamp time.Time
-	Coordinates
+	Location
 }
 
 type CollectionDetail struct {
@@ -114,6 +115,7 @@ type Location struct {
 	Region      string  `json:"region,omitempty"`
 	Locality    string  `json:"locality,omitempty"`
 	Coordinates `json:"coordinates,omitempty"`
+	Timezone    string `json:"timezone,omitempty"`
 }
 
 type Country struct {

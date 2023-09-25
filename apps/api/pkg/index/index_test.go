@@ -78,32 +78,40 @@ func TestFindNearestGPX(t *testing.T) {
 			points: []app.GPXPoint{
 				{
 					Timestamp: time.Date(2022, time.January, 28, 13, 0, 0, 0, time.UTC),
-					Coordinates: app.Coordinates{
-						Lat: 54.26073423586785793304443359375,
-						Lng: -4.46283244527876377105712890625,
+					Location: app.Location{
+						Coordinates: app.Coordinates{
+							Lat: 54.26073423586785793304443359375,
+							Lng: -4.46283244527876377105712890625,
+						},
 					},
 				},
 				{
 					Timestamp: time.Date(2022, time.January, 28, 14, 0, 0, 0, time.UTC),
-					Coordinates: app.Coordinates{
-						Lat: 10,
-						Lng: 20,
+					Location: app.Location{
+						Coordinates: app.Coordinates{
+							Lat: 10,
+							Lng: 20,
+						},
 					},
 				},
 				{
 					Timestamp: time.Date(2022, time.January, 28, 10, 0, 0, 0, time.UTC),
-					Coordinates: app.Coordinates{
-						Lat: 10,
-						Lng: 20,
+					Location: app.Location{
+						Coordinates: app.Coordinates{
+							Lat: 10,
+							Lng: 20,
+						},
 					},
 				},
 			},
 			currentTime: time.Date(2022, time.January, 28, 12, 0, 0, 0, time.UTC),
 			expectedGPX: app.GPXPoint{
 				Timestamp: time.Date(2022, time.January, 28, 13, 0, 0, 0, time.UTC),
-				Coordinates: app.Coordinates{
-					Lat: 54.26073423586786,
-					Lng: -4.462832445278764,
+				Location: app.Location{
+					Coordinates: app.Coordinates{
+						Lat: 54.26073423586786,
+						Lng: -4.462832445278764,
+					},
 				},
 			},
 		},
@@ -113,39 +121,49 @@ func TestFindNearestGPX(t *testing.T) {
 			points: []app.GPXPoint{
 				{
 					Timestamp: time.Date(2022, time.January, 28, 15, 0, 0, 0, time.UTC),
-					Coordinates: app.Coordinates{
-						Lat: 10,
-						Lng: 20,
+					Location: app.Location{
+						Coordinates: app.Coordinates{
+							Lat: 10,
+							Lng: 20,
+						},
 					},
 				},
 				{
 					Timestamp: time.Date(2022, time.January, 28, 14, 0, 0, 0, time.UTC),
-					Coordinates: app.Coordinates{
-						Lat: 10,
-						Lng: 20,
+					Location: app.Location{
+						Coordinates: app.Coordinates{
+							Lat: 10,
+							Lng: 20,
+						},
 					},
 				},
 				{
 					Timestamp: time.Date(2022, time.January, 28, 11, 0, 0, 0, time.UTC),
-					Coordinates: app.Coordinates{
-						Lat: 10,
-						Lng: 20,
+					Location: app.Location{
+						Coordinates: app.Coordinates{
+							Lat: 10,
+							Lng: 20,
+						},
 					},
 				},
 				{
 					Timestamp: time.Date(2022, time.January, 28, 10, 0, 0, 0, time.UTC),
-					Coordinates: app.Coordinates{
-						Lat: 10,
-						Lng: 20,
+					Location: app.Location{
+						Coordinates: app.Coordinates{
+							Lat: 10,
+							Lng: 20,
+						},
 					},
 				},
 			},
 			currentTime: time.Date(2022, time.January, 28, 12, 0, 0, 0, time.UTC),
 			expectedGPX: app.GPXPoint{
 				Timestamp: time.Date(2022, time.January, 28, 11, 0, 0, 0, time.UTC),
-				Coordinates: app.Coordinates{
-					Lat: 10,
-					Lng: 20,
+				Location: app.Location{
+					Coordinates: app.Coordinates{
+						Lat: 10,
+						Lng: 20,
+					},
 				},
 			},
 		},
@@ -155,9 +173,11 @@ func TestFindNearestGPX(t *testing.T) {
 			points: []app.GPXPoint{
 				{
 					Timestamp: time.Date(2022, time.January, 28, 15, 0, 0, 0, time.UTC),
-					Coordinates: app.Coordinates{
-						Lat: 10,
-						Lng: 20,
+					Location: app.Location{
+						Coordinates: app.Coordinates{
+							Lat: 10,
+							Lng: 20,
+						},
 					},
 				},
 			},
@@ -170,9 +190,11 @@ func TestFindNearestGPX(t *testing.T) {
 			points: []app.GPXPoint{
 				{
 					Timestamp: time.Date(2022, time.January, 28, 9, 0, 0, 0, time.UTC),
-					Coordinates: app.Coordinates{
-						Lat: 10,
-						Lng: 20,
+					Location: app.Location{
+						Coordinates: app.Coordinates{
+							Lat: 10,
+							Lng: 20,
+						},
 					},
 				},
 			},

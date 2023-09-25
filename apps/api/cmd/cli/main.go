@@ -59,11 +59,15 @@ func main() {
 	notifier := notify.NewNoopNotifier()
 	resizer := imgresize.NewResizer(thumbnailsPath)
 	queryNearestGPX := index.NewQueryNearestGPX(db, 8)
-	geo := google.NewGeocoder(queryNearestGPX, logger, apiKey, baseURL)
+	lookupTimezone := google.NewLookupTimezone(apiKey)
+	mediaGeocoder := google.NewMediaGeocoder(queryNearestGPX, lookupTimezone, logger, apiKey, baseURL)
 
-	importMedia := app.ImportDir(app.NewImporter(mediaDetail, logger, downloader, extractMetadata, uploader, indexer, resizer, geo, notifier), logger)
+	importMedia := app.ImportDir(app.NewImporter(mediaDetail, logger, downloader, extractMetadata, uploader, indexer, resizer, mediaGeocoder, notifier), logger)
 	listCollections := index.NewSqliteCollectionLister(db)
-	importGPX := app.ImportDir(gpx.NewGpxImporter(logger, db), logger)
+	importGPX := app.ImportDir(gpx.NewGpxImporter(
+		gpx.NewAddLocationToGPXPoints(lookupTimezone),
+		logger,
+	), logger)
 
 	// app commands
 	app := &cli.App{
