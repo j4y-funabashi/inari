@@ -11,16 +11,16 @@ import (
 	"github.com/tkrajina/gpxgo/gpx"
 )
 
-func NewGpxImporter(addLocationToGPXPoints addLocationToGPXPoints, logger app.Logger) app.Importer {
+func NewGpxImporter(addLocationToGPXPoints addLocationToGPXPoints, saveGPXPoints app.SaveGPXPoints, logger app.Logger) app.Importer {
 	return func(inputFilename string) (app.Media, error) {
 		m := app.Media{}
 		startTime := time.Now()
 
+		// read gpx file
 		ext := strings.ToLower(filepath.Ext(inputFilename))
 		if ext != ".gpx" {
 			return m, nil
 		}
-
 		gpxBytes, err := os.ReadFile(inputFilename)
 		if err != nil {
 			logger.Error("failed to open file",
@@ -35,7 +35,6 @@ func NewGpxImporter(addLocationToGPXPoints addLocationToGPXPoints, logger app.Lo
 				"filename", inputFilename)
 			return m, err
 		}
-
 		allPoints := []app.GPXPoint{}
 		for _, track := range gpxFile.Tracks {
 			for _, segment := range track.Segments {
@@ -52,13 +51,22 @@ func NewGpxImporter(addLocationToGPXPoints addLocationToGPXPoints, logger app.Lo
 			}
 		}
 
-		_, err = addLocationToGPXPoints(allPoints)
+		pointsToSave, err := addLocationToGPXPoints(allPoints)
 		if err != nil {
 			logger.Error("failed to add location to gpx points",
 				"err", err,
 				"filename", inputFilename)
 			return m, err
 		}
+
+		err = saveGPXPoints(pointsToSave)
+		if err != nil {
+			logger.Error("failed to save gpx points",
+				"err", err,
+				"filename", inputFilename)
+			return m, err
+		}
+
 		logger.Info(
 			"imported file",
 			"time", time.Since(startTime),

@@ -405,33 +405,33 @@ func addMediaToCollection(db *sql.DB, collectionID, collectionType, collectionTi
 	return media, err
 }
 
-func InsertGPXPoints(db *sql.DB, points []app.GPXPoint) (int, error) {
-	pointCount := 0
-	tx, err := db.Begin()
-	if err != nil {
-		return pointCount, fmt.Errorf("failed to begin transaction: %w", err)
-	}
-	insertStmt, err := tx.Prepare(`INSERT OR IGNORE INTO gpx (timestamp, lat, lng) VALUES (?,?,?);`)
-	if err != nil {
-		return pointCount, fmt.Errorf("failed to prepare statement: %w", err)
-	}
-	for _, point := range points {
-
-		_, err = insertStmt.Exec(
-			point.Timestamp.Format(time.RFC3339),
-			strconv.FormatFloat(point.Lat, 'f', -1, 64),
-			strconv.FormatFloat(point.Lng, 'f', -1, 64),
-		)
+func NewSaveGPXPoints(db *sql.DB) app.SaveGPXPoints {
+	return func(points []app.GPXPoint) error {
+		pointCount := 0
+		tx, err := db.Begin()
 		if err != nil {
-			return pointCount, fmt.Errorf("failed to save gpx point: %w", err)
+			return fmt.Errorf("failed to begin transaction: %w", err)
+		}
+		insertStmt, err := tx.Prepare(`INSERT OR IGNORE INTO gpx (timestamp, lat, lng) VALUES (?,?,?);`)
+		if err != nil {
+			return fmt.Errorf("failed to prepare statement: %w", err)
+		}
+		for _, point := range points {
+
+			_, err = insertStmt.Exec(
+				point.Timestamp.Format(time.RFC3339),
+				strconv.FormatFloat(point.Lat, 'f', -1, 64),
+				strconv.FormatFloat(point.Lng, 'f', -1, 64),
+			)
+			if err != nil {
+				return fmt.Errorf("failed to save gpx point: %w", err)
+			}
+
+			pointCount++
 		}
 
-		pointCount++
+		return tx.Commit()
 	}
-
-	err = tx.Commit()
-
-	return pointCount, err
 }
 
 func NewQueryNearestGPX(db *sql.DB, hoursBoundary int) app.QueryNearestGPX {

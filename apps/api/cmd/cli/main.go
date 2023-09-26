@@ -66,6 +66,7 @@ func main() {
 	listCollections := index.NewSqliteCollectionLister(db)
 	importGPX := app.ImportDir(gpx.NewGpxImporter(
 		gpx.NewAddLocationToGPXPoints(lookupTimezone),
+		index.NewSaveGPXPoints(db),
 		logger,
 	), logger)
 

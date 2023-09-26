@@ -217,10 +217,10 @@ func TestFindNearestGPX(t *testing.T) {
 				t.Fatalf("%s", err)
 			}
 			fetchNearestPoint := index.NewQueryNearestGPX(db, tC.hoursBoundary)
+			saveGPXPoints := index.NewSaveGPXPoints(db)
 
 			// act
-			numPoints, err := index.InsertGPXPoints(db, tC.points)
-			t.Logf("points inserted: %d", numPoints)
+			err = saveGPXPoints(tC.points)
 			assert.NilError(t, err)
 			nearestPoint, err := fetchNearestPoint(tC.currentTime)
 			assert.NilError(t, err)

@@ -57,6 +57,7 @@ type Geocoder = func(lat, lng float64, cTime time.Time) (Location, error)
 type LookupTimezone = func(lat, lng float64, cTime time.Time) (string, error)
 type MediaGeocoder = func(mediaID string) (Location, error)
 type LocationPutter = func(mediaID string, location Location) error
+type SaveGPXPoints = func(points []GPXPoint) error
 
 type Media struct {
 	ID            string `json:"id,omitempty"`
