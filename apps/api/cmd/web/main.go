@@ -63,7 +63,7 @@ func newDeleteMediaHandler(deleteMedia app.DeleteMedia, logger app.Logger) httpr
 	}
 }
 
-func newUpdateMediaCaptionHandler(updateMediaCaption app.UpdateMediaCaption, logger app.Logger) httprouter.Handle {
+func newUpdateMediaCaptionHandler(updateMediaCaption app.UpdateMediaTextProperty, logger app.Logger) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		mediaID := ps.ByName("mediaid")
 		newCaption, err := io.ReadAll(r.Body)
