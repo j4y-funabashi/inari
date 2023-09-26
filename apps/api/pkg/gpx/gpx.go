@@ -51,6 +51,15 @@ func NewGpxImporter(addLocationToGPXPoints addLocationToGPXPoints, saveGPXPoints
 			}
 		}
 
+		if len(allPoints) == 0 {
+			logger.Error(
+				"no points in file",
+				"time", time.Since(startTime),
+				"points", len(allPoints),
+				"filename", inputFilename)
+			return m, nil
+		}
+
 		pointsToSave, err := addLocationToGPXPoints(allPoints)
 		if err != nil {
 			logger.Error("failed to add location to gpx points",
@@ -88,18 +97,15 @@ func NewAddLocationToGPXPoints(fetchLocation app.LookupTimezone) addLocationToGP
 		if err != nil {
 			return out, fmt.Errorf("failed to fetch location for first point: %w", err)
 		}
-		fmt.Printf("first location:: %+v\n", fTimezone)
 
 		last := points[len(points)-1]
 		lTimezone, err := fetchLocation(last.Lat, last.Lng, last.Timestamp)
 		if err != nil {
 			return out, fmt.Errorf("failed to fetch location for last point: %w", err)
 		}
-		fmt.Printf("last location:: %+v\n", lTimezone)
 
 		// timezones match
 		if fTimezone == lTimezone {
-			fmt.Println("timezones match")
 			for _, point := range points {
 				point, err := applyTimezoneToGPXPoint(point, fTimezone)
 				if err != nil {
@@ -113,7 +119,6 @@ func NewAddLocationToGPXPoints(fetchLocation app.LookupTimezone) addLocationToGP
 
 		// timezones differ
 		seenHours := map[string]string{}
-		fmt.Println("timezones differ")
 		for _, point := range points {
 
 			key := point.Timestamp.Format("2006-01-02T15")
@@ -123,7 +128,6 @@ func NewAddLocationToGPXPoints(fetchLocation app.LookupTimezone) addLocationToGP
 				if err != nil {
 					return out, fmt.Errorf("failed to fetch location for point: %w", err)
 				}
-				fmt.Printf("%s :: %s\n", key, pTimezone)
 				seenHours[key] = pTimezone
 			}
 
