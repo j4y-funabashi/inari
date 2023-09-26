@@ -13,7 +13,8 @@ FROM alpine:latest
 
 RUN apk update && \
 	apk add \
-	exiftool
+	exiftool \
+    tzdata
 
 WORKDIR /
 
