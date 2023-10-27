@@ -9,7 +9,7 @@ interface MediaCardProps {
     saveCaption: (id: string, newCaption: string) => Promise<void>
 }
 export const MediaCard = function ({ m, handleDelete, saveCaption }: MediaCardProps) {
-    const srcUrl = "/thumbnails/" + m.thumbnails.large
+    const srcUrl = m.thumbnails.large
 
     const caption = (m.caption ? m.caption.trim() : "")
     const dat = m.date

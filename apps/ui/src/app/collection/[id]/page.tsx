@@ -1,6 +1,6 @@
 'use client';
 
-import { CollectionDetail, Media, collectionDetailFetcher, deleteMedia, updateMediaCaption } from "@/app/apiClient";
+import { CollectionDetail, Media, NewFetchCollectionDetail, deleteMedia, updateMediaCaption } from "@/app/apiClient";
 import { MediaCard } from "@/app/components/mediaCard";
 import { useState } from "react";
 import useSWR from "swr";
@@ -14,6 +14,7 @@ interface CollectionDetailParams {
 export default function CollectionDetailPage({ params }: CollectionDetailParams) {
 
     const collectionID = params.id
+    const collectionDetailFetcher = NewFetchCollectionDetail(process.env.NODE_ENV)
 
     const { data, error, isLoading } = useSWR<CollectionDetail>(collectionID, collectionDetailFetcher)
 

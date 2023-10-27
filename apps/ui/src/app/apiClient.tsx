@@ -46,6 +46,11 @@ const getCollectionsByType = async function (type: string): Promise<Collection[]
 
     return res.json()
 }
+const mockGetCollectionsByType = function (type: string): Collection[] {
+    return [
+        getMockCollection()
+    ]
+}
 
 
 const getCollectionDetail = async function (id: string): Promise<CollectionDetail> {
@@ -53,6 +58,39 @@ const getCollectionDetail = async function (id: string): Promise<CollectionDetai
     console.log(res)
 
     return res.json()
+}
+const mockGetCollectionDetail = function (id: string): CollectionDetail {
+    return {
+        collection_meta: getMockCollection(),
+        media: [
+            getMockMedia(),
+            getMockMedia(),
+            getMockMedia(),
+            getMockMedia(),
+            getMockMedia(),
+        ]
+    }
+}
+
+const getMockMedia = (): Media => {
+    return {
+        id: "testid",
+        thumbnails: {
+            medium: "https://picsum.photos/420",
+            large: "https://placekitten.com/1080/600",
+        },
+        date: "2022-01-28T10:01:02Z",
+        collections: [],
+    }
+}
+
+const getMockCollection = (): Collection => {
+    return {
+        id: "test-1",
+        title: "test-1",
+        media_count: 5,
+        type: "inbox"
+    }
 }
 
 export const deleteMedia = async function (id: string) {
@@ -74,5 +112,26 @@ export const updateMediaCaption = async function (id: string, caption: string) {
     console.log(res)
 }
 
-export const collectionListFetcher: Fetcher<Collection[], string> = (type) => getCollectionsByType(type)
-export const collectionDetailFetcher: Fetcher<CollectionDetail, string> = (id) => getCollectionDetail(id)
+export const NewCollectionLister = (env: string): Fetcher<Collection[], string> => {
+    switch (env) {
+        case "production":
+            const collectionListFetcher: Fetcher<Collection[], string> = (type) => getCollectionsByType(type)
+            return collectionListFetcher
+
+        default:
+            return mockGetCollectionsByType
+    }
+}
+
+export const NewFetchCollectionDetail = (env: string): Fetcher<CollectionDetail, string> => {
+    switch (env) {
+        case "production":
+            const fetchCollectionDetail: Fetcher<CollectionDetail, string> = (id) => getCollectionDetail(id)
+            return fetchCollectionDetail
+
+        default:
+            return mockGetCollectionDetail
+    }
+
+}
+

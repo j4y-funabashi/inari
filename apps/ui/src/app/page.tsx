@@ -1,6 +1,6 @@
 'use client';
 import useSWR from 'swr';
-import { collectionListFetcher } from './apiClient';
+import { NewCollectionLister } from './apiClient';
 import Link from 'next/link';
 
 export default function Home() {
@@ -12,7 +12,9 @@ export default function Home() {
 
 const CollectionList = function () {
 
-  const { data, error, isLoading } = useSWR('/api/timeline/months', collectionListFetcher)
+  const collectionLister = NewCollectionLister(process.env.NODE_ENV)
+
+  const { data, error, isLoading } = useSWR('/api/timeline/months', collectionLister)
 
   if (error) return <div>failed to load</div>
   if (isLoading) return <div>loading...</div>
