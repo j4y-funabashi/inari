@@ -73,8 +73,9 @@ const mockGetCollectionDetail = function (id: string): CollectionDetail {
 }
 
 const getMockMedia = (): Media => {
+    const uuid = crypto.randomUUID()
     return {
-        id: "testid",
+        id: `testid-${uuid}`,
         thumbnails: {
             medium: "https://placekitten.com/420/420",
             large: "https://placekitten.com/1080/600",
@@ -95,9 +96,10 @@ const getMockMedia = (): Media => {
 }
 
 const getMockCollection = (): Collection => {
+    const uuid = crypto.randomUUID()
     return {
-        id: "test-1",
-        title: "test-1",
+        id: `test-1-${uuid}`,
+        title: `c ${uuid}`,
         media_count: 5,
         type: "inbox"
     }

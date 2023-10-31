@@ -3,13 +3,22 @@ import { Media } from "../apiClient"
 import { format } from "date-fns"
 import { useState } from "react"
 
+export enum MediaCardDisplayType {
+    list,
+    grid,
+    large,
+}
+
 interface MediaCardProps {
     m: Media
     handleDelete: () => void
     saveCaption: (id: string, newCaption: string) => Promise<void>
+    displayType: MediaCardDisplayType
 }
-export const MediaCard = function ({ m, handleDelete, saveCaption }: MediaCardProps) {
-    const srcUrl = m.thumbnails.large
+export const MediaCard = function ({ m, displayType, handleDelete, saveCaption }: MediaCardProps) {
+
+    const srcUrl = displayType === MediaCardDisplayType.large ? m.thumbnails.large
+        : m.thumbnails.medium
 
     const caption = (m.caption ? m.caption.trim() : "")
     const dat = m.date
@@ -35,12 +44,12 @@ export const MediaCard = function ({ m, handleDelete, saveCaption }: MediaCardPr
         <div>
             <div
                 className="my-8 rounded bg-gray-800">
-                <figure>
-                    <img src={srcUrl} className="rounded-t" alt={caption} />
 
-                    <figcaption className="p-4">
+                <img src={srcUrl} className="rounded-t" alt={caption} />
+
+                {displayType === MediaCardDisplayType.large &&
+                    <div>
                         <time dateTime={dat} className="text-blue text-xs">{fdat}</time>
-
                         {caption !== "" &&
                             <p className="leading-5 text-gray-500 dark:text-gray-400">
                                 {caption}
@@ -57,18 +66,18 @@ export const MediaCard = function ({ m, handleDelete, saveCaption }: MediaCardPr
                             </label>
                             <input type="submit" value="save" />
                         </form>
-
                         {location !== "" &&
                             <p>{location}</p>
                         }
-                    </figcaption>
-                </figure>
-                <ul>{collections}</ul>
-                <div>
-                    <button className="bg-red text-white font-bold py-1 px-2 rounded" onClick={handleDelete}>
-                        Delete
-                    </button>
-                </div>
+                        <ul>{collections}</ul>
+                        <div>
+                            <button className="bg-red text-white font-bold py-1 px-2 rounded" onClick={handleDelete}>
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                }
+
             </div>
         </div>
     )
