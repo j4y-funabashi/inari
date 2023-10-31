@@ -113,13 +113,13 @@ const MediaGallery = function ({ data }: MediaListProps) {
     return (
 
         <div className="grid grid-cols-7">
-            <aside className="col-span-1 overflow-scroll h-screen">
+            <aside className="col-span-2 overflow-scroll h-screen">
                 <h1 className="">{data.collection_meta.title}</h1>
 
                 <div>{mediaList}</div>
             </aside>
 
-            <main className="col-span-6">
+            <main className="col-span-5">
                 <MediaCard displayType={MediaCardDisplayType.large} key={currentMedia.id} m={currentMedia} handleDelete={handleDelete} saveCaption={saveCaption} />
             </main>
         </div>

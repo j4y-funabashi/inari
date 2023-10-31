@@ -17,8 +17,8 @@ interface MediaCardProps {
 }
 export const MediaCard = function ({ m, displayType, handleDelete, saveCaption }: MediaCardProps) {
 
-    const srcUrl = displayType === MediaCardDisplayType.large ? m.thumbnails.large
-        : m.thumbnails.medium
+    const srcUrl = displayType === MediaCardDisplayType.large ? `/thumbnails/${m.thumbnails.large}`
+        : `/thumbnails/${m.thumbnails.medium}`
 
     const caption = (m.caption ? m.caption.trim() : "")
     const dat = m.date
@@ -45,7 +45,9 @@ export const MediaCard = function ({ m, displayType, handleDelete, saveCaption }
             <div
                 className="my-8 rounded bg-gray-800">
 
-                <img src={srcUrl} className="rounded-t" alt={caption} />
+                <a href="#">
+                    <img src={srcUrl} className="rounded-t" alt={caption} />
+                </a>
 
                 {displayType === MediaCardDisplayType.large &&
                     <div>
