@@ -116,7 +116,9 @@ const MediaGallery = function ({ data }: MediaListProps) {
             <aside className="col-span-2 overflow-scroll h-screen">
                 <h1 className="">{data.collection_meta.title}</h1>
 
-                <div>{mediaList}</div>
+                <div className="grid grid-cols-3">
+                    {mediaList}
+                </div>
             </aside>
 
             <main className="col-span-5">
