@@ -42,45 +42,40 @@ export const MediaCard = function ({ m, displayType, handleDelete, saveCaption }
 
     return (
         <div>
-            <div
-                className="my-8 rounded bg-gray-800">
+            <a href="#">
+                <img src={srcUrl} className="rounded-t" alt={caption} />
+            </a>
 
-                <a href="#">
-                    <img src={srcUrl} className="rounded-t" alt={caption} />
-                </a>
-
-                {displayType === MediaCardDisplayType.large &&
+            {displayType === MediaCardDisplayType.large &&
+                <div>
+                    <time dateTime={dat} className="text-blue text-xs">{fdat}</time>
+                    {caption !== "" &&
+                        <p className="leading-5 text-gray-500 dark:text-gray-400">
+                            {caption}
+                        </p>
+                    }
+                    <form onSubmit={handleCaptionSubmit}>
+                        <label>
+                            Caption:
+                            <textarea
+                                name="newCaption"
+                                value={newCaption}
+                                onChange={e => setNewCaption(e.target.value)}
+                            />
+                        </label>
+                        <input type="submit" value="save" />
+                    </form>
+                    {location !== "" &&
+                        <p>{location}</p>
+                    }
+                    <ul>{collections}</ul>
                     <div>
-                        <time dateTime={dat} className="text-blue text-xs">{fdat}</time>
-                        {caption !== "" &&
-                            <p className="leading-5 text-gray-500 dark:text-gray-400">
-                                {caption}
-                            </p>
-                        }
-                        <form onSubmit={handleCaptionSubmit}>
-                            <label>
-                                Caption:
-                                <textarea
-                                    name="newCaption"
-                                    value={newCaption}
-                                    onChange={e => setNewCaption(e.target.value)}
-                                />
-                            </label>
-                            <input type="submit" value="save" />
-                        </form>
-                        {location !== "" &&
-                            <p>{location}</p>
-                        }
-                        <ul>{collections}</ul>
-                        <div>
-                            <button className="bg-red text-white font-bold py-1 px-2 rounded" onClick={handleDelete}>
-                                Delete
-                            </button>
-                        </div>
+                        <button className="bg-red text-white font-bold py-1 px-2 rounded" onClick={handleDelete}>
+                            Delete
+                        </button>
                     </div>
-                }
-
-            </div>
+                </div>
+            }
         </div>
     )
 }
