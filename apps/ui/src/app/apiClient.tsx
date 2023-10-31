@@ -76,11 +76,21 @@ const getMockMedia = (): Media => {
     return {
         id: "testid",
         thumbnails: {
-            medium: "https://picsum.photos/420",
+            medium: "https://placekitten.com/420/420",
             large: "https://placekitten.com/1080/600",
         },
         date: "2022-01-28T10:01:02Z",
-        collections: [],
+        collections: [
+            getMockCollection(),
+            getMockCollection(),
+            getMockCollection(),
+        ],
+        location: {
+            country: { long: "Country", short: "c" },
+            region: "Region",
+            locality: "Locality",
+        },
+        caption: "This is the caption",
     }
 }
 
