@@ -11,14 +11,16 @@ export enum MediaCardDisplayType {
 
 interface MediaCardProps {
     m: Media
-    handleDelete: () => void
+    handleDelete: () => Promise<void>
     saveCaption: (id: string, newCaption: string) => Promise<void>
+    setCurrent: (id: string) => Promise<void>
     displayType: MediaCardDisplayType
 }
-export const MediaCard = function ({ m, displayType, handleDelete, saveCaption }: MediaCardProps) {
+export const MediaCard = function ({ m, displayType, handleDelete, saveCaption, setCurrent }: MediaCardProps) {
 
-    const srcUrl = displayType === MediaCardDisplayType.large ? `/thumbnails/${m.thumbnails.large}`
-        : `/thumbnails/${m.thumbnails.medium}`
+    const srcPrefix = process.env.NODE_ENV === "production" ? "/thumbnails/" : ""
+    const srcUrl = displayType === MediaCardDisplayType.large ? `${srcPrefix}${m.thumbnails.large}`
+        : `${srcPrefix}${m.thumbnails.medium}`
 
     const caption = (m.caption ? m.caption.trim() : "")
     const dat = m.date
@@ -42,7 +44,7 @@ export const MediaCard = function ({ m, displayType, handleDelete, saveCaption }
 
     return (
         <div>
-            <a href="#">
+            <a href="#" onClick={() => { setCurrent(m.id) }}>
                 <img src={srcUrl} className="rounded-t" alt={caption} />
             </a>
 

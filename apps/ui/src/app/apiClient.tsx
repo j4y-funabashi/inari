@@ -73,12 +73,13 @@ const mockGetCollectionDetail = function (id: string): CollectionDetail {
 }
 
 const getMockMedia = (): Media => {
+    const urlPrefix = "https://picsum.photos"
     const uuid = crypto.randomUUID()
     return {
         id: `testid-${uuid}`,
         thumbnails: {
-            medium: "https://placekitten.com/420/420",
-            large: "https://placekitten.com/1080/600",
+            medium: `${urlPrefix}/420/420`,
+            large: `${urlPrefix}/1080/600`,
         },
         date: "2022-01-28T10:01:02Z",
         collections: [

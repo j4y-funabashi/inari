@@ -46,28 +46,16 @@ interface MediaListProps {
     data: CollectionDetail
 }
 
-const createGalleryModel = (data: CollectionDetail): MediaListModel => {
-    const sortedMedia = data.media.sort(
-        (a, b) => {
-            if (a.date === b.date) {
-                return 0
-            }
-            if (a.date < b.date) {
-                return -1
-            }
-            return 1
-        }
-    )
-
-    // createGalleryModel(data)
+const createMediaList = (media: Media[], currentID: string): MediaListModel => {
     const model: MediaListModel = {
         prev: [],
-        current: sortedMedia[0],
+        current: media[0],
         next: [],
     }
     var prev = true
-    sortedMedia.forEach((m) => {
-        if (m.id === model.current.id) {
+    media.forEach((m) => {
+        if (m.id === currentID) {
+            model.current = m
             prev = false
             return
         }
@@ -81,9 +69,28 @@ const createGalleryModel = (data: CollectionDetail): MediaListModel => {
     return model
 }
 
+const createGalleryModel = (data: CollectionDetail): MediaListModel => {
+    const sortedMedia = data.media.sort(
+        (a, b) => {
+            if (a.date === b.date) {
+                return 0
+            }
+            if (a.date < b.date) {
+                return -1
+            }
+            return 1
+        }
+    )
+
+    const model = createMediaList(sortedMedia, sortedMedia[0].id)
+
+    return model
+}
+
 const getCurrentMedia = (model: MediaListModel): Media => {
     return model.current
 }
+
 
 const MediaGallery = function ({ data }: MediaListProps) {
 
@@ -99,12 +106,17 @@ const MediaGallery = function ({ data }: MediaListProps) {
     const saveCaption = async (id: string, caption: string) => {
     }
 
+    const setCurrentMedia = async (id: string) => {
+        const model = createMediaList(getMediaList(galleryModel), id)
+        setGalleryModel(model)
+    }
+
     const media = getMediaList(galleryModel)
     const mediaList = media.map(
         (m) => {
 
             return (
-                <MediaCard displayType={MediaCardDisplayType.list} key={m.id} m={m} handleDelete={handleDelete} saveCaption={saveCaption} />
+                <MediaCard displayType={MediaCardDisplayType.list} key={m.id} m={m} handleDelete={handleDelete} saveCaption={saveCaption} setCurrent={setCurrentMedia} />
             )
         }
     )
@@ -122,7 +134,7 @@ const MediaGallery = function ({ data }: MediaListProps) {
             </aside>
 
             <main className="col-span-5">
-                <MediaCard displayType={MediaCardDisplayType.large} key={currentMedia.id} m={currentMedia} handleDelete={handleDelete} saveCaption={saveCaption} />
+                <MediaCard displayType={MediaCardDisplayType.large} key={currentMedia.id} m={currentMedia} handleDelete={handleDelete} saveCaption={saveCaption} setCurrent={setCurrentMedia} />
             </main>
         </div>
 
