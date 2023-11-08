@@ -11,7 +11,7 @@ export enum MediaCardDisplayType {
 
 interface MediaCardProps {
     m: Media
-    handleDelete: () => Promise<void>
+    handleDelete: (id: string) => Promise<void>
     saveCaption: (id: string, newCaption: string) => Promise<void>
     setCurrent: (id: string) => Promise<void>
     displayType: MediaCardDisplayType
@@ -57,14 +57,11 @@ export const MediaCard = function ({ m, displayType, handleDelete, saveCaption, 
                         </p>
                     }
                     <form onSubmit={handleCaptionSubmit}>
-                        <label>
-                            Caption:
-                            <textarea
-                                name="newCaption"
-                                value={newCaption}
-                                onChange={e => setNewCaption(e.target.value)}
-                            />
-                        </label>
+                        <input
+                            type="text"
+                            value={newCaption}
+                            onChange={e => setNewCaption(e.target.value)}
+                        />
                         <input type="submit" value="save" />
                     </form>
                     {location !== "" &&
@@ -72,7 +69,7 @@ export const MediaCard = function ({ m, displayType, handleDelete, saveCaption, 
                     }
                     <ul>{collections}</ul>
                     <div>
-                        <button className="bg-red text-white font-bold py-1 px-2 rounded" onClick={handleDelete}>
+                        <button className="bg-red text-white font-bold py-1 px-2 rounded" onClick={() => { handleDelete(m.id) }}>
                             Delete
                         </button>
                     </div>

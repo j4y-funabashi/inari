@@ -7,5 +7,6 @@ module.exports = {
   ],
   plugins: [
     require('@catppuccin/tailwindcss'),
+    require('@tailwindcss/forms'),
   ],
 }

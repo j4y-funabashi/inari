@@ -18,7 +18,20 @@ interface MediaListModel {
 }
 
 const getMediaList = (m: MediaListModel): Media[] => {
+    if (!m.current) return [...m.prev, ...m.next]
     return [...m.prev, m.current, ...m.next]
+}
+
+const deleteFromMediaList = (m: MediaListModel, id: string): MediaListModel => {
+    const ml = getMediaList(m).filter((m) => {
+        return m.id !== id
+    })
+
+    const out = createMediaList(
+        ml,
+        ml[0] ? ml[0].id : "" // TODO this should be the next media?
+    )
+    return out
 }
 
 export default function CollectionDetailPage({ params }: CollectionDetailParams) {
@@ -47,26 +60,33 @@ interface MediaListProps {
 }
 
 const createMediaList = (media: Media[], currentID: string): MediaListModel => {
-    const model: MediaListModel = {
-        prev: [],
-        current: media[0],
-        next: [],
-    }
-    var prev = true
+
+    const current = media.filter(
+        (m) => {
+            return m.id === currentID
+        }
+    )
+    const prev: Media[] = []
+    const next: Media[] = []
+
+    var pr = true
     media.forEach((m) => {
         if (m.id === currentID) {
-            model.current = m
-            prev = false
+            pr = false
             return
         }
-        if (prev) {
-            model.prev.push(m)
+        if (pr) {
+            prev.push(m)
             return
         }
-        model.next.push(m)
+        next.push(m)
     })
 
-    return model
+    return {
+        prev: prev,
+        current: current[0],
+        next: next
+    }
 }
 
 const createGalleryModel = (data: CollectionDetail): MediaListModel => {
@@ -100,7 +120,10 @@ const MediaGallery = function ({ data }: MediaListProps) {
 
     console.log(galleryModel)
 
-    const handleDelete = async function () {
+    const handleDelete = async function (id: string) {
+        const ml = deleteFromMediaList(galleryModel, id)
+        setGalleryModel(ml)
+        await deleteMedia(id)
     }
 
     const saveCaption = async (id: string, caption: string) => {
@@ -112,30 +135,43 @@ const MediaGallery = function ({ data }: MediaListProps) {
     }
 
     const media = getMediaList(galleryModel)
+
     const mediaList = media.map(
         (m) => {
-
             return (
-                <MediaCard displayType={MediaCardDisplayType.list} key={m.id} m={m} handleDelete={handleDelete} saveCaption={saveCaption} setCurrent={setCurrentMedia} />
+                <MediaCard
+                    displayType={MediaCardDisplayType.list}
+                    key={m.id}
+                    m={m}
+                    handleDelete={handleDelete}
+                    saveCaption={saveCaption}
+                    setCurrent={setCurrentMedia}
+                />
             )
         }
     )
     const currentMedia = getCurrentMedia(galleryModel)
 
+    if (!media.length) {
+        return (
+            <div>empty gallery</div>
+        )
+    }
     return (
 
-        <div className="grid grid-cols-7">
-            <aside className="col-span-2 overflow-scroll h-screen">
-                <h1 className="">{data.collection_meta.title}</h1>
+        <div className="">
+            <main className="">
+                <MediaCard displayType={MediaCardDisplayType.large} key={currentMedia.id} m={currentMedia} handleDelete={handleDelete} saveCaption={saveCaption} setCurrent={setCurrentMedia} />
+            </main>
 
-                <div className="grid grid-cols-3">
+            <aside className="">
+                <h1 className="text-xl mt-4 mb-1">{data.collection_meta.title}</h1>
+
+                <div className="grid gap-0.5 grid-cols-4">
                     {mediaList}
                 </div>
             </aside>
 
-            <main className="col-span-5">
-                <MediaCard displayType={MediaCardDisplayType.large} key={currentMedia.id} m={currentMedia} handleDelete={handleDelete} saveCaption={saveCaption} setCurrent={setCurrentMedia} />
-            </main>
         </div>
 
     )

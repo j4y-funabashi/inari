@@ -48,7 +48,11 @@ const getCollectionsByType = async function (type: string): Promise<Collection[]
 }
 const mockGetCollectionsByType = function (type: string): Collection[] {
     return [
-        getMockCollection()
+        getMockCollection("inbox Apr 2023"),
+        getMockCollection("inbox Mar 2023"),
+        getMockCollection("inbox Feb 2023"),
+        getMockCollection("inbox Jan 2023"),
+        getMockCollection("inbox Dec 2022"),
     ]
 }
 
@@ -61,7 +65,7 @@ const getCollectionDetail = async function (id: string): Promise<CollectionDetai
 }
 const mockGetCollectionDetail = function (id: string): CollectionDetail {
     return {
-        collection_meta: getMockCollection(),
+        collection_meta: getMockCollection("inbox Jan 2023"),
         media: [
             getMockMedia(),
             getMockMedia(),
@@ -83,24 +87,24 @@ const getMockMedia = (): Media => {
         },
         date: "2022-01-28T10:01:02Z",
         collections: [
-            getMockCollection(),
-            getMockCollection(),
-            getMockCollection(),
+            getMockCollection("inbox Jan 2022"),
+            getMockCollection("January 2022"),
+            getMockCollection("West Yorkshire, United Kingdom"),
         ],
         location: {
-            country: { long: "Country", short: "c" },
-            region: "Region",
-            locality: "Locality",
+            country: { long: "United Kingdom", short: "c" },
+            region: "West Yorkshire",
+            locality: "Meanwood",
         },
         caption: "This is the caption",
     }
 }
 
-const getMockCollection = (): Collection => {
+const getMockCollection = (title: string): Collection => {
     const uuid = crypto.randomUUID()
     return {
         id: `test-1-${uuid}`,
-        title: `c ${uuid}`,
+        title: `${title}`,
         media_count: 5,
         type: "inbox"
     }
