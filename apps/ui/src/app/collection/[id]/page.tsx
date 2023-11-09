@@ -39,18 +39,15 @@ export default function CollectionDetailPage({ params }: CollectionDetailParams)
     const collectionID = params.id
     const collectionDetailFetcher = NewFetchCollectionDetail(process.env.NODE_ENV)
 
-    const { data, error, isLoading } = useSWR<CollectionDetail>(collectionID, collectionDetailFetcher)
-
-    console.log(data, error, isLoading)
-
-    if (!data) {
+    const { data: collectionDetailData, error: collectionDetailError, isLoading: collectionDetailLoading } = useSWR<CollectionDetail>(collectionID, collectionDetailFetcher)
+    if (!collectionDetailData) {
         return
     }
 
 
     return (
         <div>
-            <MediaGallery data={data} />
+            <MediaGallery data={collectionDetailData} />
         </div>
     )
 }
@@ -134,6 +131,25 @@ const MediaGallery = function ({ data }: MediaListProps) {
         setGalleryModel(model)
     }
 
+    const setNextMedia = async () => {
+        if (!galleryModel.next.length) {
+            return
+        }
+
+        console.log("setting next media")
+        const model = createMediaList(getMediaList(galleryModel), galleryModel.next[0].id)
+        setGalleryModel(model)
+    }
+    const setPrevMedia = async () => {
+        if (!galleryModel.prev.length) {
+            return
+        }
+
+        console.log("setting prev media")
+        const model = createMediaList(getMediaList(galleryModel), galleryModel.prev[galleryModel.prev.length - 1].id)
+        setGalleryModel(model)
+    }
+
     const media = getMediaList(galleryModel)
 
     const mediaList = media.map(
@@ -146,6 +162,8 @@ const MediaGallery = function ({ data }: MediaListProps) {
                     handleDelete={handleDelete}
                     saveCaption={saveCaption}
                     setCurrent={setCurrentMedia}
+                    setNext={setNextMedia}
+                    setPrev={setPrevMedia}
                 />
             )
         }
@@ -161,7 +179,16 @@ const MediaGallery = function ({ data }: MediaListProps) {
 
         <div className="">
             <main className="">
-                <MediaCard displayType={MediaCardDisplayType.large} key={currentMedia.id} m={currentMedia} handleDelete={handleDelete} saveCaption={saveCaption} setCurrent={setCurrentMedia} />
+                <MediaCard
+                    displayType={MediaCardDisplayType.large}
+                    key={currentMedia.id}
+                    m={currentMedia}
+                    handleDelete={handleDelete}
+                    saveCaption={saveCaption}
+                    setCurrent={setCurrentMedia}
+                    setNext={setNextMedia}
+                    setPrev={setPrevMedia}
+                />
             </main>
 
             <aside className="">

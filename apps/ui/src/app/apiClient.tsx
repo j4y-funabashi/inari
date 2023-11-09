@@ -66,14 +66,18 @@ const getCollectionDetail = async function (id: string): Promise<CollectionDetai
 const mockGetCollectionDetail = function (id: string): CollectionDetail {
     return {
         collection_meta: getMockCollection("inbox Jan 2023"),
-        media: [
-            getMockMedia(),
-            getMockMedia(),
-            getMockMedia(),
-            getMockMedia(),
-            getMockMedia(),
-        ]
+        media: getMockMediaList(60)
     }
+}
+
+const getMockMediaList = (count: number): Media[] => {
+    const out: Media[] = []
+
+    for (let index = 0; index < count; index++) {
+        out.push(getMockMedia())
+    }
+
+    return out
 }
 
 const getMockMedia = (): Media => {

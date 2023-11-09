@@ -14,9 +14,11 @@ interface MediaCardProps {
     handleDelete: (id: string) => Promise<void>
     saveCaption: (id: string, newCaption: string) => Promise<void>
     setCurrent: (id: string) => Promise<void>
+    setNext: () => Promise<void>
+    setPrev: () => Promise<void>
     displayType: MediaCardDisplayType
 }
-export const MediaCard = function ({ m, displayType, handleDelete, saveCaption, setCurrent }: MediaCardProps) {
+export const MediaCard = function ({ m, displayType, handleDelete, saveCaption, setCurrent, setNext, setPrev }: MediaCardProps) {
 
     const srcPrefix = process.env.NODE_ENV === "production" ? "/thumbnails/" : ""
     const srcUrl = displayType === MediaCardDisplayType.large ? `${srcPrefix}${m.thumbnails.large}`
@@ -44,6 +46,17 @@ export const MediaCard = function ({ m, displayType, handleDelete, saveCaption, 
 
     return (
         <div>
+            {displayType === MediaCardDisplayType.large &&
+                <nav className="grid grid-cols-2">
+                    <button className="bg-green text-white font-bold py-1 px-2 rounded block w-full" onClick={() => { setPrev() }}>
+                        Prev
+                    </button>
+
+                    <button className="bg-green text-white font-bold py-1 px-2 rounded block w-full" onClick={() => { setNext() }}>
+                        Next
+                    </button>
+                </nav>
+            }
             <a href="#" onClick={() => { setCurrent(m.id) }}>
                 <img src={srcUrl} className="rounded-t" alt={caption} />
             </a>
