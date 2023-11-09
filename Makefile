@@ -10,7 +10,10 @@ build-api:
 	docker compose build inari-api
 
 up:
-	docker compose up --remove-orphans
+	docker compose up --remove-orphans --detach
+
+down:
+	docker compose down --rmi all
 
 test: test-ui test-api
 
