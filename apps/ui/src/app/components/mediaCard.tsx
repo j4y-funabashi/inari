@@ -28,12 +28,6 @@ export const MediaCard = function ({ m, displayType, handleDelete, saveCaption, 
     const dat = m.date
     const fdat = format(new Date(m.date), "eee, do LLL y HH:mm:ss")
 
-    const collections = m.collections.map(
-        (m => {
-            const collectionLink = "/collection/" + m.id
-            return <li key={m.id} className=""><Link className="border rounded" href={collectionLink}>{m.title}</Link></li>
-        })
-    )
     const location = formatLocation(m)
 
 
@@ -85,16 +79,34 @@ export const MediaCard = function ({ m, displayType, handleDelete, saveCaption, 
                         <p>{location}</p>
                     }
 
-                    {/* CollectionList */}
-                    <ul>{collections}</ul>
+                    <CollectionList m={m} />
 
-                    <div>
+                    <div className="my-4">
                         <button className="bg-red text-white font-bold py-1 px-2 rounded" onClick={() => { handleDelete(m.id) }}>
                             Delete
                         </button>
                     </div>
+
                 </div>
             }
+        </div>
+    )
+}
+
+interface CollectionListProps {
+    m: Media
+}
+const CollectionList = ({ m }: CollectionListProps) => {
+    const collections = m.collections.map(
+        (m => {
+            const collectionLink = "/collection/" + m.id
+            return <Link key={m.id} className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-indigo-100 bg-indigo-700 rounded mx-1" href={collectionLink}>{m.title}</Link>
+        })
+    )
+
+    return (
+        <div className="my-2">
+            {collections}
         </div>
     )
 }
