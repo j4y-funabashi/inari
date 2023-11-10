@@ -13,7 +13,7 @@ up:
 	docker compose up --remove-orphans --detach
 
 down:
-	docker compose down --rmi all
+	docker compose down
 
 test: test-ui test-api
 
