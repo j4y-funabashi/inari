@@ -24,14 +24,14 @@ const CollectionList = function () {
   const collections = data?.map(
     (c) => {
       const collectionLink = "/collection/" + c.id
-      return <li key={c.id}><Link href={collectionLink}>{c.title}</Link> ({c.media_count})</li>
+      return <li key={c.id}><Link className='p-2 block hover:bg-slate-900' href={collectionLink}>{c.title} ({c.media_count})</Link></li>
     }
   )
 
   return (
     <div>
       <h1>Hello!</h1>
-      {collections}
+      <ul>{collections}</ul>
     </div>
   )
 }

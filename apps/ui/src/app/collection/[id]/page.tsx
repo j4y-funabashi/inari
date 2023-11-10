@@ -34,6 +34,21 @@ const deleteFromMediaList = (m: MediaListModel, id: string): MediaListModel => {
     return out
 }
 
+const updateMediaListItemCaption = (m: MediaListModel, id: string, caption: string): MediaListModel => {
+    const ml = getMediaList(m).map((m) => {
+        if (m.id === id) {
+            m.caption = caption
+        }
+        return m
+    })
+
+    const out = createMediaList(
+        ml,
+        id,
+    )
+    return out
+}
+
 export default function CollectionDetailPage({ params }: CollectionDetailParams) {
 
     const collectionID = params.id
@@ -124,6 +139,9 @@ const MediaGallery = function ({ data }: MediaListProps) {
     }
 
     const saveCaption = async (id: string, caption: string) => {
+        const ml = updateMediaListItemCaption(galleryModel, id, caption)
+        setGalleryModel(ml)
+        await updateMediaCaption(id, caption)
     }
 
     const setCurrentMedia = async (id: string) => {

@@ -31,7 +31,7 @@ export const MediaCard = function ({ m, displayType, handleDelete, saveCaption, 
     const collections = m.collections.map(
         (m => {
             const collectionLink = "/collection/" + m.id
-            return <li key={m.id}><Link className="text-white bg-gray text-xs" href={collectionLink}>{m.title}</Link></li>
+            return <li key={m.id} className=""><Link className="border rounded" href={collectionLink}>{m.title}</Link></li>
         })
     )
     const location = formatLocation(m)
@@ -39,8 +39,7 @@ export const MediaCard = function ({ m, displayType, handleDelete, saveCaption, 
 
     const [newCaption, setNewCaption] = useState(caption);
 
-    const handleCaptionSubmit = async function (event: React.FormEvent<HTMLFormElement>) {
-        event.preventDefault()
+    const handleCaptionSave = async function () {
         await saveCaption(m.id, newCaption)
     }
 
@@ -48,17 +47,17 @@ export const MediaCard = function ({ m, displayType, handleDelete, saveCaption, 
         <div>
             {displayType === MediaCardDisplayType.large &&
                 <nav className="grid grid-cols-2">
-                    <button className="bg-green text-white font-bold py-1 px-2 rounded block w-full" onClick={() => { setPrev() }}>
+                    <button className="bg-green text-white font-bold py-1 px-2 block w-full" onClick={() => { setPrev() }}>
                         Prev
                     </button>
 
-                    <button className="bg-green text-white font-bold py-1 px-2 rounded block w-full" onClick={() => { setNext() }}>
+                    <button className="bg-green text-white font-bold py-1 px-2 block w-full" onClick={() => { setNext() }}>
                         Next
                     </button>
                 </nav>
             }
             <a href="#" onClick={() => { setCurrent(m.id) }}>
-                <img src={srcUrl} className="rounded-t" alt={caption} />
+                <img src={srcUrl} className="" alt={caption} />
             </a>
 
             {displayType === MediaCardDisplayType.large &&
@@ -69,18 +68,26 @@ export const MediaCard = function ({ m, displayType, handleDelete, saveCaption, 
                             {caption}
                         </p>
                     }
-                    <form onSubmit={handleCaptionSubmit}>
+                    <div className="grid grid-cols-6">
                         <input
                             type="text"
                             value={newCaption}
                             onChange={e => setNewCaption(e.target.value)}
+                            className="col-span-5 text-black"
                         />
-                        <input type="submit" value="save" />
-                    </form>
+                        <button
+                            className="bg-green text-white font-bold py-1 px-2 col-span-1"
+                            onClick={() => { handleCaptionSave() }}>Save</button>
+                    </div>
+
+                    {/* LocationList */}
                     {location !== "" &&
                         <p>{location}</p>
                     }
+
+                    {/* CollectionList */}
                     <ul>{collections}</ul>
+
                     <div>
                         <button className="bg-red text-white font-bold py-1 px-2 rounded" onClick={() => { handleDelete(m.id) }}>
                             Delete

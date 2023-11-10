@@ -15,7 +15,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="macchiato bg-base text-pink">
+      <body className="macchiato bg-base text-white">
         {children}
       </body>
     </html>
