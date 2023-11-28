@@ -16,9 +16,10 @@ interface MediaCardProps {
     setCurrent: (id: string) => Promise<void>
     setNext: () => Promise<void>
     setPrev: () => Promise<void>
+    setBack: () => Promise<void>
     displayType: MediaCardDisplayType
 }
-export const MediaCard = function ({ m, displayType, handleDelete, saveCaption, setCurrent, setNext, setPrev }: MediaCardProps) {
+export const MediaCard = function ({ m, displayType, handleDelete, saveCaption, setCurrent, setNext, setPrev, setBack }: MediaCardProps) {
 
     const srcPrefix = process.env.NODE_ENV === "production" ? "/thumbnails/" : ""
     const srcUrl = displayType === MediaCardDisplayType.large ? `${srcPrefix}${m.thumbnails.large}`
@@ -40,7 +41,11 @@ export const MediaCard = function ({ m, displayType, handleDelete, saveCaption, 
     return (
         <div>
             {displayType === MediaCardDisplayType.large &&
-                <nav className="grid grid-cols-2">
+                <nav className="grid grid-cols-3">
+                    <button className="bg-black text-white font-bold py-1 px-2 block w-full" onClick={() => { setBack() }}>
+                        Back
+                    </button>
+
                     <button className="bg-green text-white font-bold py-1 px-2 block w-full" onClick={() => { setPrev() }}>
                         Prev
                     </button>

@@ -123,12 +123,16 @@ const getCurrentMedia = (model: MediaListModel): Media => {
     return model.current
 }
 
+enum GalleryViewMode {
+    grid,
+    single
+}
 
 const MediaGallery = function ({ data }: MediaListProps) {
 
-
     const model = createGalleryModel(data)
     const [galleryModel, setGalleryModel] = useState<MediaListModel>(model)
+    const [viewMode, setViewMode] = useState<GalleryViewMode>(GalleryViewMode.grid)
 
     console.log(galleryModel)
 
@@ -147,6 +151,11 @@ const MediaGallery = function ({ data }: MediaListProps) {
     const setCurrentMedia = async (id: string) => {
         const model = createMediaList(getMediaList(galleryModel), id)
         setGalleryModel(model)
+        setViewMode(GalleryViewMode.single)
+    }
+
+    const handleCloseMedia = async () => {
+        setViewMode(GalleryViewMode.grid)
     }
 
     const setNextMedia = async () => {
@@ -182,6 +191,7 @@ const MediaGallery = function ({ data }: MediaListProps) {
                     setCurrent={setCurrentMedia}
                     setNext={setNextMedia}
                     setPrev={setPrevMedia}
+                    setBack={handleCloseMedia}
                 />
             )
         }
@@ -196,7 +206,7 @@ const MediaGallery = function ({ data }: MediaListProps) {
     return (
 
         <div className="">
-            <main className="">
+            {viewMode === GalleryViewMode.single && <main className="">
                 <MediaCard
                     displayType={MediaCardDisplayType.large}
                     key={currentMedia.id}
@@ -206,16 +216,20 @@ const MediaGallery = function ({ data }: MediaListProps) {
                     setCurrent={setCurrentMedia}
                     setNext={setNextMedia}
                     setPrev={setPrevMedia}
+                    setBack={handleCloseMedia}
                 />
             </main>
+            }
 
-            <aside className="">
-                <h1 className="text-xl mt-4 mb-1">{data.collection_meta.title}</h1>
+            {viewMode === GalleryViewMode.grid &&
+                <aside className="">
+                    <h1 className="text-xl mt-4 mb-1">{data.collection_meta.title}</h1>
 
-                <div className="grid gap-0.5 grid-cols-4">
-                    {mediaList}
-                </div>
-            </aside>
+                    <div className="grid gap-0.5 grid-cols-4">
+                        {mediaList}
+                    </div>
+                </aside>
+            }
 
         </div>
 
