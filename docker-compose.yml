@@ -9,10 +9,12 @@ services:
                         - /mnt/data/backup/jayr/inari_mediastore/thumbnails:/var/media/thumbnails
                 ports:
                         - 8010:80
+                restart: unless-stopped
 
         inari-ui:
                 build:
                         context: ./apps/ui
+                restart: unless-stopped
 
         inari-api-test:
                 build:
