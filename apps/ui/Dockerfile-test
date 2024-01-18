@@ -1,3 +1,8 @@
 FROM node:18-alpine AS deps
 
+RUN apk update && \
+    apk add \
+    build-base \
+    bash
+
 WORKDIR /app
