@@ -21,7 +21,7 @@ test-api:
 	docker compose run --rm inari-api-test ./test.sh
 
 test-ui:
-	docker compose run --build inari-ui-test yarn test
+	docker compose run --build inari-ui-test npm test
 
 test-acceptance:
 	docker compose run --rm acceptance firefox:headless
