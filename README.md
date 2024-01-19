@@ -39,7 +39,7 @@ docker run --env GOOGLE_API_KEY=${GOOGLE_API_KEY} -v /mnt/data/backup/jayr/phone
 - [x] update media caption
 - [x] import geo xml files
 - [x] use imported locations to add lat/lng on import
-- [ ] https://github.com/j4y-funabashi/inari/issues/10
+- [ ] [add media hashtag](https://github.com/j4y-funabashi/inari/issues/10)
 - [ ] search for and add location to media
 - [ ] search for and add venue to media
 - [ ] import movie files
