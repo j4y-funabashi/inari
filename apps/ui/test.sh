@@ -18,7 +18,7 @@ function __log_info () {
 
 __log_info "TESTING"
 
-npm install;
+npm install --save-dev;
 npm test;
 
 __log_info "END"

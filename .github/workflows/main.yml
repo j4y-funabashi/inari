@@ -1,16 +1,16 @@
-name: build test deploy
+name: lint test build
 on:
   push:
 
 jobs:
-  build-api:
+  api:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: test
         run: make test-api
 
-  build-ui:
+  ui:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
