@@ -84,6 +84,27 @@ func newUpdateMediaCaptionHandler(updateMediaCaption app.UpdateMediaTextProperty
 	}
 }
 
+func newUpdateMediaTagHandler(updateMediaTag app.UpdateMediaTextProperty, logger app.Logger) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		mediaID := ps.ByName("mediaid")
+		newTag, err := io.ReadAll(r.Body)
+		if err != nil {
+			logger.Error("failed to update media tag",
+				"err", err)
+			panic(err)
+		}
+		err = updateMediaTag(mediaID, string(newTag))
+		if err != nil {
+			logger.Error("failed to update media tag",
+				"err", err)
+			panic(err)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+	}
+}
+
 func main() {
 	// conf
 	baseDir := filepath.Join(os.TempDir(), "inari")
@@ -108,12 +129,14 @@ func main() {
 	collectionDetail := index.NewSqliteCollectionDetail(db)
 	deleteMedia := index.NewDeleteMedia(db)
 	updateMediaCaption := index.NewUpdateMediaCaption(db)
+	updateMediaTag := index.NewUpdateMediaTag(db)
 
 	router := httprouter.New()
 	router.GET("/api/timeline/months", newMonthsHandler(listCollections, logger))
 	router.GET("/api/timeline/month/:collectionid", newCollectionDetailHandler(collectionDetail, logger))
 	router.DELETE("/api/media/:mediaid", newDeleteMediaHandler(deleteMedia, logger))
 	router.POST("/api/media/:mediaid/caption", newUpdateMediaCaptionHandler(updateMediaCaption, logger))
+	router.POST("/api/media/:mediaid/tag", newUpdateMediaTagHandler(updateMediaTag, logger))
 
 	http.ListenAndServe(":8090", router)
 }
