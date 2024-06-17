@@ -10,6 +10,7 @@ import (
 	log "github.com/inconshreveable/log15"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/app"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/exiftool"
+	"github.com/j4y_funabashi/inari/apps/api/pkg/geo"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/google"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/gpx"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/imgresize"
@@ -27,7 +28,8 @@ func main() {
 	mediaStorePath := filepath.Join(baseDir, "media")
 	thumbnailsPath := filepath.Join(baseDir, "thumbnails")
 	dbFilepath := filepath.Join(baseDir, "inari-media-db.db")
-	apiKey := os.Getenv("GOOGLE_API_KEY")
+	googleAPIKey := os.Getenv("GOOGLE_API_KEY")
+	geo2tzBaseURL := "http://localhost:2004"
 	baseURL := "https://maps.googleapis.com/maps/api/geocode/json"
 
 	err := os.MkdirAll(baseDir, 0700)
@@ -59,8 +61,8 @@ func main() {
 	notifier := notify.NewNoopNotifier()
 	resizer := imgresize.NewResizer(thumbnailsPath)
 	queryNearestGPX := index.NewQueryNearestGPX(db, 8)
-	lookupTimezone := google.NewLookupTimezone(apiKey)
-	mediaGeocoder := google.NewMediaGeocoder(queryNearestGPX, lookupTimezone, logger, apiKey, baseURL)
+	lookupTimezone := geo.NewTZAPILookupTimezone(geo2tzBaseURL)
+	mediaGeocoder := google.NewMediaGeocoder(queryNearestGPX, lookupTimezone, logger, googleAPIKey, baseURL)
 
 	importMedia := app.ImportDir(app.NewImporter(mediaDetail, logger, downloader, extractMetadata, uploader, indexer, resizer, mediaGeocoder, notifier), logger)
 	listCollections := index.NewSqliteCollectionLister(db)

@@ -83,6 +83,26 @@ func TestImporter(t *testing.T) {
 				},
 			},
 		},
+		{
+			desc: "it applies daylight savings to points",
+			gpxPoints: []app.GPXPoint{
+				{
+					Timestamp: time.Date(2022, time.June, 10, 14, 0, 0, 0, time.UTC),
+					Location: app.Location{
+						Coordinates: google.UKCoordinates,
+					},
+				},
+			},
+			expected: []app.GPXPoint{
+				{
+					Timestamp: time.Date(2022, time.June, 10, 15, 0, 0, 0, time.UTC),
+					Location: app.Location{
+						Coordinates: google.UKCoordinates,
+						Timezone: "Europe/London",
+					},
+				},
+			},
+		},
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
