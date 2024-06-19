@@ -9,6 +9,8 @@ services:
                         - /mnt/data/backup/jayr/inari_mediastore/thumbnails:/var/media/thumbnails
                 ports:
                         - 8010:80
+                depends_on:
+                        - geo2tz
 
         inari-ui:
                 build:
