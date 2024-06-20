@@ -21,6 +21,10 @@ var LusakaCoordinates = app.Coordinates{
 	Lat: 22.2222222222,
 	Lng: -3.2222222222,
 }
+var UKCoordinates = app.Coordinates{
+	Lat: 53.8700189722222,
+	Lng: -1.561703,
+}
 
 func NewNullGeocoder() app.Geocoder {
 	return func(lat, lng float64, cTime time.Time) (app.Location, error) {
@@ -196,6 +200,7 @@ func buildURL(lat, lng float64, baseURL, apiKey string) string {
 	q.Add("latlng", latlng)
 	q.Add("key", apiKey)
 	u.RawQuery = q.Encode()
+
 	return u.String()
 }
 

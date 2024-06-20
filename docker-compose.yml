@@ -9,10 +9,18 @@ services:
                         - /mnt/data/backup/jayr/inari_mediastore/thumbnails:/var/media/thumbnails
                 ports:
                         - 8010:80
+                depends_on:
+                        - geo2tz
 
         inari-ui:
                 build:
                         context: ./apps/ui
+
+        geo2tz:
+                container_name: geo2tz
+                image: ghcr.io/noandrea/geo2tz:2.1.4
+                ports:
+                        - 2004:2004
 
         inari-api-test:
                 build:
