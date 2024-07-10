@@ -17,3 +17,6 @@ function __log_info () {
 }
 
 make build
+make down
+make up
+make test
