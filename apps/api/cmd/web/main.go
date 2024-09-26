@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -9,9 +8,9 @@ import (
 	"path/filepath"
 
 	log "github.com/inconshreveable/log15"
+	appconfig "github.com/j4y_funabashi/inari/apps/api/pkg/app_config"
 
 	"github.com/j4y_funabashi/inari/apps/api/pkg/app"
-	"github.com/j4y_funabashi/inari/apps/api/pkg/index"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -87,28 +86,15 @@ func newUpdateMediaCaptionHandler(updateMediaCaption app.UpdateMediaTextProperty
 func main() {
 	// conf
 	baseDir := filepath.Join(os.TempDir(), "inari")
-	dbFilepath := filepath.Join(baseDir, "inari-media-db.db")
 
 	// deps
 	logger := log.New()
-	db, err := sql.Open("sqlite3", dbFilepath)
-	if err != nil {
-		logger.Error("failed to open db",
-			"err", err)
-		panic(err)
-	}
-	err = index.CreateIndex(db)
-	if err != nil {
-		logger.Error("failed to create index",
-			"err", err)
-		panic(err)
-	}
+	listCollections := appconfig.NewListCollections(baseDir)
+	collectionDetail := appconfig.NewCollectionDetail(baseDir)
+	deleteMedia := appconfig.NewDeleteMedia(baseDir)
+	updateMediaCaption := appconfig.NewUpdateMediaCaption(baseDir)
 
-	listCollections := index.NewSqliteCollectionLister(db)
-	collectionDetail := index.NewSqliteCollectionDetail(db)
-	deleteMedia := index.NewDeleteMedia(db)
-	updateMediaCaption := index.NewUpdateMediaCaption(db)
-
+	// routes
 	router := httprouter.New()
 	router.GET("/api/timeline/months", newMonthsHandler(listCollections, logger))
 	router.GET("/api/timeline/month/:collectionid", newCollectionDetailHandler(collectionDetail, logger))

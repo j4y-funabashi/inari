@@ -72,7 +72,7 @@ func TestImporter(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			// arrange
-			extractMetadata := exiftool.NewExtractor("/usr/bin/exiftool")
+			extractMetadata := exiftool.NewExtractor()
 
 			// act
 			fileName := path.Join("./test_data", test.backupFilename)

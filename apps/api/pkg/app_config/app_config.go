@@ -11,6 +11,7 @@ import (
 	"github.com/j4y_funabashi/inari/apps/api/pkg/exiftool"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/geo"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/google"
+	"github.com/j4y_funabashi/inari/apps/api/pkg/gpx"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/imgresize"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/index"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/notify"
@@ -75,6 +76,45 @@ func WithNullGeocoder() func(*app.MediaImporterConfig) {
 		c.Geocode = google.NewNullGeocoder()
 	}
 }
+
+func NewListCollections(baseDir string) app.CollectionLister {
+	db := newDB(baseDir)
+	return index.NewSqliteCollectionLister(db)
+}
+
+func NewImportGPX(baseDir string) app.Importer {
+	logger := log.New()
+	db := newDB(baseDir)
+	geo2tzBaseURL := "http://localhost:2004"
+	lookupTimezone := geo.NewTZAPILookupTimezone(geo2tzBaseURL)
+
+	return gpx.NewGpxImporter(
+		gpx.NewAddLocationToGPXPoints(lookupTimezone),
+		index.NewSaveGPXPoints(db),
+		logger,
+	)
+}
+
+func NewMediaDetail(baseDir string) app.QueryMediaDetail {
+	db := newDB(baseDir)
+	return index.NewQueryMediaDetail(db)
+}
+
+func NewCollectionDetail(baseDir string) app.CollectionDetailQuery {
+	db := newDB(baseDir)
+	return index.NewSqliteCollectionDetail(db)
+}
+
+func NewDeleteMedia(baseDir string) app.DeleteMedia {
+	db := newDB(baseDir)
+	return index.NewDeleteMedia(db)
+}
+
+func NewUpdateMediaCaption(baseDir string) app.UpdateMediaTextProperty {
+	db := newDB(baseDir)
+	return index.NewUpdateMediaCaption(db)
+}
+
 
 func newDB(testDir string) *sql.DB {
 	dbFileName := "inari-media-db.db"

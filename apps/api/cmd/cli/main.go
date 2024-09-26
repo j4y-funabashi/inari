@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -10,50 +9,20 @@ import (
 	log "github.com/inconshreveable/log15"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/app"
 	appconfig "github.com/j4y_funabashi/inari/apps/api/pkg/app_config"
-	"github.com/j4y_funabashi/inari/apps/api/pkg/geo"
-	"github.com/j4y_funabashi/inari/apps/api/pkg/gpx"
-	"github.com/j4y_funabashi/inari/apps/api/pkg/index"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/urfave/cli/v2"
 )
 
 func main() {
 
-	// conf
 	baseDir := filepath.Join(os.TempDir(), "inari")
-	dbFilepath := filepath.Join(baseDir, "inari-media-db.db")
-	geo2tzBaseURL := "http://localhost:2004"
-	err := os.MkdirAll(baseDir, 0700)
-	if err != nil {
-		panic("failed to create root dir: " + err.Error())
-	}
-	// deps
 	logger := log.New()
-	db, err := sql.Open("sqlite3", dbFilepath)
-	if err != nil {
-		logger.Error("failed to open db",
-			"err", err)
-		panic(err)
-	}
-	err = index.CreateIndex(db)
-	if err != nil {
-		logger.Error("failed to create index",
-			"err", err)
-		panic(err)
-	}
 
 	////////////////////
 
-	lookupTimezone := geo.NewTZAPILookupTimezone(geo2tzBaseURL)
-
 	importMedia := app.ImportDir(appconfig.NewMediaImporter(os.TempDir()), logger)
-
-	listCollections := index.NewSqliteCollectionLister(db)
-	importGPX := app.ImportDir(gpx.NewGpxImporter(
-		gpx.NewAddLocationToGPXPoints(lookupTimezone),
-		index.NewSaveGPXPoints(db),
-		logger,
-	), logger)
+	listCollections := appconfig.NewListCollections(baseDir)
+	importGPX := app.ImportDir(appconfig.NewImportGPX(baseDir), logger)
 
 	// app commands
 	app := &cli.App{

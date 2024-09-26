@@ -1,7 +1,6 @@
 package app_test
 
 import (
-	"database/sql"
 	"os"
 	"path"
 	"path/filepath"
@@ -11,7 +10,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/app"
 	appconfig "github.com/j4y_funabashi/inari/apps/api/pkg/app_config"
-	"github.com/j4y_funabashi/inari/apps/api/pkg/index"
 	"gotest.tools/v3/assert"
 )
 
@@ -150,19 +148,17 @@ func TestImport(t *testing.T) {
 			// create uniq test dir to store db + output files
 			testID := "inari-test-" + uuid.New().String()
 			testDir := filepath.Join(os.TempDir(), testID)
-			err := os.MkdirAll(testDir, 0700)
-			if err != nil {
-				t.Fatalf("failed to create test dir: %s %s", testDir, err)
-			}
 
 			// arrange
-			importMedia := appconfig.NewMediaImporter(testDir, appconfig.WithNullLogger(), appconfig.WithNullGeocoder())
-
-			queryMediaDetail := newMediaDetailQuery(testDir)
+			importMedia := appconfig.NewMediaImporter(
+				testDir,
+				appconfig.WithNullLogger(),
+				appconfig.WithNullGeocoder(),
+			)
+			queryMediaDetail := appconfig.NewMediaDetail(testDir)
 
 			// act
-			filePath := path.Join("./test_data", tC.filePath)
-			iMedia, err := importMedia(filePath)
+			iMedia, err := importMedia(path.Join("./test_data", tC.filePath))
 			assert.NilError(t, err)
 			actual, err := queryMediaDetail(iMedia.ID)
 			assert.NilError(t, err)
@@ -172,26 +168,4 @@ func TestImport(t *testing.T) {
 
 		})
 	}
-}
-
-func newMediaDetailQuery(testDir string) app.QueryMediaDetail {
-	db := newDB(testDir)
-
-	return index.NewQueryMediaDetail(db)
-}
-
-func newDB(testDir string) *sql.DB {
-	dbFileName := "inari-media-db.db"
-	dbFilepath := filepath.Join(testDir, filepath.Base(dbFileName))
-
-	db, err := sql.Open("sqlite3", dbFilepath)
-	if err != nil {
-		panic(err)
-	}
-	err = index.CreateIndex(db)
-	if err != nil {
-		panic(err)
-	}
-
-	return db
 }
