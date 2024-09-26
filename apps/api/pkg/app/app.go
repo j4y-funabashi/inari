@@ -210,7 +210,19 @@ func ImportDir(importFile Importer, logger log.Logger) func(backupFilename strin
 	}
 }
 
-func NewImporter(fetchMediaDetail QueryMediaDetail, logger Logger, downloadFromBackup Downloader, extractMetadata MetadataExtractor, uploadToMediaStore Uploader, indexMedia Indexer, createThumbnails Resizer, geocode Geocoder, notifyDownstream Notifier) Importer {
+type MediaImporterConfig struct {
+	FetchMediaDetail   QueryMediaDetail
+	Logger             Logger
+	DownloadFromBackup Downloader
+	ExtractMetadata    MetadataExtractor
+	UploadToMediaStore Uploader
+	IndexMedia         Indexer
+	CreateThumbnails   Resizer
+	Geocode            Geocoder
+	NotifyDownstream   Notifier
+}
+
+func NewImporter(config MediaImporterConfig) Importer {
 	return func(inputFilename string) (Media, error) {
 		startTime := time.Now()
 		media := Media{}
@@ -225,20 +237,20 @@ func NewImporter(fetchMediaDetail QueryMediaDetail, logger Logger, downloadFromB
 		if err != nil {
 			return media, fmt.Errorf("failed to parse media hash: %w", err)
 		}
-		existingMedia, _ := fetchMediaDetail(hash)
+		existingMedia, _ := config.FetchMediaDetail(hash)
 		if existingMedia.Hash == hash {
 			return existingMedia, nil
 		}
 
 		// download file from backup storage
-		tmpFilename, err := downloadFromBackup(inputFilename)
+		tmpFilename, err := config.DownloadFromBackup(inputFilename)
 		if err != nil {
 			return media, fmt.Errorf("failed to download media from backup: %w", err)
 		}
 		defer os.Remove(tmpFilename)
 
 		// extract metadata
-		mediaMeta, err := extractMetadata(tmpFilename)
+		mediaMeta, err := config.ExtractMetadata(tmpFilename)
 		if err != nil {
 			return media, fmt.Errorf("failed to extract media metadata: %w", err)
 		}
@@ -246,42 +258,42 @@ func NewImporter(fetchMediaDetail QueryMediaDetail, logger Logger, downloadFromB
 		media.Caption = mediaMeta.Title
 
 		// upload renamed file to media storage
-		err = uploadToMediaStore(tmpFilename, media.NewFilename())
+		err = config.UploadToMediaStore(tmpFilename, media.NewFilename())
 		if err != nil {
 			return media, fmt.Errorf("failed to upload to media store: %w", err)
 		}
 		media.FilePath = media.NewFilename()
 
 		// create thumbnails
-		thumbnails, err := createThumbnails(tmpFilename, media.NewFilename())
+		thumbnails, err := config.CreateThumbnails(tmpFilename, media.NewFilename())
 		if err != nil {
 			return media, fmt.Errorf("failed to create thumbnails: %w", err)
 		}
 		media.Thumbnails = thumbnails
 
 		// geocode
-		loc, err := geocode(media.Coordinates.Lat, media.Coordinates.Lng, media.Date)
+		loc, err := config.Geocode(media.Coordinates.Lat, media.Coordinates.Lng, media.Date)
 		if err != nil {
 			return media, fmt.Errorf("failed to geocode: %w", err)
 		}
 		media.Location = loc
 
 		// index metadata in datastore
-		media, err = indexMedia(media)
+		media, err = config.IndexMedia(media)
 		if err != nil {
 			return media, fmt.Errorf("failed to index media metadata: %w", err)
 		}
 
 		// add to queue
-		err = notifyDownstream(media)
+		err = config.NotifyDownstream(media)
 		if err != nil {
-			logger.Error("failed to notify downstream",
+			config.Logger.Error("failed to notify downstream",
 				"err", err,
 				"backupFilename", inputFilename)
 			return media, nil
 		}
 
-		logger.Info("imported media",
+		config.Logger.Info("imported media",
 			"path", inputFilename,
 			"elapsedTime", time.Since(startTime),
 		)

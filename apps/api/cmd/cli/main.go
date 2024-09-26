@@ -9,14 +9,10 @@ import (
 
 	log "github.com/inconshreveable/log15"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/app"
-	"github.com/j4y_funabashi/inari/apps/api/pkg/exiftool"
+	appconfig "github.com/j4y_funabashi/inari/apps/api/pkg/app_config"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/geo"
-	"github.com/j4y_funabashi/inari/apps/api/pkg/google"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/gpx"
-	"github.com/j4y_funabashi/inari/apps/api/pkg/imgresize"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/index"
-	"github.com/j4y_funabashi/inari/apps/api/pkg/notify"
-	"github.com/j4y_funabashi/inari/apps/api/pkg/storage"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/urfave/cli/v2"
 )
@@ -25,21 +21,14 @@ func main() {
 
 	// conf
 	baseDir := filepath.Join(os.TempDir(), "inari")
-	mediaStorePath := filepath.Join(baseDir, "media")
-	thumbnailsPath := filepath.Join(baseDir, "thumbnails")
 	dbFilepath := filepath.Join(baseDir, "inari-media-db.db")
-	googleAPIKey := os.Getenv("GOOGLE_API_KEY")
 	geo2tzBaseURL := "http://localhost:2004"
-	baseURL := "https://maps.googleapis.com/maps/api/geocode/json"
-
 	err := os.MkdirAll(baseDir, 0700)
 	if err != nil {
 		panic("failed to create root dir: " + err.Error())
 	}
-
 	// deps
 	logger := log.New()
-
 	db, err := sql.Open("sqlite3", dbFilepath)
 	if err != nil {
 		logger.Error("failed to open db",
@@ -53,18 +42,12 @@ func main() {
 		panic(err)
 	}
 
-	mediaDetail := index.NewQueryMediaDetail(db)
-	downloader := storage.NewLocalFSDownloader()
-	uploader := storage.NewLocalFSUploader(mediaStorePath)
-	indexer := index.NewSqliteIndexer(db)
-	extractMetadata := exiftool.NewExtractor("/usr/bin/exiftool")
-	notifier := notify.NewNoopNotifier()
-	resizer := imgresize.NewResizer(thumbnailsPath)
-	queryNearestGPX := index.NewQueryNearestGPX(db, 8)
-	lookupTimezone := geo.NewTZAPILookupTimezone(geo2tzBaseURL)
-	mediaGeocoder := google.NewMediaGeocoder(queryNearestGPX, lookupTimezone, logger, googleAPIKey, baseURL)
+	////////////////////
 
-	importMedia := app.ImportDir(app.NewImporter(mediaDetail, logger, downloader, extractMetadata, uploader, indexer, resizer, mediaGeocoder, notifier), logger)
+	lookupTimezone := geo.NewTZAPILookupTimezone(geo2tzBaseURL)
+
+	importMedia := app.ImportDir(appconfig.NewMediaImporter(os.TempDir()), logger)
+
 	listCollections := index.NewSqliteCollectionLister(db)
 	importGPX := app.ImportDir(gpx.NewGpxImporter(
 		gpx.NewAddLocationToGPXPoints(lookupTimezone),

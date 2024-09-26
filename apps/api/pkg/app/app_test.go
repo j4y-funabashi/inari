@@ -10,12 +10,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/app"
-	"github.com/j4y_funabashi/inari/apps/api/pkg/exiftool"
-	"github.com/j4y_funabashi/inari/apps/api/pkg/google"
-	"github.com/j4y_funabashi/inari/apps/api/pkg/imgresize"
+	appconfig "github.com/j4y_funabashi/inari/apps/api/pkg/app_config"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/index"
-	"github.com/j4y_funabashi/inari/apps/api/pkg/notify"
-	"github.com/j4y_funabashi/inari/apps/api/pkg/storage"
 	"gotest.tools/v3/assert"
 )
 
@@ -160,7 +156,8 @@ func TestImport(t *testing.T) {
 			}
 
 			// arrange
-			importMedia := newImporter(testDir)
+			importMedia := appconfig.NewMediaImporter(testDir, appconfig.WithNullLogger(), appconfig.WithNullGeocoder())
+
 			queryMediaDetail := newMediaDetailQuery(testDir)
 
 			// act
@@ -175,27 +172,6 @@ func TestImport(t *testing.T) {
 
 		})
 	}
-}
-
-func newImporter(baseDir string) app.Importer {
-
-	// conf
-	mediaStorePath := baseDir
-
-	// deps
-	db := newDB(baseDir)
-	mediaDetail := index.NewQueryMediaDetail(db)
-	logger := app.NewNullLogger()
-	downloader := storage.NewLocalFSDownloader()
-	uploader := storage.NewLocalFSUploader(mediaStorePath)
-	indexer := index.NewSqliteIndexer(db)
-	extractMetadata := exiftool.NewExtractor("/usr/bin/exiftool")
-	notifier := notify.NewNoopNotifier()
-	createThumbnails := imgresize.NewResizer(filepath.Join(baseDir, "thumbnails"))
-
-	geo := google.NewNullGeocoder()
-
-	return app.NewImporter(mediaDetail, logger, downloader, extractMetadata, uploader, indexer, createThumbnails, geo, notifier)
 }
 
 func newMediaDetailQuery(testDir string) app.QueryMediaDetail {
