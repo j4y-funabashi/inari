@@ -34,7 +34,7 @@ func NewMediaImporter(baseDirectory string, c ...func(*app.MediaImporterConfig))
 	downloader := storage.NewLocalFSDownloader()
 	uploader := storage.NewLocalFSUploader(mediaStorePath)
 	indexer := index.NewSqliteIndexer(db)
-	extractMetadata := exiftool.NewExtractor("/usr/bin/exiftool")
+	extractMetadata := exiftool.NewExtractor()
 	notifier := notify.NewNoopNotifier()
 	createThumbnails := imgresize.NewResizer(thumbnailsPath)
 
