@@ -20,7 +20,7 @@ func main() {
 
 	////////////////////
 
-	importMedia := app.ImportDir(appconfig.NewMediaImporter(os.TempDir()), logger)
+	importMedia := app.ImportDir(appconfig.NewMediaImporter(baseDir), logger)
 	listCollections := appconfig.NewListCollections(baseDir)
 	importGPX := app.ImportDir(appconfig.NewImportGPX(baseDir), logger)
 
@@ -59,6 +59,11 @@ func main() {
 					fmt.Printf("%s", string(out))
 					return err
 				},
+			},
+			{
+				Name:    "media",
+				Usage:   "list media",
+				Subcommands: []*cli.Command{},
 			},
 		},
 	}

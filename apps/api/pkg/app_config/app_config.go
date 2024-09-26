@@ -29,9 +29,9 @@ func NewMediaImporter(baseDirectory string, c ...func(*app.MediaImporterConfig))
 	}
 
 	// deps
+	logger := log.New()
 	db := newDB(baseDir)
 	mediaDetail := index.NewQueryMediaDetail(db)
-	logger := log.New()
 	downloader := storage.NewLocalFSDownloader()
 	uploader := storage.NewLocalFSUploader(mediaStorePath)
 	indexer := index.NewSqliteIndexer(db)
@@ -114,7 +114,6 @@ func NewUpdateMediaCaption(baseDir string) app.UpdateMediaTextProperty {
 	db := newDB(baseDir)
 	return index.NewUpdateMediaCaption(db)
 }
-
 
 func newDB(testDir string) *sql.DB {
 	dbFileName := "inari-media-db.db"
