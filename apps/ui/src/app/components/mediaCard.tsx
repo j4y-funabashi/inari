@@ -13,13 +13,14 @@ interface MediaCardProps {
     m: Media
     handleDelete: (id: string) => Promise<void>
     saveCaption: (id: string, newCaption: string) => Promise<void>
+    saveHashtag: (id: string, newHashtag: string) => Promise<void>
     setCurrent: (id: string) => Promise<void>
     setNext: () => Promise<void>
     setPrev: () => Promise<void>
     setBack: () => Promise<void>
     displayType: MediaCardDisplayType
 }
-export const MediaCard = function ({ m, displayType, handleDelete, saveCaption, setCurrent, setNext, setPrev, setBack }: MediaCardProps) {
+export const MediaCard = function ({ m, displayType, handleDelete, saveCaption, saveHashtag, setCurrent, setNext, setPrev, setBack }: MediaCardProps) {
 
     const srcPrefix = process.env.NODE_ENV === "production" ? "/thumbnails/" : ""
     const srcUrl = displayType === MediaCardDisplayType.large ? `${srcPrefix}${m.thumbnails.large}`
@@ -33,9 +34,14 @@ export const MediaCard = function ({ m, displayType, handleDelete, saveCaption, 
 
 
     const [newCaption, setNewCaption] = useState(caption);
+    const [newHashtag, setNewHashtag] = useState("");
 
     const handleCaptionSave = async function () {
         await saveCaption(m.id, newCaption)
+    }
+
+    const handleHashtagSave = async function () {
+        await saveHashtag(m.id, newHashtag)
     }
 
     return (
@@ -77,6 +83,19 @@ export const MediaCard = function ({ m, displayType, handleDelete, saveCaption, 
                         <button
                             className="bg-green text-white font-bold py-1 px-2 col-span-1"
                             onClick={() => { handleCaptionSave() }}>Save</button>
+                    </div>
+
+                    <div className="grid grid-cols-6">
+                        <input
+                            type="text"
+                            value={newHashtag}
+                            onChange={e => setNewHashtag(e.target.value)}
+                            placeholder="add a hashtag"
+                            className="col-span-5 text-black"
+                        />
+                        <button
+                            className="bg-green text-white font-bold py-1 px-2 col-span-1"
+                            onClick={() => { handleHashtagSave() }}>Save</button>
                     </div>
 
                     {/* LocationList */}

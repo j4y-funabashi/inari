@@ -1,6 +1,6 @@
 'use client';
 
-import { CollectionDetail, Media, NewFetchCollectionDetail, deleteMedia, updateMediaCaption } from "@/app/apiClient";
+import { CollectionDetail, Media, NewFetchCollectionDetail, deleteMedia, updateMediaCaption, updateMediaHashtag } from "@/app/apiClient";
 import { MediaCard, MediaCardDisplayType } from "@/app/components/mediaCard";
 import { useState } from "react";
 import useSWR from "swr";
@@ -148,6 +148,12 @@ const MediaGallery = function ({ data }: MediaListProps) {
         await updateMediaCaption(id, caption)
     }
 
+    const saveHashtag = async (id: string, hashtag: string) => {
+        const ml = updateMediaListItemCaption(galleryModel, id, hashtag)
+        setGalleryModel(ml)
+        await updateMediaHashtag(id, hashtag)
+    }
+
     const setCurrentMedia = async (id: string) => {
         const model = createMediaList(getMediaList(galleryModel), id)
         setGalleryModel(model)
@@ -188,6 +194,7 @@ const MediaGallery = function ({ data }: MediaListProps) {
                     m={m}
                     handleDelete={handleDelete}
                     saveCaption={saveCaption}
+                    saveHashtag={saveHashtag}
                     setCurrent={setCurrentMedia}
                     setNext={setNextMedia}
                     setPrev={setPrevMedia}
@@ -213,6 +220,7 @@ const MediaGallery = function ({ data }: MediaListProps) {
                     m={currentMedia}
                     handleDelete={handleDelete}
                     saveCaption={saveCaption}
+                    saveHashtag={saveHashtag}
                     setCurrent={setCurrentMedia}
                     setNext={setNextMedia}
                     setPrev={setPrevMedia}

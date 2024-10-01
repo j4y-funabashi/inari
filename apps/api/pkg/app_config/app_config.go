@@ -115,6 +115,11 @@ func NewUpdateMediaCaption(baseDir string) app.UpdateMediaTextProperty {
 	return index.NewUpdateMediaCaption(db)
 }
 
+func NewUpdateMediaHashtag(baseDir string) app.UpdateMediaTextProperty {
+	db := newDB(baseDir)
+	return index.NewUpdateMediaTag(db)
+}
+
 func newDB(testDir string) *sql.DB {
 	dbFileName := "inari-media-db.db"
 	dbFilepath := filepath.Join(testDir, filepath.Base(dbFileName))

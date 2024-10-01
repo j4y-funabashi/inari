@@ -133,6 +133,16 @@ export const updateMediaCaption = async function (id: string, caption: string) {
     console.log(res)
 }
 
+export const updateMediaHashtag = async function (id: string, hashtag: string) {
+    const requestOptions: RequestInit = {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        body: hashtag
+    }
+    const res = await fetch("/api/media/" + id + "/hashtag", requestOptions)
+    console.log(res)
+}
+
 export const NewCollectionLister = (env: string): Fetcher<Collection[], string> => {
     switch (env) {
         case "production":

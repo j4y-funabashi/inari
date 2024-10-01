@@ -83,6 +83,27 @@ func newUpdateMediaCaptionHandler(updateMediaCaption app.UpdateMediaTextProperty
 	}
 }
 
+func newUpdateMediaHashtagHandler(updateMediaHashtag app.UpdateMediaTextProperty, logger app.Logger) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		mediaID := ps.ByName("mediaid")
+		newHashtag, err := io.ReadAll(r.Body)
+		if err != nil {
+			logger.Error("failed to update media hashtag",
+				"err", err)
+			panic(err)
+		}
+		err = updateMediaHashtag(mediaID, string(newHashtag))
+		if err != nil {
+			logger.Error("failed to update media hashtag",
+				"err", err)
+			panic(err)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+	}
+}
+
 func main() {
 	// conf
 	baseDir := filepath.Join(os.TempDir(), "inari")
@@ -93,6 +114,7 @@ func main() {
 	collectionDetail := appconfig.NewCollectionDetail(baseDir)
 	deleteMedia := appconfig.NewDeleteMedia(baseDir)
 	updateMediaCaption := appconfig.NewUpdateMediaCaption(baseDir)
+	updateMediaHashtag := appconfig.NewUpdateMediaHashtag(baseDir)
 
 	// routes
 	router := httprouter.New()
@@ -100,6 +122,7 @@ func main() {
 	router.GET("/api/timeline/month/:collectionid", newCollectionDetailHandler(collectionDetail, logger))
 	router.DELETE("/api/media/:mediaid", newDeleteMediaHandler(deleteMedia, logger))
 	router.POST("/api/media/:mediaid/caption", newUpdateMediaCaptionHandler(updateMediaCaption, logger))
+	router.POST("/api/media/:mediaid/hashtag", newUpdateMediaHashtagHandler(updateMediaHashtag, logger))
 
 	http.ListenAndServe(":8090", router)
 }
