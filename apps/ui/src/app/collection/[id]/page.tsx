@@ -140,6 +140,7 @@ const MediaGallery = function ({ data }: MediaListProps) {
         const ml = deleteFromMediaList(galleryModel, id)
         setGalleryModel(ml)
         await deleteMedia(id)
+        setViewMode(GalleryViewMode.grid)
     }
 
     const saveCaption = async (id: string, caption: string) => {
