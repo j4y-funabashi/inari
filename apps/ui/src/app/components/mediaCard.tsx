@@ -19,8 +19,12 @@ interface MediaCardProps {
     setPrev: () => Promise<void>
     setBack: () => Promise<void>
     displayType: MediaCardDisplayType
+    showNav:bool
+    showMeta: bool
+    showEditButtons:bool
 }
-export const MediaCard = function ({ m, displayType, handleDelete, saveCaption, saveHashtag, setCurrent, setNext, setPrev, setBack }: MediaCardProps) {
+
+export const MediaCard = function ({ m, displayType, handleDelete, saveCaption, saveHashtag, setCurrent, setNext, setPrev, setBack, showNav,showMeta,showEditButtons }: MediaCardProps) {
 
     const srcPrefix = process.env.NODE_ENV === "production" ? "/thumbnails/" : ""
     const srcUrl = displayType === MediaCardDisplayType.large ? `${srcPrefix}${m.thumbnails.large}`
@@ -46,7 +50,7 @@ export const MediaCard = function ({ m, displayType, handleDelete, saveCaption, 
 
     return (
         <div>
-            {displayType === MediaCardDisplayType.large &&
+            {showNav &&
                 <nav className="grid grid-cols-3">
                     <button className="bg-black text-white font-bold py-1 px-2 block w-full" onClick={() => { setBack() }}>
                         Back
@@ -65,7 +69,7 @@ export const MediaCard = function ({ m, displayType, handleDelete, saveCaption, 
                 <img src={srcUrl} className="" alt={caption} />
             </a>
 
-            {displayType === MediaCardDisplayType.large &&
+            {showMeta &&
                 <div>
                     <time dateTime={dat} className="text-blue text-xs">{fdat}</time>
                     {caption !== "" &&
@@ -73,6 +77,16 @@ export const MediaCard = function ({ m, displayType, handleDelete, saveCaption, 
                             {caption}
                         </p>
                     }
+                    {/* LocationList */}
+                    {location !== "" &&
+                        <p>{location}</p>
+                    }
+                    <CollectionList m={m} />
+                </div>
+            }
+
+            { showEditButtons &&
+            <div>
                     <div className="grid grid-cols-6">
                         <input
                             type="text"
@@ -98,21 +112,14 @@ export const MediaCard = function ({ m, displayType, handleDelete, saveCaption, 
                             onClick={() => { handleHashtagSave() }}>Save</button>
                     </div>
 
-                    {/* LocationList */}
-                    {location !== "" &&
-                        <p>{location}</p>
-                    }
-
-                    <CollectionList m={m} />
-
                     <div className="my-4">
                         <button className="bg-red text-white font-bold py-1 px-2 rounded" onClick={() => { handleDelete(m.id) }}>
                             Delete
                         </button>
                     </div>
-
-                </div>
+            </div>
             }
+
         </div>
     )
 }

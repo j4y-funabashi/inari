@@ -200,6 +200,9 @@ const MediaGallery = function ({ data }: MediaListProps) {
                     setNext={setNextMedia}
                     setPrev={setPrevMedia}
                     setBack={handleCloseMedia}
+                    showNav={false}
+                    showMeta={true}
+                    showEditButtons={false}
                 />
             )
         }
@@ -226,6 +229,9 @@ const MediaGallery = function ({ data }: MediaListProps) {
                     setNext={setNextMedia}
                     setPrev={setPrevMedia}
                     setBack={handleCloseMedia}
+                    showNav={true}
+                    showMeta={true}
+                    showEditButtons={true}
                 />
             </main>
             }
@@ -234,7 +240,7 @@ const MediaGallery = function ({ data }: MediaListProps) {
                 <aside className="">
                     <h1 className="text-xl mt-4 mb-1">{data.collection_meta.title}</h1>
 
-                    <div className="grid gap-0.5 grid-cols-4">
+                    <div className="grid gap-0.5 grid-cols-3">
                         {mediaList}
                     </div>
                 </aside>
