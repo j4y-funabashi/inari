@@ -19,9 +19,9 @@ interface MediaCardProps {
     setPrev: () => Promise<void>
     setBack: () => Promise<void>
     displayType: MediaCardDisplayType
-    showNav:bool
-    showMeta: bool
-    showEditButtons:bool
+    showNav:boolean
+    showMeta: boolean
+    showEditButtons:boolean
 }
 
 export const MediaCard = function ({ m, displayType, handleDelete, saveCaption, saveHashtag, setCurrent, setNext, setPrev, setBack, showNav,showMeta,showEditButtons }: MediaCardProps) {
