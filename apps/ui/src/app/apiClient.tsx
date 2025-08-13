@@ -40,13 +40,13 @@ export interface CollectionDetail {
     media: Media[]
 }
 
-const getCollectionsByType = async function (type: string): Promise<Collection[]> {
+const getCollectionsByType = async function(type: string): Promise<Collection[]> {
     const res = await fetch("/api/timeline/months")
     console.log(res)
 
     return res.json()
 }
-const mockGetCollectionsByType = function (type: string): Collection[] {
+const mockGetCollectionsByType = function(type: string): Collection[] {
     return [
         getMockCollection("inbox Apr 2023"),
         getMockCollection("inbox Mar 2023"),
@@ -57,13 +57,13 @@ const mockGetCollectionsByType = function (type: string): Collection[] {
 }
 
 
-const getCollectionDetail = async function (id: string): Promise<CollectionDetail> {
+const getCollectionDetail = async function(id: string): Promise<CollectionDetail> {
     const res = await fetch("/api/timeline/month/" + id)
     console.log(res)
 
     return res.json()
 }
-const mockGetCollectionDetail = function (id: string): CollectionDetail {
+const mockGetCollectionDetail = function(id: string): CollectionDetail {
     return {
         collection_meta: getMockCollection("inbox Jan 2023"),
         media: getMockMediaList(60)
@@ -99,6 +99,10 @@ const getMockMedia = (): Media => {
             country: { long: "United Kingdom", short: "c" },
             region: "West Yorkshire",
             locality: "Meanwood",
+            coordinates: {
+                lat: 53.8303739722222,
+                lng: -1.558564
+            },
         },
         caption: "This is the caption",
     }
@@ -114,7 +118,7 @@ const getMockCollection = (title: string): Collection => {
     }
 }
 
-export const deleteMedia = async function (id: string) {
+export const deleteMedia = async function(id: string) {
     const requestOptions: RequestInit = {
         method: "DELETE",
         headers: { 'Content-Type': 'application/json' }
@@ -123,7 +127,7 @@ export const deleteMedia = async function (id: string) {
     console.log(res)
 }
 
-export const updateMediaCaption = async function (id: string, caption: string) {
+export const updateMediaCaption = async function(id: string, caption: string) {
     const requestOptions: RequestInit = {
         method: "POST",
         headers: { 'Content-Type': 'application/json' },
@@ -133,7 +137,7 @@ export const updateMediaCaption = async function (id: string, caption: string) {
     console.log(res)
 }
 
-export const updateMediaHashtag = async function (id: string, hashtag: string) {
+export const updateMediaHashtag = async function(id: string, hashtag: string) {
     const requestOptions: RequestInit = {
         method: "POST",
         headers: { 'Content-Type': 'application/json' },

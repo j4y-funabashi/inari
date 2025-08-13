@@ -19,12 +19,12 @@ interface MediaCardProps {
     setPrev: () => Promise<void>
     setBack: () => Promise<void>
     displayType: MediaCardDisplayType
-    showNav:boolean
+    showNav: boolean
     showMeta: boolean
-    showEditButtons:boolean
+    showEditButtons: boolean
 }
 
-export const MediaCard = function ({ m, displayType, handleDelete, saveCaption, saveHashtag, setCurrent, setNext, setPrev, setBack, showNav,showMeta,showEditButtons }: MediaCardProps) {
+export const MediaCard = function({ m, displayType, handleDelete, saveCaption, saveHashtag, setCurrent, setNext, setPrev, setBack, showNav, showMeta, showEditButtons }: MediaCardProps) {
 
     const srcPrefix = process.env.NODE_ENV === "production" ? "/thumbnails/" : ""
     const srcUrl = displayType === MediaCardDisplayType.large ? `${srcPrefix}${m.thumbnails.large}`
@@ -40,11 +40,11 @@ export const MediaCard = function ({ m, displayType, handleDelete, saveCaption, 
     const [newCaption, setNewCaption] = useState(caption);
     const [newHashtag, setNewHashtag] = useState("");
 
-    const handleCaptionSave = async function () {
+    const handleCaptionSave = async function() {
         await saveCaption(m.id, newCaption)
     }
 
-    const handleHashtagSave = async function () {
+    const handleHashtagSave = async function() {
         await saveHashtag(m.id, newHashtag)
     }
 
@@ -77,16 +77,13 @@ export const MediaCard = function ({ m, displayType, handleDelete, saveCaption, 
                             {caption}
                         </p>
                     }
-                    {/* LocationList */}
-                    {location !== "" &&
-                        <p>{location}</p>
-                    }
+                    <MediaLocation m={m} />
                     <CollectionList m={m} />
                 </div>
             }
 
-            { showEditButtons &&
-            <div>
+            {showEditButtons &&
+                <div>
                     <div className="grid grid-cols-6">
                         <input
                             type="text"
@@ -117,7 +114,7 @@ export const MediaCard = function ({ m, displayType, handleDelete, saveCaption, 
                             Delete
                         </button>
                     </div>
-            </div>
+                </div>
             }
 
         </div>
@@ -142,13 +139,33 @@ const CollectionList = ({ m }: CollectionListProps) => {
     )
 }
 
+interface MediaLocationProps {
+    m: Media
+}
+const MediaLocation = ({ m }: MediaLocationProps) => {
+    const location = formatLocation(m)
+    const lat = m.location?.coordinates?.lat
+    const lng = m.location?.coordinates?.lng
+    const hasCoords = lat != null
+    const mapUrl = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=19/${lat}/${lng}&layers=P`
+    const coordsText = `${lat}, ${lng}`
+
+    return (
+        <div>
+            {hasCoords && <a
+                href={mapUrl}
+                target="_blank">
+                {coordsText}
+            </a>}
+            {location}
+        </div >
+    );
+
+
+}
+
 const formatLocation = (m: Media): string => {
     const loc = []
-    if (m.location?.coordinates?.lat) {
-        const latlng = `(${m.location.coordinates.lat}, ${m.location.coordinates.lng})`
-        loc.push(latlng)
-
-    }
     if (m.location?.locality && m.location.locality != "") {
         loc.push(m.location.locality)
     }
