@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -101,8 +102,8 @@ func (m Media) ToMicroformat() Microformat {
 							Microformat{
 								Type: []string{"h-geo"},
 								Properties: map[string][]any{
-									"latitude":  {m.Location.Coordinates.Lat},
-									"longitude": {m.Location.Coordinates.Lng},
+									"latitude":  {strconv.FormatFloat(m.Location.Coordinates.Lat, 'f', -1, 64)},
+									"longitude": {strconv.FormatFloat(m.Location.Coordinates.Lng, 'f', -1, 64)},
 								},
 							},
 						},
