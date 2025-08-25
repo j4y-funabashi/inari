@@ -11,6 +11,10 @@ services:
                         - 8010:80
                 depends_on:
                         - geo2tz
+                environment:
+                        - AWS_ACCESS_KEY_ID
+                        - AWS_SECRET_ACCESS_KEY
+                        - AWS_DEFAULT_REGION
 
         inari-ui:
                 build:

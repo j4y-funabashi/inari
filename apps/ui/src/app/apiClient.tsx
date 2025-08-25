@@ -127,6 +127,15 @@ export const deleteMedia = async function(id: string) {
     console.log(res)
 }
 
+export const exportMedia = async function(id: string) {
+    const requestOptions: RequestInit = {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' }
+    }
+    const res = await fetch("/api/media/" + id + "/export", requestOptions)
+    console.log(res)
+}
+
 export const updateMediaCaption = async function(id: string, caption: string) {
     const requestOptions: RequestInit = {
         method: "POST",

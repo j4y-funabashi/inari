@@ -1,6 +1,6 @@
 'use client';
 
-import { CollectionDetail, Media, NewFetchCollectionDetail, deleteMedia, updateMediaCaption, updateMediaHashtag } from "@/app/apiClient";
+import { CollectionDetail, Media, NewFetchCollectionDetail, exportMedia, deleteMedia, updateMediaCaption, updateMediaHashtag } from "@/app/apiClient";
 import { MediaCard, MediaCardDisplayType } from "@/app/components/mediaCard";
 import { useState } from "react";
 import useSWR from "swr";
@@ -128,7 +128,7 @@ enum GalleryViewMode {
     single
 }
 
-const MediaGallery = function ({ data }: MediaListProps) {
+const MediaGallery = function({ data }: MediaListProps) {
 
     const model = createGalleryModel(data)
     const [galleryModel, setGalleryModel] = useState<MediaListModel>(model)
@@ -136,7 +136,7 @@ const MediaGallery = function ({ data }: MediaListProps) {
 
     console.log(galleryModel)
 
-    const handleDelete = async function (id: string) {
+    const handleDelete = async function(id: string) {
         const ml = deleteFromMediaList(galleryModel, id)
         setGalleryModel(ml)
         await deleteMedia(id)
@@ -194,6 +194,7 @@ const MediaGallery = function ({ data }: MediaListProps) {
                     key={m.id}
                     m={m}
                     handleDelete={handleDelete}
+                    exportMedia={exportMedia}
                     saveCaption={saveCaption}
                     saveHashtag={saveHashtag}
                     setCurrent={setCurrentMedia}
@@ -223,6 +224,7 @@ const MediaGallery = function ({ data }: MediaListProps) {
                     key={currentMedia.id}
                     m={currentMedia}
                     handleDelete={handleDelete}
+                    exportMedia={exportMedia}
                     saveCaption={saveCaption}
                     saveHashtag={saveHashtag}
                     setCurrent={setCurrentMedia}

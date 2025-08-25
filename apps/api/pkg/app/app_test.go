@@ -1,15 +1,22 @@
 package app_test
 
 import (
+	"context"
+	log "github.com/inconshreveable/log15"
 	"os"
 	"path"
 	"path/filepath"
 	"testing"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+
 	"github.com/google/uuid"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/app"
 	appconfig "github.com/j4y_funabashi/inari/apps/api/pkg/app_config"
+	"github.com/j4y_funabashi/inari/apps/api/pkg/storage"
 	"gotest.tools/v3/assert"
 )
 
@@ -160,6 +167,7 @@ func TestImport(t *testing.T) {
 			// act
 			iMedia, err := importMedia(path.Join("./test_data", tC.filePath))
 			assert.NilError(t, err)
+
 			actual, err := queryMediaDetail(iMedia.ID)
 			assert.NilError(t, err)
 
@@ -168,4 +176,62 @@ func TestImport(t *testing.T) {
 
 		})
 	}
+}
+
+func TestExport(t *testing.T) {
+
+	testCases := []struct {
+		desc     string
+		filePath string
+		expected app.Media
+	}{
+		{
+			desc:     "it imports photo with keywords and caption",
+			filePath: "p20140321_080118.jpg",
+		},
+	}
+
+	for _, tC := range testCases {
+		t.Run(tC.desc, func(t *testing.T) {
+
+			// create uniq test dir to store db + output files
+			testID := "inari-test-" + uuid.New().String()
+			testDir := filepath.Join(os.TempDir(), testID)
+			logger := log.New()
+
+			// arrange
+			importMedia := appconfig.NewMediaImporter(
+				testDir,
+				appconfig.WithNullLogger(),
+				appconfig.WithNullGeocoder(),
+			)
+			queryMediaDetail := appconfig.NewMediaDetail(testDir)
+			updateHashtag := appconfig.NewUpdateMediaHashtag(testDir)
+
+			// uploader
+			micropubBucket := "micropub.funabashi.co.uk"
+			mediaBucket := "media.funabashi.co.uk"
+			cfg, _ := config.LoadDefaultConfig(context.TODO())
+			s3Client := s3.NewFromConfig(cfg)
+			s3Uploader := manager.NewUploader(s3Client)
+
+			micropubUploader := storage.NewUploader(micropubBucket, s3Uploader, s3Client)
+			mediaUploader := storage.NewUploader(mediaBucket, s3Uploader, s3Client)
+
+			exportMedia := appconfig.NewExporter(logger, queryMediaDetail, mediaUploader, micropubUploader, testDir)
+
+			// act
+			iMedia, err := importMedia(path.Join("./test_data", tC.filePath))
+			assert.NilError(t, err)
+
+			err = updateHashtag(iMedia.ID, "new-test-tag")
+			assert.NilError(t, err)
+
+			err = exportMedia(iMedia.ID)
+			assert.NilError(t, err)
+
+			t.FailNow()
+		})
+	}
+
 }

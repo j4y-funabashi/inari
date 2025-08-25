@@ -1,14 +1,19 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
 
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	log "github.com/inconshreveable/log15"
 	appconfig "github.com/j4y_funabashi/inari/apps/api/pkg/app_config"
+	"github.com/j4y_funabashi/inari/apps/api/pkg/storage"
 
 	"github.com/j4y_funabashi/inari/apps/api/pkg/app"
 	"github.com/julienschmidt/httprouter"
@@ -104,6 +109,22 @@ func newUpdateMediaHashtagHandler(updateMediaHashtag app.UpdateMediaTextProperty
 	}
 }
 
+func newExportMediaHandler(exportMedia app.Exporter, logger app.Logger) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		mediaID := ps.ByName("mediaid")
+
+		err := exportMedia(mediaID)
+		if err != nil {
+			logger.Error("failed to export media",
+				"err", err)
+			panic(err)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+	}
+}
+
 func main() {
 	// conf
 	baseDir := filepath.Join(os.TempDir(), "inari")
@@ -115,6 +136,19 @@ func main() {
 	deleteMedia := appconfig.NewDeleteMedia(baseDir)
 	updateMediaCaption := appconfig.NewUpdateMediaCaption(baseDir)
 	updateMediaHashtag := appconfig.NewUpdateMediaHashtag(baseDir)
+	queryMediaDetail := appconfig.NewMediaDetail(baseDir)
+
+	// uploader
+	micropubBucket := "micropub.funabashi.co.uk"
+	mediaBucket := "media.funabashi.co.uk"
+	cfg, _ := config.LoadDefaultConfig(context.TODO())
+	s3Client := s3.NewFromConfig(cfg)
+	s3Uploader := manager.NewUploader(s3Client)
+
+	micropubUploader := storage.NewUploader(micropubBucket, s3Uploader, s3Client)
+	mediaUploader := storage.NewUploader(mediaBucket, s3Uploader, s3Client)
+
+	exportMedia := appconfig.NewExporter(logger, queryMediaDetail, mediaUploader, micropubUploader, baseDir)
 
 	// routes
 	router := httprouter.New()
@@ -123,6 +157,7 @@ func main() {
 	router.DELETE("/api/media/:mediaid", newDeleteMediaHandler(deleteMedia, logger))
 	router.POST("/api/media/:mediaid/caption", newUpdateMediaCaptionHandler(updateMediaCaption, logger))
 	router.POST("/api/media/:mediaid/hashtag", newUpdateMediaHashtagHandler(updateMediaHashtag, logger))
+	router.POST("/api/media/:mediaid/export", newExportMediaHandler(exportMedia, logger))
 
 	http.ListenAndServe(":8090", router)
 }

@@ -85,6 +85,7 @@ func fetchMediaByID(db *sql.DB, mediaID string) (app.Media, error) {
 		return out, err
 	}
 	err = json.Unmarshal([]byte(jsonStr), &out)
+	out.FormattedDate = out.MediaMetadata.Date.Format(time.RFC3339Nano)
 	return out, err
 
 }
