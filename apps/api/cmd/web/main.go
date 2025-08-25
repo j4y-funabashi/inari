@@ -109,11 +109,11 @@ func newUpdateMediaHashtagHandler(updateMediaHashtag app.UpdateMediaTextProperty
 	}
 }
 
-func newExportMediaHandler(exportMedia app.Exporter, logger app.Logger) httprouter.Handle {
+func newExportMediaHandler(export app.Exporter, logger app.Logger) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		mediaID := ps.ByName("mediaid")
 
-		err := exportMedia(mediaID)
+		err := export(mediaID)
 		if err != nil {
 			logger.Error("failed to export media",
 				"err", err)
@@ -134,6 +134,7 @@ func main() {
 	listCollections := appconfig.NewListCollections(baseDir)
 	collectionDetail := appconfig.NewCollectionDetail(baseDir)
 	deleteMedia := appconfig.NewDeleteMedia(baseDir)
+	exportMedia := appconfig.NewExportMedia(baseDir)
 	updateMediaCaption := appconfig.NewUpdateMediaCaption(baseDir)
 	updateMediaHashtag := appconfig.NewUpdateMediaHashtag(baseDir)
 	queryMediaDetail := appconfig.NewMediaDetail(baseDir)
@@ -148,7 +149,7 @@ func main() {
 	micropubUploader := storage.NewUploader(micropubBucket, s3Uploader, s3Client)
 	mediaUploader := storage.NewUploader(mediaBucket, s3Uploader, s3Client)
 
-	exportMedia := appconfig.NewExporter(logger, queryMediaDetail, mediaUploader, micropubUploader, baseDir)
+	exporter := appconfig.NewExporter(logger, queryMediaDetail, mediaUploader, micropubUploader, baseDir, exportMedia)
 
 	// routes
 	router := httprouter.New()
@@ -157,7 +158,7 @@ func main() {
 	router.DELETE("/api/media/:mediaid", newDeleteMediaHandler(deleteMedia, logger))
 	router.POST("/api/media/:mediaid/caption", newUpdateMediaCaptionHandler(updateMediaCaption, logger))
 	router.POST("/api/media/:mediaid/hashtag", newUpdateMediaHashtagHandler(updateMediaHashtag, logger))
-	router.POST("/api/media/:mediaid/export", newExportMediaHandler(exportMedia, logger))
+	router.POST("/api/media/:mediaid/export", newExportMediaHandler(exporter, logger))
 
 	http.ListenAndServe(":8090", router)
 }

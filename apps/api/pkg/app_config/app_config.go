@@ -111,6 +111,11 @@ func NewDeleteMedia(baseDir string) app.DeleteMedia {
 	return index.NewDeleteMedia(db)
 }
 
+func NewExportMedia(baseDir string) app.ExportMedia {
+	db := newDB(baseDir)
+	return index.NewExportMedia(db)
+}
+
 func NewUpdateMediaCaption(baseDir string) app.UpdateMediaTextProperty {
 	db := newDB(baseDir)
 	return index.NewUpdateMediaCaption(db)
@@ -121,7 +126,7 @@ func NewUpdateMediaHashtag(baseDir string) app.UpdateMediaTextProperty {
 	return index.NewUpdateMediaTag(db)
 }
 
-func NewExporter(logger app.Logger, queryMediaDetail app.QueryMediaDetail, mediaUploader, postUploader app.UploaderB, baseDir string) app.Exporter {
+func NewExporter(logger app.Logger, queryMediaDetail app.QueryMediaDetail, mediaUploader, postUploader app.UploaderB, baseDir string, saveExportedMedia app.ExportMedia) app.Exporter {
 	return func(mediaID string) error {
 		// fetch media
 		media, err := queryMediaDetail(mediaID)
@@ -158,6 +163,11 @@ func NewExporter(logger app.Logger, queryMediaDetail app.QueryMediaDetail, media
 		logger.Info("exported media", "media", media.Thumbnails.Large, "post", media.PostFilename())
 
 		// mark media as exported
+		err = saveExportedMedia(media.ID)
+		if err != nil {
+			return err
+		}
+
 		// call github workflow URL
 		return nil
 	}

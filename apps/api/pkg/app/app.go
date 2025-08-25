@@ -42,6 +42,7 @@ type Exporter = func(mediaID string) error
 type Thumbnailer = func(mediastoreKey string) error
 type QueryMediaDetail = func(mediaID string) (Media, error)
 type DeleteMedia = func(mediaID string) error
+type ExportMedia = func(mediaID string) error
 type UpdateMediaTextProperty = func(mediaID, caption string) error
 type QueryNearestGPX = func(cTime time.Time) (GPXPoint, error)
 

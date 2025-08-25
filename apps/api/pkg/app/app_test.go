@@ -206,6 +206,7 @@ func TestExport(t *testing.T) {
 				appconfig.WithNullGeocoder(),
 			)
 			queryMediaDetail := appconfig.NewMediaDetail(testDir)
+			exportMedia := appconfig.NewExportMedia(testDir)
 			updateHashtag := appconfig.NewUpdateMediaHashtag(testDir)
 
 			// uploader
@@ -218,7 +219,7 @@ func TestExport(t *testing.T) {
 			micropubUploader := storage.NewUploader(micropubBucket, s3Uploader, s3Client)
 			mediaUploader := storage.NewUploader(mediaBucket, s3Uploader, s3Client)
 
-			exportMedia := appconfig.NewExporter(logger, queryMediaDetail, mediaUploader, micropubUploader, testDir)
+			export := appconfig.NewExporter(logger, queryMediaDetail, mediaUploader, micropubUploader, testDir, exportMedia)
 
 			// act
 			iMedia, err := importMedia(path.Join("./test_data", tC.filePath))
@@ -227,7 +228,7 @@ func TestExport(t *testing.T) {
 			err = updateHashtag(iMedia.ID, "new-test-tag")
 			assert.NilError(t, err)
 
-			err = exportMedia(iMedia.ID)
+			err = export(iMedia.ID)
 			assert.NilError(t, err)
 
 			t.FailNow()

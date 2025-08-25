@@ -17,6 +17,7 @@ func CreateIndex(db *sql.DB) error {
 			id TEXT NOT NULL PRIMARY KEY,
 			date_created DATETIME NOT NULL,
 			date_deleted DATETIME,
+			date_exported DATETIME,
 			media_data TEXT
 		);`
 	if _, err := db.Exec(q); err != nil {
@@ -95,6 +96,21 @@ func NewDeleteMedia(db *sql.DB) app.DeleteMedia {
 
 		now := time.Now().Format(time.RFC3339Nano)
 		q := `UPDATE media SET date_deleted = ? WHERE id = ?;`
+		pq, err := db.Prepare(q)
+		if err != nil {
+			return err
+		}
+		_, err = pq.Exec(now, mediaID)
+		return err
+
+	}
+}
+
+func NewExportMedia(db *sql.DB) app.DeleteMedia {
+	return func(mediaID string) error {
+
+		now := time.Now().Format(time.RFC3339Nano)
+		q := `UPDATE media SET date_exported = ? WHERE id = ?;`
 		pq, err := db.Prepare(q)
 		if err != nil {
 			return err
