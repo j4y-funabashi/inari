@@ -75,7 +75,7 @@ type Media struct {
 }
 
 func (m Media) ToMicroformat() Microformat {
-	category := []string{}
+	category := []any{}
 	for _, cat := range m.Collections {
 		if cat.Type == CollectionTypeHashTag {
 			category = append(category, cat.Title)
@@ -91,7 +91,7 @@ func (m Media) ToMicroformat() Microformat {
 			"published": {m.FormattedDate},
 			"content":   {m.Caption},
 			"photo":     {photoURL},
-			"category":  {category},
+			"category":  category,
 			"location": {
 				Microformat{
 					Type: []string{"h-adr"},
