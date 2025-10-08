@@ -5,6 +5,7 @@ export interface Media {
     thumbnails: Thumbnails
     collections: Collection[]
     date: string
+    is_exported: boolean
     location?: Location
     caption?: string
 }
@@ -18,6 +19,7 @@ interface Collection {
     title: string;
     media_count: number;
     type: string;
+    exported_count: number;
 }
 
 interface Location {
@@ -105,6 +107,7 @@ const getMockMedia = (): Media => {
             },
         },
         caption: "This is the caption",
+        is_exported: false
     }
 }
 
@@ -114,6 +117,7 @@ const getMockCollection = (title: string): Collection => {
         id: `test-1-${uuid}`,
         title: `${title}`,
         media_count: 5,
+        exported_count: 1,
         type: "inbox"
     }
 }

@@ -10,7 +10,7 @@ export default function Home() {
   )
 }
 
-const CollectionList = function () {
+const CollectionList = function() {
 
   const collectionLister = NewCollectionLister(process.env.NODE_ENV)
 
@@ -24,7 +24,7 @@ const CollectionList = function () {
   const collections = data?.map(
     (c) => {
       const collectionLink = "/collection/" + c.id
-      return <li key={c.id}><Link className='p-2 block hover:bg-slate-900' href={collectionLink}>{c.title} ({c.media_count})</Link></li>
+      return <li key={c.id}><Link className='p-2 block hover:bg-slate-900' href={collectionLink}>{c.title} ({c.exported_count} / {c.media_count})</Link></li>
     }
   )
 

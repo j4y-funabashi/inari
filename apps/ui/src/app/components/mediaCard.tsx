@@ -72,6 +72,7 @@ export const MediaCard = function({ m, displayType, handleDelete, saveCaption, s
 
             {showMeta &&
                 <div>
+                    <ExportedIcon m={m} />
                     <time dateTime={dat} className="text-blue text-xs">{fdat}</time>
                     {caption !== "" &&
                         <p className="leading-5 text-gray-500 dark:text-gray-400">
@@ -142,6 +143,16 @@ const CollectionList = ({ m }: CollectionListProps) => {
     return (
         <div className="my-2">
             {collections}
+        </div>
+    )
+}
+
+const ExportedIcon = ({ m }: CollectionListProps) => {
+    const isExported = m.is_exported ? "EX" : "NO";
+
+    return (
+        <div>
+            {isExported}
         </div>
     )
 }

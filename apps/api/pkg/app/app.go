@@ -66,12 +66,13 @@ type SaveGPXPoints = func(points []GPXPoint) error
 type Media struct {
 	ID            string `json:"id,omitempty"`
 	FilePath      string `json:"file_path,omitempty"`
-	MediaMetadata `json:"media_metadata,omitempty"`
-	Thumbnails    MediaSrc     `json:"thumbnails,omitempty"`
-	Location      Location     `json:"location,omitempty"`
+	MediaMetadata `json:"media_metadata"`
+	Thumbnails    MediaSrc     `json:"thumbnails"`
+	Location      Location     `json:"location"`
 	Collections   []Collection `json:"collections,omitempty"`
 	FormattedDate string       `json:"date,omitempty"`
 	Caption       string       `json:"caption,omitempty"`
+	IsExported    bool         `json:"is_exported,omitempty"`
 }
 
 func (m Media) ToMicroformat() Microformat {
@@ -122,10 +123,11 @@ type Microformat struct {
 
 // Collection types can be TIMELINE_MONTH
 type Collection struct {
-	ID         string `json:"id,omitempty"`
-	Title      string `json:"title,omitempty"`
-	Type       string `json:"type,omitempty"`
-	MediaCount int    `json:"media_count,omitempty"`
+	ID            string `json:"id,omitempty"`
+	Title         string `json:"title,omitempty"`
+	Type          string `json:"type,omitempty"`
+	MediaCount    int    `json:"media_count,omitempty"`
+	ExportedCount int    `json:"exported_count,omitempty"`
 }
 
 type GPXPoint struct {

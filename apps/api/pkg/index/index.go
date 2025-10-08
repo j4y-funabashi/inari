@@ -74,14 +74,15 @@ func fetchMediaByID(db *sql.DB, mediaID string) (app.Media, error) {
 	out := app.Media{}
 
 	q := `SELECT
-			media_data
+			media_data,
+			date_exported IS NOT NULL
 			FROM media
 			WHERE id = ?;
 			`
 	row := db.QueryRow(q, mediaID)
 
 	jsonStr := ""
-	err := row.Scan(&jsonStr)
+	err := row.Scan(&jsonStr, &out.IsExported)
 	if err != nil {
 		return out, err
 	}
@@ -275,7 +276,7 @@ func NewSqliteCollectionLister(db *sql.DB) app.CollectionLister {
 		out := []app.Collection{}
 
 		q := `SELECT
-			c.id, c.collection_type, c.title, count(*) as media_count
+			c.id, c.collection_type, c.title, count(*) as media_count, count(media.date_exported) as exported_count
 			FROM collection AS c
 			INNER JOIN media_collection ON media_collection.collection_id = c.id
 			INNER JOIN media ON media_collection.media_id = media.id
@@ -290,7 +291,7 @@ func NewSqliteCollectionLister(db *sql.DB) app.CollectionLister {
 
 		for rows.Next() {
 			c := app.Collection{}
-			err = rows.Scan(&c.ID, &c.Type, &c.Title, &c.MediaCount)
+			err = rows.Scan(&c.ID, &c.Type, &c.Title, &c.MediaCount, &c.ExportedCount)
 			if err != nil {
 				return out, err
 			}
@@ -325,7 +326,8 @@ func fetchMediaByCollectionID(db *sql.DB, collectionID string) ([]app.Media, err
 	out := []app.Media{}
 
 	q := `SELECT
-			media_data
+			media_data,
+			date_exported IS NOT NULL
 			FROM collection AS c
 			INNER JOIN media_collection ON media_collection.collection_id = c.id
 			INNER JOIN media ON media_collection.media_id = media.id
@@ -340,7 +342,7 @@ func fetchMediaByCollectionID(db *sql.DB, collectionID string) ([]app.Media, err
 	for rows.Next() {
 		m := app.Media{}
 		jsonStr := ""
-		err = rows.Scan(&jsonStr)
+		err = rows.Scan(&jsonStr, &m.IsExported)
 		if err != nil {
 			return out, err
 		}
@@ -359,7 +361,7 @@ func fetchMediaByCollectionID(db *sql.DB, collectionID string) ([]app.Media, err
 
 func fetchCollectionByID(db *sql.DB, collectionID string) (app.Collection, error) {
 	q := `SELECT
-			c.id, c.collection_type, c.title, count(*) as media_count
+			c.id, c.collection_type, c.title, count(*) as media_count, count(media.date_exported) as exported_count
 			FROM collection AS c
 			INNER JOIN media_collection ON media_collection.collection_id = c.id
 			INNER JOIN media ON media_collection.media_id = media.id
@@ -369,7 +371,7 @@ func fetchCollectionByID(db *sql.DB, collectionID string) (app.Collection, error
 			`
 
 	c := app.Collection{}
-	err := db.QueryRow(q, collectionID).Scan(&c.ID, &c.Type, &c.Title, &c.MediaCount)
+	err := db.QueryRow(q, collectionID).Scan(&c.ID, &c.Type, &c.Title, &c.MediaCount, &c.ExportedCount)
 	if err != nil {
 		return c, err
 	}
