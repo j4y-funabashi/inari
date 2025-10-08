@@ -24,7 +24,7 @@ const CollectionList = function() {
   const collections = data?.map(
     (c) => {
       return (
-        <MediaCollection c={c} />
+        <MediaCollection c={c} key={c.id} />
       );
     }
   )
