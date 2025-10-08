@@ -35,9 +35,6 @@ export const MediaCard = function({ m, displayType, handleDelete, saveCaption, s
     const dat = m.date
     const fdat = format(new Date(m.date), "eee, do LLL y HH:mm:ss")
 
-    const location = formatLocation(m)
-
-
     const [newCaption, setNewCaption] = useState(caption);
     const [newHashtag, setNewHashtag] = useState("");
 
@@ -117,11 +114,14 @@ export const MediaCard = function({ m, displayType, handleDelete, saveCaption, s
                         </button>
                     </div>
 
-                    <div className="my-4">
-                        <button className="bg-red text-white font-bold py-1 px-2 rounded" onClick={() => { handleDelete(m.id) }}>
-                            Delete
-                        </button>
-                    </div>
+                    {!m.is_exported &&
+
+                        <div className="my-4">
+                            <button className="bg-red text-white font-bold py-1 px-2 rounded" onClick={() => { handleDelete(m.id) }}>
+                                Delete
+                            </button>
+                        </div>
+                    }
                 </div>
             }
 

@@ -14,7 +14,7 @@ interface Thumbnails {
     large: string
 }
 
-interface Collection {
+export interface Collection {
     id: string;
     title: string;
     media_count: number;

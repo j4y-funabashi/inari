@@ -1,4 +1,5 @@
 'use client';
+import Link from "next/link"
 
 import { CollectionDetail, Media, NewFetchCollectionDetail, exportMedia, deleteMedia, updateMediaCaption, updateMediaHashtag } from "@/app/apiClient";
 import { MediaCard, MediaCardDisplayType } from "@/app/components/mediaCard";
@@ -20,6 +21,21 @@ interface MediaListModel {
 const getMediaList = (m: MediaListModel): Media[] => {
     if (!m.current) return [...m.prev, ...m.next]
     return [...m.prev, m.current, ...m.next]
+}
+
+const updateMediaListItemExportedStatus = (m: MediaListModel, id: string): MediaListModel => {
+    const ml = getMediaList(m).map((m) => {
+        if (m.id === id) {
+            m.is_exported = true
+        }
+        return m
+    })
+
+    const out = createMediaList(
+        ml,
+        id,
+    )
+    return out
 }
 
 const deleteFromMediaList = (m: MediaListModel, id: string): MediaListModel => {
@@ -65,10 +81,6 @@ export default function CollectionDetailPage({ params }: CollectionDetailParams)
             <MediaGallery data={collectionDetailData} />
         </div>
     )
-}
-
-interface MediaListProps {
-    data: CollectionDetail
 }
 
 const createMediaList = (media: Media[], currentID: string): MediaListModel => {
@@ -128,6 +140,10 @@ enum GalleryViewMode {
     single
 }
 
+interface MediaListProps {
+    data: CollectionDetail
+}
+
 const MediaGallery = function({ data }: MediaListProps) {
 
     const model = createGalleryModel(data)
@@ -140,6 +156,13 @@ const MediaGallery = function({ data }: MediaListProps) {
         const ml = deleteFromMediaList(galleryModel, id)
         setGalleryModel(ml)
         await deleteMedia(id)
+        setViewMode(GalleryViewMode.grid)
+    }
+
+    const handleExport = async (id: string) => {
+        const ml = updateMediaListItemExportedStatus(galleryModel, id)
+        setGalleryModel(ml)
+        await exportMedia(id);
         setViewMode(GalleryViewMode.grid)
     }
 
@@ -194,7 +217,7 @@ const MediaGallery = function({ data }: MediaListProps) {
                     key={m.id}
                     m={m}
                     handleDelete={handleDelete}
-                    exportMedia={exportMedia}
+                    exportMedia={handleExport}
                     saveCaption={saveCaption}
                     saveHashtag={saveHashtag}
                     setCurrent={setCurrentMedia}
@@ -218,13 +241,16 @@ const MediaGallery = function({ data }: MediaListProps) {
     return (
 
         <div className="">
+            <nav>
+                <Link href="/" className="bg-purple text-white font-bold py-1 px-2 block w-full">Collections</Link>
+            </nav>
             {viewMode === GalleryViewMode.single && <main className="">
                 <MediaCard
                     displayType={MediaCardDisplayType.large}
                     key={currentMedia.id}
                     m={currentMedia}
                     handleDelete={handleDelete}
-                    exportMedia={exportMedia}
+                    exportMedia={handleExport}
                     saveCaption={saveCaption}
                     saveHashtag={saveHashtag}
                     setCurrent={setCurrentMedia}
