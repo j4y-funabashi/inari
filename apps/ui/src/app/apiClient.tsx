@@ -68,7 +68,7 @@ const getCollectionDetail = async function(id: string): Promise<CollectionDetail
 const mockGetCollectionDetail = function(id: string): CollectionDetail {
     return {
         collection_meta: getMockCollection("inbox Jan 2023"),
-        media: getMockMediaList(60)
+        media: getMockMediaList(12)
     }
 }
 
@@ -106,7 +106,7 @@ const getMockMedia = (): Media => {
                 lng: -1.558564
             },
         },
-        caption: "This is the caption",
+        caption: `This is the caption ${uuid}`,
         is_exported: false
     }
 }

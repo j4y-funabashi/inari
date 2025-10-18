@@ -166,16 +166,14 @@ const MediaLocation = ({ m }: MediaLocationProps) => {
     const lng = m.location?.coordinates?.lng
     const hasCoords = lat != null
     const mapUrl = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=19/${lat}/${lng}&layers=P`
-    const coordsText = `${lat}, ${lng}`
 
     return (
         <div>
             {hasCoords && <a
                 href={mapUrl}
                 target="_blank">
-                {coordsText}
+                {location}
             </a>}
-            {location}
         </div >
     );
 

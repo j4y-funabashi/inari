@@ -39,13 +39,18 @@ const updateMediaListItemExportedStatus = (m: MediaListModel, id: string): Media
 }
 
 const deleteFromMediaList = (m: MediaListModel, id: string): MediaListModel => {
+
+    const nextMediaId = m.next.length > 0 ? m.next[0].id
+        : m.prev.length > 0 ? m.prev[0].id
+            : "";
+
     const ml = getMediaList(m).filter((m) => {
         return m.id !== id
     })
 
     const out = createMediaList(
         ml,
-        ml[0] ? ml[0].id : "" // TODO this should be the next media?
+        nextMediaId
     )
     return out
 }
@@ -137,7 +142,8 @@ const getCurrentMedia = (model: MediaListModel): Media => {
 
 enum GalleryViewMode {
     grid,
-    single
+    single,
+    confirmDelete
 }
 
 interface MediaListProps {
@@ -152,11 +158,16 @@ const MediaGallery = function({ data }: MediaListProps) {
 
     console.log(galleryModel)
 
+    const handleConfirmDelete = async function(id: string) {
+        console.log("confirm delete " + id);
+        setViewMode(GalleryViewMode.confirmDelete)
+    }
+
     const handleDelete = async function(id: string) {
         const ml = deleteFromMediaList(galleryModel, id)
         setGalleryModel(ml)
         await deleteMedia(id)
-        setViewMode(GalleryViewMode.grid)
+        setViewMode(GalleryViewMode.single)
     }
 
     const handleExport = async (id: string) => {
@@ -216,7 +227,7 @@ const MediaGallery = function({ data }: MediaListProps) {
                     displayType={MediaCardDisplayType.list}
                     key={m.id}
                     m={m}
-                    handleDelete={handleDelete}
+                    handleDelete={handleConfirmDelete}
                     exportMedia={handleExport}
                     saveCaption={saveCaption}
                     saveHashtag={saveHashtag}
@@ -249,7 +260,7 @@ const MediaGallery = function({ data }: MediaListProps) {
                     displayType={MediaCardDisplayType.large}
                     key={currentMedia.id}
                     m={currentMedia}
-                    handleDelete={handleDelete}
+                    handleDelete={handleConfirmDelete}
                     exportMedia={handleExport}
                     saveCaption={saveCaption}
                     saveHashtag={saveHashtag}
@@ -272,6 +283,13 @@ const MediaGallery = function({ data }: MediaListProps) {
                         {mediaList}
                     </div>
                 </aside>
+            }
+
+            {viewMode === GalleryViewMode.confirmDelete && <main className="">
+                <button className="bg-red text-white font-bold py-1 px-2 rounded" onClick={() => { handleDelete(currentMedia.id) }}>
+                    Confirm Delete
+                </button>
+            </main>
             }
 
         </div>
