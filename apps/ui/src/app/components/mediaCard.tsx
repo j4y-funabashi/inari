@@ -149,9 +149,10 @@ const CollectionList = ({ m }: CollectionListProps) => {
 
 const ExportedIcon = ({ m }: CollectionListProps) => {
     const isExported = m.is_exported ? "EX" : "NO";
+    const bgColor = m.is_exported ? "bg-green-900" : "bg-red-900"
 
     return (
-        <div>
+        <div className={bgColor}>
             {isExported}
         </div>
     )
