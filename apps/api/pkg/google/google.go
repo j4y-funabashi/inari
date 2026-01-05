@@ -17,10 +17,12 @@ var SpainCoordinates = app.Coordinates{
 	Lat: 11.2222222222,
 	Lng: -1.2222222222,
 }
+
 var LusakaCoordinates = app.Coordinates{
 	Lat: 22.2222222222,
 	Lng: -3.2222222222,
 }
+
 var UKCoordinates = app.Coordinates{
 	Lat: 53.8700189722222,
 	Lng: -1.561703,
@@ -28,7 +30,6 @@ var UKCoordinates = app.Coordinates{
 
 func NewNullGeocoder() app.Geocoder {
 	return func(lat, lng float64, cTime time.Time) (app.Location, error) {
-
 		if lat == 0 && lng == 0 {
 			return app.Location{}, nil
 		}
@@ -82,7 +83,6 @@ func NewNullGeocoder() app.Geocoder {
 
 func NewNullLookupTimezone() app.LookupTimezone {
 	return func(lat, lng float64, cTime time.Time) (string, error) {
-
 		if lat == SpainCoordinates.Lat && lng == SpainCoordinates.Lng {
 			return "Europe/Madrid", nil
 		}
@@ -96,7 +96,6 @@ func NewNullLookupTimezone() app.LookupTimezone {
 
 func NewLookupTimezone(apiKey string) app.LookupTimezone {
 	return func(lat, lng float64, cTime time.Time) (string, error) {
-
 		c, err := maps.NewClient(maps.WithAPIKey(apiKey))
 		if err != nil {
 			return "", fmt.Errorf("failed to create maps client: %w", err)
@@ -120,7 +119,6 @@ func NewLookupTimezone(apiKey string) app.LookupTimezone {
 
 func NewMediaGeocoder(queryNearestGPX app.QueryNearestGPX, lookupTimezone app.LookupTimezone, logger app.Logger, apiKey, baseURL string) app.Geocoder {
 	return func(lat, lng float64, cTime time.Time) (app.Location, error) {
-
 		if lat == 0 && lng == 0 {
 			nearestGPX, err := queryNearestGPX(cTime)
 			if err != nil {

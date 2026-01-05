@@ -8,7 +8,6 @@ import (
 
 func NewNotifier(snsClient *sns.SNS, topicARN string) app.Notifier {
 	return func(mediaMeta app.Media) error {
-
 		_, err := snsClient.Publish(&sns.PublishInput{
 			Message:  aws.String(mediaMeta.ID),
 			TopicArn: &topicARN,

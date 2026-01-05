@@ -89,12 +89,10 @@ func fetchMediaByID(db *sql.DB, mediaID string) (app.Media, error) {
 	err = json.Unmarshal([]byte(jsonStr), &out)
 	out.FormattedDate = out.MediaMetadata.Date.Format(time.RFC3339Nano)
 	return out, err
-
 }
 
 func NewDeleteMedia(db *sql.DB) app.DeleteMedia {
 	return func(mediaID string) error {
-
 		now := time.Now().Format(time.RFC3339Nano)
 		q := `UPDATE media SET date_deleted = ? WHERE id = ?;`
 		pq, err := db.Prepare(q)
@@ -103,13 +101,11 @@ func NewDeleteMedia(db *sql.DB) app.DeleteMedia {
 		}
 		_, err = pq.Exec(now, mediaID)
 		return err
-
 	}
 }
 
 func NewExportMedia(db *sql.DB) app.DeleteMedia {
 	return func(mediaID string) error {
-
 		now := time.Now().Format(time.RFC3339Nano)
 		q := `UPDATE media SET date_exported = ? WHERE id = ?;`
 		pq, err := db.Prepare(q)
@@ -118,7 +114,6 @@ func NewExportMedia(db *sql.DB) app.DeleteMedia {
 		}
 		_, err = pq.Exec(now, mediaID)
 		return err
-
 	}
 }
 
@@ -172,7 +167,6 @@ func updateMediaDataByID(db *sql.DB, media app.Media) error {
 
 func NewSqliteIndexer(db *sql.DB) app.Indexer {
 	return func(media app.Media) (app.Media, error) {
-
 		media.ID = media.Hash
 
 		// inbox
@@ -380,7 +374,6 @@ func fetchCollectionByID(db *sql.DB, collectionID string) (app.Collection, error
 }
 
 func addMediaToCollection(db *sql.DB, collectionID, collectionType, collectionTitle string, media app.Media) (app.Media, error) {
-
 	collectionID = slug.Make(fmt.Sprintf("%s__%s", collectionType, collectionID))
 
 	_, err := db.Exec(
@@ -472,7 +465,6 @@ func NewQueryNearestGPX(db *sql.DB, hoursBoundary int) app.QueryNearestGPX {
 
 		return pPoint, err
 	}
-
 }
 
 func fetchFuturePoint(db *sql.DB, cTime time.Time, hoursBoundary int) (app.GPXPoint, error) {

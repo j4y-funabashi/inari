@@ -24,7 +24,7 @@ func NewMediaImporter(baseDirectory string, c ...func(*app.MediaImporterConfig))
 	mediaStorePath := filepath.Join(baseDir, "media")
 	thumbnailsPath := filepath.Join(baseDir, "thumbnails")
 
-	err := os.MkdirAll(baseDir, 0700)
+	err := os.MkdirAll(baseDir, 0o700)
 	if err != nil {
 		panic("failed to create root dir: " + err.Error())
 	}

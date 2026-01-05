@@ -51,7 +51,6 @@ func NewNullUploader() app.Uploader {
 
 func NewLocalFSUploader(dstRootDir string) app.Uploader {
 	return func(srcFilename, dstFilename string) error {
-
 		dstFilename = filepath.Join(dstRootDir, dstFilename)
 
 		if _, err := os.Stat(dstFilename); !os.IsNotExist(err) {

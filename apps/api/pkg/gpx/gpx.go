@@ -45,7 +45,8 @@ func NewGpxImporter(addLocationToGPXPoints addLocationToGPXPoints, saveGPXPoints
 							Coordinates: app.Coordinates{
 								Lat: p.Latitude,
 								Lng: p.Longitude,
-							}},
+							},
+						},
 					})
 				}
 			}
@@ -155,5 +156,4 @@ func applyTimezoneToGPXPoint(point app.GPXPoint, timezone string) (app.GPXPoint,
 	point.Location.Timezone = timezone
 
 	return point, nil
-
 }

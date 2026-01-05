@@ -32,7 +32,6 @@ func newMonthsHandler(listCollections app.CollectionLister, logger app.Logger) h
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(out)
 	}
-
 }
 
 func newCollectionDetailHandler(queryCollectionDetail app.CollectionDetailQuery, logger app.Logger) httprouter.Handle {
@@ -49,7 +48,6 @@ func newCollectionDetailHandler(queryCollectionDetail app.CollectionDetailQuery,
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(out)
 	}
-
 }
 
 func newDeleteMediaHandler(deleteMedia app.DeleteMedia, logger app.Logger) httprouter.Handle {

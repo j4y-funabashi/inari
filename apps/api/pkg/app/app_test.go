@@ -2,12 +2,13 @@ package app_test
 
 import (
 	"context"
-	log "github.com/inconshreveable/log15"
 	"os"
 	"path"
 	"path/filepath"
 	"testing"
 	"time"
+
+	log "github.com/inconshreveable/log15"
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
@@ -151,7 +152,6 @@ func TestImport(t *testing.T) {
 
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-
 			// create uniq test dir to store db + output files
 			testID := "inari-test-" + uuid.New().String()
 			testDir := filepath.Join(os.TempDir(), testID)
@@ -173,13 +173,11 @@ func TestImport(t *testing.T) {
 
 			// assert
 			assert.DeepEqual(t, tC.expected, actual)
-
 		})
 	}
 }
 
 func TestExport(t *testing.T) {
-
 	testCases := []struct {
 		desc     string
 		filePath string
@@ -193,7 +191,6 @@ func TestExport(t *testing.T) {
 
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-
 			// create uniq test dir to store db + output files
 			testID := "inari-test-" + uuid.New().String()
 			testDir := filepath.Join(os.TempDir(), testID)
@@ -234,5 +231,4 @@ func TestExport(t *testing.T) {
 			t.FailNow()
 		})
 	}
-
 }

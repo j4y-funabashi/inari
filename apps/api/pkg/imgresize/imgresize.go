@@ -9,22 +9,23 @@ import (
 	"github.com/j4y_funabashi/inari/apps/api/pkg/app"
 )
 
-const ImgSizeSQSMPrefix = "sqsm"
-const ImgSizeSQMDPrefix = "sqmd"
-const ImgSizeLGPrefix = "lg"
-const ImgSizeSQSM = 92
-const ImgSizeSQMD = 420
-const ImgSizeLG = 1080
-const Landscape = "l"
+const (
+	ImgSizeSQSMPrefix = "sqsm"
+	ImgSizeSQMDPrefix = "sqmd"
+	ImgSizeLGPrefix   = "lg"
+	ImgSizeSQSM       = 92
+	ImgSizeSQMD       = 420
+	ImgSizeLG         = 1080
+	Landscape         = "l"
+)
 
 func NewResizer(baseDir string) app.Resizer {
-	err := os.MkdirAll(baseDir, 0700)
+	err := os.MkdirAll(baseDir, 0o700)
 	if err != nil {
 		panic("failed to create thumbnails dir: " + err.Error())
 	}
 
 	return func(inPath, outPath string) (app.MediaSrc, error) {
-
 		thumbnails := app.MediaSrc{}
 		src, err := imaging.Open(inPath, imaging.AutoOrientation(true))
 		if err != nil {

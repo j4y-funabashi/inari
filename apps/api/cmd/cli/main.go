@@ -14,7 +14,6 @@ import (
 )
 
 func main() {
-
 	baseDir := filepath.Join(os.TempDir(), "inari")
 	logger := log.New()
 
@@ -61,8 +60,8 @@ func main() {
 				},
 			},
 			{
-				Name:    "media",
-				Usage:   "list media",
+				Name:        "media",
+				Usage:       "list media",
 				Subcommands: []*cli.Command{},
 			},
 		},
@@ -72,5 +71,4 @@ func main() {
 		logger.Error("failed to run cli app",
 			"err", err)
 	}
-
 }

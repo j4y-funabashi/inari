@@ -37,31 +37,35 @@ func NewNullLogger() Logger {
 	return NullLogger{}
 }
 
-type Importer = func(backupFilename string) (Media, error)
-type Exporter = func(mediaID string) error
-type Thumbnailer = func(mediastoreKey string) error
-type QueryMediaDetail = func(mediaID string) (Media, error)
-type DeleteMedia = func(mediaID string) error
-type ExportMedia = func(mediaID string) error
-type UpdateMediaTextProperty = func(mediaID, caption string) error
-type QueryNearestGPX = func(cTime time.Time) (GPXPoint, error)
+type (
+	Importer                = func(backupFilename string) (Media, error)
+	Exporter                = func(mediaID string) error
+	Thumbnailer             = func(mediastoreKey string) error
+	QueryMediaDetail        = func(mediaID string) (Media, error)
+	DeleteMedia             = func(mediaID string) error
+	ExportMedia             = func(mediaID string) error
+	UpdateMediaTextProperty = func(mediaID, caption string) error
+	QueryNearestGPX         = func(cTime time.Time) (GPXPoint, error)
+)
 
-type CollectionLister func(collectionType string) ([]Collection, error)
-type CollectionDetailQuery = func(collectionID string) (CollectionDetail, error)
-type Resizer = func(in, out string) (MediaSrc, error)
-type Downloader = func(backupFilename string) (string, error)
-type Uploader = func(localFilename, mediaStoreFilename string) error
-type UploaderB = func(sourceData []byte, mediaStoreFilename, contentType string) error
-type Indexer = func(media Media) (Media, error)
-type Notifier = func(mediaMeta Media) error
-type FileLister = func() ([]string, error)
-type MetadataExtractor = func(mediaFile string) (MediaMetadata, error)
-type MediaDetailQuery = func(mediaID string) (MediaDetailView, error)
-type Geocoder = func(lat, lng float64, cTime time.Time) (Location, error)
-type LookupTimezone = func(lat, lng float64, cTime time.Time) (string, error)
-type MediaGeocoder = func(mediaID string) (Location, error)
-type LocationPutter = func(mediaID string, location Location) error
-type SaveGPXPoints = func(points []GPXPoint) error
+type (
+	CollectionLister      func(collectionType string) ([]Collection, error)
+	CollectionDetailQuery = func(collectionID string) (CollectionDetail, error)
+	Resizer               = func(in, out string) (MediaSrc, error)
+	Downloader            = func(backupFilename string) (string, error)
+	Uploader              = func(localFilename, mediaStoreFilename string) error
+	UploaderB             = func(sourceData []byte, mediaStoreFilename, contentType string) error
+	Indexer               = func(media Media) (Media, error)
+	Notifier              = func(mediaMeta Media) error
+	FileLister            = func() ([]string, error)
+	MetadataExtractor     = func(mediaFile string) (MediaMetadata, error)
+	MediaDetailQuery      = func(mediaID string) (MediaDetailView, error)
+	Geocoder              = func(lat, lng float64, cTime time.Time) (Location, error)
+	LookupTimezone        = func(lat, lng float64, cTime time.Time) (string, error)
+	MediaGeocoder         = func(mediaID string) (Location, error)
+	LocationPutter        = func(mediaID string, location Location) error
+	SaveGPXPoints         = func(points []GPXPoint) error
+)
 
 type Media struct {
 	ID            string `json:"id,omitempty"`

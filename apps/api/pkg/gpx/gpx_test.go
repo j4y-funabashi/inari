@@ -11,7 +11,6 @@ import (
 )
 
 func TestImporter(t *testing.T) {
-
 	testCases := []struct {
 		desc      string
 		gpxPoints []app.GPXPoint
@@ -98,7 +97,7 @@ func TestImporter(t *testing.T) {
 					Timestamp: time.Date(2022, time.June, 10, 15, 0, 0, 0, time.UTC),
 					Location: app.Location{
 						Coordinates: google.UKCoordinates,
-						Timezone: "Europe/London",
+						Timezone:    "Europe/London",
 					},
 				},
 			},
@@ -106,7 +105,6 @@ func TestImporter(t *testing.T) {
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-
 			addLocationToGPXPoints := gpx.NewAddLocationToGPXPoints(google.NewNullLookupTimezone())
 
 			actual, err := addLocationToGPXPoints(tC.gpxPoints)

@@ -13,7 +13,6 @@ import (
 
 func NewTZAPILookupTimezone(baseURL string) app.LookupTimezone {
 	return func(lat, lng float64, cTime time.Time) (string, error) {
-
 		type TzAPIResponse struct {
 			TZ string `json:"tz"`
 		}

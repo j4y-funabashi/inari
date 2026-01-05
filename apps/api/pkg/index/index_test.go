@@ -24,7 +24,6 @@ func TestIndex(t *testing.T) {
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-
 			// arrange
 			dbFilepath := filepath.Join(os.TempDir(), fmt.Sprintf("inari-test-db-%s", uuid.New().String()))
 			db, err := sql.Open("sqlite3", dbFilepath)
@@ -204,7 +203,6 @@ func TestFindNearestGPX(t *testing.T) {
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-
 			// arrange
 			dbFilepath := filepath.Join(os.TempDir(), fmt.Sprintf("inari-test-db-%s", uuid.New().String()))
 			db, err := sql.Open("sqlite3", dbFilepath)
@@ -280,7 +278,6 @@ func TestUpdateMediaTags(t *testing.T) {
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-
 			// arrange
 			dbFilepath := filepath.Join(os.TempDir(), fmt.Sprintf("inari-test-db-%s", uuid.New().String()))
 			db, err := sql.Open("sqlite3", dbFilepath)
@@ -307,7 +304,6 @@ func TestUpdateMediaTags(t *testing.T) {
 			newMedia, err := getMedia(tC.media.ID)
 			assert.NilError(t, err)
 			assert.DeepEqual(t, tC.expectedMedia, newMedia)
-
 		})
 	}
 }

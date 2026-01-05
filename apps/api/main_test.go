@@ -3,7 +3,7 @@ package main
 import "testing"
 
 func TestItWorks(t *testing.T) {
-	var tests = []struct {
+	tests := []struct {
 		name     string
 		expected string
 		given    string
@@ -17,7 +17,6 @@ func TestItWorks(t *testing.T) {
 			if actual != tt.expected {
 				t.Errorf("(%s): expected %s, actual %s", tt.given, tt.expected, actual)
 			}
-
 		})
 	}
 }
