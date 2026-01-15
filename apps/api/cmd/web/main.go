@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -11,7 +12,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	log "github.com/inconshreveable/log15"
 	appconfig "github.com/j4y_funabashi/inari/apps/api/pkg/app_config"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/storage"
 
@@ -128,7 +128,7 @@ func main() {
 	baseDir := filepath.Join(os.TempDir(), "inari")
 
 	// deps
-	logger := log.New()
+	logger := slog.Default()
 	listCollections := appconfig.NewListCollections(baseDir)
 	collectionDetail := appconfig.NewCollectionDetail(baseDir)
 	deleteMedia := appconfig.NewDeleteMedia(baseDir)
@@ -158,5 +158,9 @@ func main() {
 	router.POST("/api/media/:mediaid/hashtag", newUpdateMediaHashtagHandler(updateMediaHashtag, logger))
 	router.POST("/api/media/:mediaid/export", newExportMediaHandler(exporter, logger))
 
-	http.ListenAndServe(":8090", router)
+	port := ":8080"
+
+	logger.Info("inari web server running on port", "port", port)
+
+	http.ListenAndServe(port, router)
 }

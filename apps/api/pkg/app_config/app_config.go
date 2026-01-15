@@ -3,6 +3,7 @@ package appconfig
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -177,12 +178,20 @@ func newDB(testDir string) *sql.DB {
 	dbFileName := "inari-media-db.db"
 	dbFilepath := filepath.Join(testDir, filepath.Base(dbFileName))
 
+	err := os.MkdirAll(testDir, os.ModePerm)
+	if err != nil {
+		fmt.Printf("failed to mkdir: %s %s", testDir, err.Error())
+		panic(err)
+	}
+
 	db, err := sql.Open("sqlite3", dbFilepath)
 	if err != nil {
+		fmt.Printf("failed to open sqlite db: %s %s", dbFilepath, err.Error())
 		panic(err)
 	}
 	err = index.CreateIndex(db)
 	if err != nil {
+		fmt.Printf("failed to create db index: %s %s", dbFilepath, err.Error())
 		panic(err)
 	}
 

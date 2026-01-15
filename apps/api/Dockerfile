@@ -1,21 +1,22 @@
-FROM golang:alpine as buildAPI
+FROM golang:1.25-alpine AS builder
 
 RUN apk update && \
 	apk add \
 	build-base
 
 WORKDIR /api
-COPY apps/api .
+COPY . .
 RUN go mod download
 RUN go build -o inari cmd/web/main.go
 
-FROM nginx:alpine
+FROM alpine:3.23
 
 RUN apk update && \
 	apk add \
 	bash
 
 WORKDIR /
-COPY nginx.conf /etc/nginx/nginx.conf
-COPY --from=buildAPI /api/inari /inari
-COPY apps/api/start.sh /docker-entrypoint.d/start-inari-web.sh
+COPY --from=builder /api/inari /inari
+EXPOSE 8080
+
+CMD ["/inari"]

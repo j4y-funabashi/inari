@@ -32,6 +32,7 @@ interface Country {
     short: string
     long: string
 }
+
 interface Coordinates {
     lat: number
     lng: number

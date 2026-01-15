@@ -10,8 +10,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	log "github.com/inconshreveable/log15"
 )
 
 const (
@@ -231,7 +229,7 @@ func (mm MediaMetadata) PostFilename() string {
 
 // ImportDir will check if backupFilename is a directory
 // if it is a directory we will import all files with media extensions
-func ImportDir(importFile Importer, logger log.Logger) func(backupFilename string) error {
+func ImportDir(importFile Importer, logger Logger) func(backupFilename string) error {
 	return func(backupFilename string) error {
 		fInfo, err := os.Lstat(backupFilename)
 		if err != nil {

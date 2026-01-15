@@ -3,10 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 
-	log "github.com/inconshreveable/log15"
 	"github.com/j4y_funabashi/inari/apps/api/pkg/app"
 	appconfig "github.com/j4y_funabashi/inari/apps/api/pkg/app_config"
 	_ "github.com/mattn/go-sqlite3"
@@ -15,7 +15,7 @@ import (
 
 func main() {
 	baseDir := filepath.Join(os.TempDir(), "inari")
-	logger := log.New()
+	logger := slog.Default()
 
 	////////////////////
 
@@ -68,7 +68,6 @@ func main() {
 	}
 
 	if err := app.Run(os.Args); err != nil {
-		logger.Error("failed to run cli app",
-			"err", err)
+		logger.Error("failed to run cli app", "err", err)
 	}
 }
