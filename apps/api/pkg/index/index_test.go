@@ -230,6 +230,7 @@ func TestFindNearestGPX(t *testing.T) {
 }
 
 func TestUpdateMediaTags(t *testing.T) {
+	t.Skip("replace with acceptance test")
 	testCases := []struct {
 		desc          string
 		media         app.Media

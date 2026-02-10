@@ -47,7 +47,7 @@ type (
 )
 
 type (
-	CollectionLister      func(collectionType string) ([]Collection, error)
+	CollectionLister      = func(collectionType string) ([]Collection, error)
 	CollectionDetailQuery = func(collectionID string) (CollectionDetail, error)
 	Resizer               = func(in, out string) (MediaSrc, error)
 	Downloader            = func(backupFilename string) (string, error)

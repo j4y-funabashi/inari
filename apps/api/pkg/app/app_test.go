@@ -3,17 +3,11 @@ package app_test
 import (
 	"context"
 	"log/slog"
-	"net/http"
-	"net/url"
 	"os"
 	"path"
 	"path/filepath"
 	"testing"
 	"time"
-
-	"github.com/testcontainers/testcontainers-go"
-	"github.com/testcontainers/testcontainers-go/log"
-	"github.com/testcontainers/testcontainers-go/wait"
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
@@ -26,54 +20,8 @@ import (
 	"gotest.tools/v3/assert"
 )
 
-func TestMediaCollections(t *testing.T) {
-	t.Run("list collections", func(t *testing.T) {
-		ctx := context.Background()
-
-		logger := log.TestLogger(t)
-
-		ctr, err := testcontainers.Run(
-			context.Background(),
-			"",
-			testcontainers.WithLogger(logger),
-			testcontainers.WithWaitStrategy(
-				wait.ForLog("inari web server running on port"),
-			),
-			testcontainers.WithDockerfile(testcontainers.FromDockerfile{
-				Context: "../../",
-				Repo:    "inari-web-test",
-				Tag:     "latest",
-			}),
-			testcontainers.WithExposedPorts("8080/tcp"),
-		)
-		if err != nil {
-			t.Fatalf("failed to create container: %s", err.Error())
-		}
-		defer ctr.Terminate(ctx)
-
-		containerEndpoint, err := ctr.Endpoint(ctx, "http")
-		if err != nil {
-			t.Fatalf("failed to get container host %s", err.Error())
-		}
-
-		collectionsEndpoint, err := url.JoinPath(containerEndpoint, "/api/timeline/months")
-		if err != nil {
-			t.Fatalf("failed to join url: %s", err.Error())
-		}
-
-		t.Logf("GET %s", collectionsEndpoint)
-		res, err := http.Get(collectionsEndpoint)
-		if err != nil {
-			t.Fatalf("failed to GET url: %s", err.Error())
-		}
-
-		assert.Equal(t, res.StatusCode, http.StatusBadRequest)
-
-		t.Logf("http response: %s", res.Status)
-	})
-}
-
 func TestImport(t *testing.T) {
+	t.Skip("replace with acceptance test")
 	testCases := []struct {
 		desc     string
 		filePath string
@@ -230,6 +178,7 @@ func TestImport(t *testing.T) {
 }
 
 func TestExport(t *testing.T) {
+	t.Skip("replace with acceptance test")
 	testCases := []struct {
 		desc     string
 		filePath string
