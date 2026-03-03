@@ -3,25 +3,33 @@ package specs
 import (
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
-type CollectionsActor interface {
+type CollectionsDriver interface {
 	ListCollections() ([]MediaCollection, error)
-	CreateCustomCollection() (MediaCollection, error)
+	CreateCustomCollection(collectionTitle, collectionType string) (MediaCollection, error)
 }
 
 type MediaCollection struct {
-	Name string `json:"name,omitempty"`
+	ID    string `json:"id,omitempty"`
+	Title string `json:"title,omitempty"`
+	Type  string `json:"type,omitempty"`
 }
 
-func CollectionsSpec(t *testing.T, actor CollectionsActor) {
-	newCollection, err := actor.CreateCustomCollection()
-	assert.NoError(t, err)
-	assert.Equal(t, newCollection.Name, "")
+func CollectionsSpec(t *testing.T, driver CollectionsDriver) {
+	collectionTitle := uuid.New().String()
+	collectionType := "hashtag"
 
-	collections, err := actor.ListCollections()
+	newCollection, err := driver.CreateCustomCollection(collectionTitle, collectionType)
+	assert.NoError(t, err)
+	assert.Equal(t, collectionTitle, newCollection.Title)
+	assert.Equal(t, collectionType, newCollection.Type)
+
+	collections, err := driver.ListCollections()
 	assert.NoError(t, err)
 	assert.NotEmpty(t, collections)
+	t.Log(collections)
 	assert.Contains(t, collections, newCollection)
 }

@@ -18,7 +18,7 @@ down:
 test: test-ui test-api
 
 test-api:
-	docker compose run --rm inari-api-test ./test.sh
+	cd apps/api && go test -v ./...
 
 test-ui:
 	docker compose run --build inari-ui-test yarn test

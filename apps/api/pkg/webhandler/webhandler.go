@@ -18,28 +18,89 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func newMonthsHandler(listCollections app.CollectionLister, logger app.Logger) httprouter.Handle {
+const (
+	CollectionsPath = "/api/timeline/months"
+	ContentType     = "Content-Type"
+	ContentTypeJSON = "application/json"
+)
+
+func NewListCollectionsHandler(listCollections app.CollectionLister, logger app.Logger) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-		out, err := listCollections(app.CollectionTypeInbox)
+		collectionType := parseCollectionType(r)
+
+		out, err := listCollections(collectionType)
 		if err != nil {
 			logger.Error("failed to list collections",
 				"err", err)
 			panic(err)
 		}
 
-		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set(ContentType, ContentTypeJSON)
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(out)
 	}
 }
 
-func newCreateCollectionHandler() httprouter.Handle {
+func parseCollectionType(r *http.Request) app.CollectionType {
+	collectionType := app.CollectionTypeHashTag
+
+	collectionTypeFilter := r.URL.Query().Get("type")
+	if collectionTypeFilter != "" {
+		collectionType = app.CollectionType(collectionTypeFilter)
+	}
+
+	return collectionType
+}
+
+type CreateCollectionRequest struct {
+	Title string             `json:"title,omitempty"`
+	Type  app.CollectionType `json:"type,omitempty"`
+}
+
+type CreateCollectionResponse struct {
+	ID    string             `json:"id,omitempty"`
+	Title string             `json:"title,omitempty"`
+	Type  app.CollectionType `json:"type,omitempty"`
+}
+
+func NewCreateCollectionHandler(createCollection app.CreateCollection) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-		w.WriteHeader(http.StatusOK)
+		// parse request
+		createRequest := CreateCollectionRequest{}
+		requestBody, err := io.ReadAll(r.Body)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		err = json.Unmarshal(requestBody, &createRequest)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		newCollection, err := createCollection(createRequest.Title, createRequest.Type)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		// response
+		createResponse := CreateCollectionResponse{
+			ID:    newCollection.ID,
+			Title: newCollection.Title,
+			Type:  newCollection.Type,
+		}
+		w.Header().Set(ContentType, ContentTypeJSON)
+		w.WriteHeader(http.StatusCreated)
+		err = json.NewEncoder(w).Encode(createResponse)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 }
 
-func newCollectionDetailHandler(queryCollectionDetail app.CollectionDetailQuery, logger app.Logger) httprouter.Handle {
+func NewCollectionDetailHandler(queryCollectionDetail app.CollectionDetailQuery, logger app.Logger) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		collectionID := ps.ByName("collectionid")
 		out, err := queryCollectionDetail(collectionID)
@@ -49,7 +110,7 @@ func newCollectionDetailHandler(queryCollectionDetail app.CollectionDetailQuery,
 			panic(err)
 		}
 
-		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set(ContentType, ContentTypeJSON)
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(out)
 	}
@@ -65,7 +126,7 @@ func newDeleteMediaHandler(deleteMedia app.DeleteMedia, logger app.Logger) httpr
 			panic(err)
 		}
 
-		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set(ContentType, ContentTypeJSON)
 		w.WriteHeader(http.StatusOK)
 	}
 }
@@ -86,7 +147,7 @@ func newUpdateMediaCaptionHandler(updateMediaCaption app.UpdateMediaTextProperty
 			panic(err)
 		}
 
-		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set(ContentType, ContentTypeJSON)
 		w.WriteHeader(http.StatusOK)
 	}
 }
@@ -107,7 +168,7 @@ func newUpdateMediaHashtagHandler(updateMediaHashtag app.UpdateMediaTextProperty
 			panic(err)
 		}
 
-		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set(ContentType, ContentTypeJSON)
 		w.WriteHeader(http.StatusOK)
 	}
 }
@@ -123,7 +184,7 @@ func newExportMediaHandler(export app.Exporter, logger app.Logger) httprouter.Ha
 			panic(err)
 		}
 
-		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set(ContentType, ContentTypeJSON)
 		w.WriteHeader(http.StatusOK)
 	}
 }
@@ -132,9 +193,10 @@ func NewWebHandler() http.Handler {
 	// conf
 	baseDir := filepath.Join(os.TempDir(), "inari")
 
+	inariApp := appconfig.New()
+
 	// deps
 	logger := slog.Default()
-	listCollections := appconfig.NewListCollections(baseDir)
 	collectionDetail := appconfig.NewCollectionDetail(baseDir)
 	deleteMedia := appconfig.NewDeleteMedia(baseDir)
 	exportMedia := appconfig.NewExportMedia(baseDir)
@@ -158,9 +220,9 @@ func NewWebHandler() http.Handler {
 	router := httprouter.New()
 
 	// collections
-	router.POST("/api/timeline/months", newCreateCollectionHandler())
-	router.GET("/api/timeline/months", newMonthsHandler(listCollections, logger))
-	router.GET("/api/timeline/month/:collectionid", newCollectionDetailHandler(collectionDetail, logger))
+	router.POST(CollectionsPath, NewCreateCollectionHandler(inariApp.CreateCollection))
+	router.GET(CollectionsPath, NewListCollectionsHandler(inariApp.ListCollections, logger))
+	router.GET("/api/timeline/month/:collectionid", NewCollectionDetailHandler(collectionDetail, logger))
 
 	// media
 	router.DELETE("/api/media/:mediaid", newDeleteMediaHandler(deleteMedia, logger))

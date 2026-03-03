@@ -12,15 +12,22 @@ import (
 	"time"
 )
 
+type CollectionType string
+
 const (
-	CollectionTypeInbox         = "inbox"
-	CollectionTypeCamera        = "camera"
-	CollectionTypeTimelineMonth = "timeline_month"
-	CollectionTypeTimelineDay   = "timeline_day"
-	CollectionTypePlacesCountry = "places_country"
-	CollectionTypePlacesRegion  = "places_region"
-	CollectionTypeHashTag       = "hashtag"
+	CollectionTypeInbox         CollectionType = "inbox"
+	CollectionTypeCamera        CollectionType = "camera"
+	CollectionTypeTimelineMonth CollectionType = "timeline_month"
+	CollectionTypeTimelineDay   CollectionType = "timeline_day"
+	CollectionTypePlacesCountry CollectionType = "places_country"
+	CollectionTypePlacesRegion  CollectionType = "places_region"
+	CollectionTypeHashTag       CollectionType = "hashtag"
 )
+
+type App struct {
+	CreateCollection CreateCollection
+	ListCollections  CollectionLister
+}
 
 type Logger interface {
 	Info(msg string, ctx ...interface{})
@@ -47,7 +54,8 @@ type (
 )
 
 type (
-	CollectionLister      = func(collectionType string) ([]Collection, error)
+	CollectionLister      = func(collectionType CollectionType) ([]Collection, error)
+	CreateCollection      = func(collectionName string, collectionType CollectionType) (Collection, error)
 	CollectionDetailQuery = func(collectionID string) (CollectionDetail, error)
 	Resizer               = func(in, out string) (MediaSrc, error)
 	Downloader            = func(backupFilename string) (string, error)
@@ -125,11 +133,11 @@ type Microformat struct {
 
 // Collection types can be TIMELINE_MONTH
 type Collection struct {
-	ID            string `json:"id,omitempty"`
-	Title         string `json:"title,omitempty"`
-	Type          string `json:"type,omitempty"`
-	MediaCount    int    `json:"media_count,omitempty"`
-	ExportedCount int    `json:"exported_count,omitempty"`
+	ID            string         `json:"id,omitempty"`
+	Title         string         `json:"title,omitempty"`
+	Type          CollectionType `json:"type,omitempty"`
+	MediaCount    int            `json:"media_count,omitempty"`
+	ExportedCount int            `json:"exported_count,omitempty"`
 }
 
 type GPXPoint struct {

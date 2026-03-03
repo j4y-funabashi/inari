@@ -52,7 +52,7 @@ func main() {
 				Aliases: []string{"lsc"},
 				Usage:   "list collections",
 				Action: func(cCtx *cli.Context) error {
-					collectionType := cCtx.Args().First()
+					collectionType := app.CollectionType(cCtx.Args().First())
 					cols, err := listCollections(collectionType)
 					out, _ := json.Marshal(cols)
 					fmt.Printf("%s", string(out))

@@ -18,11 +18,11 @@ import (
 
 const listCollectionsPath = "/api/timeline/months"
 
-type CollectionsActorDriver struct {
+type CollectionsHttpDriver struct {
 	BaseURL string
 }
 
-func (d CollectionsActorDriver) ListCollections() ([]specs.MediaCollection, error) {
+func (d CollectionsHttpDriver) ListCollections() ([]specs.MediaCollection, error) {
 	collections := []specs.MediaCollection{}
 
 	collectionsEndpoint, err := url.JoinPath(d.BaseURL, listCollectionsPath)
@@ -48,10 +48,11 @@ func (d CollectionsActorDriver) ListCollections() ([]specs.MediaCollection, erro
 }
 
 type CreateCollectionRequest struct {
-	Name string
+	Title string `json:"title,omitempty"`
+	Type  string `json:"type,omitempty"`
 }
 
-func (d CollectionsActorDriver) CreateCustomCollection() (specs.MediaCollection, error) {
+func (d CollectionsHttpDriver) CreateCustomCollection(collectionTitle, collectionType string) (specs.MediaCollection, error) {
 	collection := specs.MediaCollection{}
 
 	collectionsEndpoint, err := url.JoinPath(d.BaseURL, listCollectionsPath)
@@ -59,7 +60,10 @@ func (d CollectionsActorDriver) CreateCustomCollection() (specs.MediaCollection,
 		return collection, fmt.Errorf("failed to create URL: %s", err.Error())
 	}
 
-	request := CreateCollectionRequest{}
+	request := CreateCollectionRequest{
+		Title: collectionTitle,
+		Type:  "hashtag",
+	}
 	requestJson, err := json.Marshal(&request)
 	if err != nil {
 		return collection, fmt.Errorf("failed to marshal json: %s :: %s", collectionsEndpoint, err.Error())

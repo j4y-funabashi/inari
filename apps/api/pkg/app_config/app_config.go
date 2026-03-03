@@ -20,6 +20,20 @@ import (
 	"github.com/j4y_funabashi/inari/apps/api/pkg/storage"
 )
 
+func New() app.App {
+	baseDir := filepath.Join(os.TempDir(), "inari")
+
+	return app.App{
+		CreateCollection: newCreateCollection(baseDir),
+		ListCollections:  NewListCollections(baseDir),
+	}
+}
+
+func newCreateCollection(baseDir string) app.CreateCollection {
+	db := newDB(baseDir)
+	return index.NewSqliteCreateCollection(db)
+}
+
 func NewMediaImporter(baseDirectory string, c ...func(*app.MediaImporterConfig)) app.Importer {
 	baseDir := filepath.Join(baseDirectory)
 	mediaStorePath := filepath.Join(baseDir, "media")

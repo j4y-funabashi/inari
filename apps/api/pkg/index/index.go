@@ -266,14 +266,14 @@ func InsertMedia(db *sql.DB, media app.Media) (app.Media, error) {
 }
 
 func NewSqliteCollectionLister(db *sql.DB) app.CollectionLister {
-	return func(collectionType string) ([]app.Collection, error) {
+	return func(collectionType app.CollectionType) ([]app.Collection, error) {
 		out := []app.Collection{}
 
 		q := `SELECT
 			c.id, c.collection_type, c.title, count(*) as media_count, count(media.date_exported) as exported_count
 			FROM collection AS c
-			INNER JOIN media_collection ON media_collection.collection_id = c.id
-			INNER JOIN media ON media_collection.media_id = media.id
+			LEFT JOIN media_collection ON media_collection.collection_id = c.id
+			LEFT JOIN media ON media_collection.media_id = media.id
 			WHERE c.collection_type = ? AND media.date_deleted IS NULL
 			GROUP BY c.id
 			ORDER BY c.id DESC;
@@ -373,7 +373,30 @@ func fetchCollectionByID(db *sql.DB, collectionID string) (app.Collection, error
 	return c, nil
 }
 
-func addMediaToCollection(db *sql.DB, collectionID, collectionType, collectionTitle string, media app.Media) (app.Media, error) {
+func NewSqliteCreateCollection(db *sql.DB) app.CreateCollection {
+	return func(collectionName string, collectionType app.CollectionType) (app.Collection, error) {
+		collectionID := slug.Make(fmt.Sprintf("%s__%s", collectionType, collectionName))
+
+		_, err := db.Exec(
+			`INSERT OR IGNORE INTO
+		collection (id, collection_type, title)
+		VALUES (?,?,?);
+		`,
+			collectionID,
+			collectionType,
+			collectionName)
+		if err != nil {
+			return app.Collection{}, err
+		}
+		return app.Collection{
+			ID:    collectionID,
+			Title: collectionName,
+			Type:  collectionType,
+		}, nil
+	}
+}
+
+func addMediaToCollection(db *sql.DB, collectionID string, collectionType app.CollectionType, collectionTitle string, media app.Media) (app.Media, error) {
 	collectionID = slug.Make(fmt.Sprintf("%s__%s", collectionType, collectionID))
 
 	_, err := db.Exec(
