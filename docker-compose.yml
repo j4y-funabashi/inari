@@ -6,13 +6,14 @@ services:
                         - 8010:80
                 depends_on:
                         - inari-ui
+                volumes:
+                        - /mnt/data/backup/jayr/inari_mediastore/thumbnails:/var/media/thumbnails
 
         inari-api:
                 build:
                         context: ./apps/api/
                 volumes:
                         - /mnt/data/backup/jayr/inari_mediastore:/tmp/inari
-                        - /mnt/data/backup/jayr/inari_mediastore/thumbnails:/var/media/thumbnails
                 depends_on:
                         - geo2tz
                 environment:
