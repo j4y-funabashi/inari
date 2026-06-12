@@ -44,19 +44,47 @@ export interface CollectionDetail {
 }
 
 const getCollectionsByType = async function(type: string): Promise<Collection[]> {
-    const res = await fetch("/api/timeline/months")
+    const url = "/api/timeline/months" + "?" + type
+    console.log(url)
+    const res = await fetch(url)
     console.log(res)
 
     return res.json()
 }
-const mockGetCollectionsByType = function(type: string): Collection[] {
-    return [
-        getMockCollection("inbox Apr 2023"),
-        getMockCollection("inbox Mar 2023"),
-        getMockCollection("inbox Feb 2023"),
-        getMockCollection("inbox Jan 2023"),
-        getMockCollection("inbox Dec 2022"),
-    ]
+const mockGetCollectionsByType = function(type: string): Promise<Collection[]> {
+    switch (type) {
+        case "inbox":
+            return new Promise((resolve, reject) => {
+                resolve(
+                    [
+                        getMockCollection("inbox Apr 2023"),
+                        getMockCollection("inbox Mar 2023"),
+                        getMockCollection("inbox Feb 2023"),
+                        getMockCollection("inbox Jan 2023"),
+                        getMockCollection("inbox Dec 2022"),
+                    ]
+                )
+            })
+        case "hashtag":
+
+            return new Promise((resolve, reject) => {
+                resolve(
+                    [
+                        getMockCollection("kitteh"),
+                        getMockCollection("mates"),
+                        getMockCollection("graffiti"),
+                        getMockCollection("gig"),
+                        getMockCollection("food"),
+                    ]
+                )
+            })
+        default:
+            return new Promise((resolve, reject) => {
+                resolve(
+                    []
+                )
+            })
+    }
 }
 
 
@@ -66,11 +94,13 @@ const getCollectionDetail = async function(id: string): Promise<CollectionDetail
 
     return res.json()
 }
-const mockGetCollectionDetail = function(id: string): CollectionDetail {
-    return {
-        collection_meta: getMockCollection("inbox Jan 2023"),
-        media: getMockMediaList(12)
-    }
+const mockGetCollectionDetail = function(id: string): Promise<CollectionDetail> {
+    return new Promise((resolve, reject) => {
+        resolve({
+            collection_meta: getMockCollection("inbox Jan 2023"),
+            media: getMockMediaList(12)
+        })
+    })
 }
 
 const getMockMediaList = (count: number): Media[] => {
@@ -159,6 +189,24 @@ export const updateMediaHashtag = async function(id: string, hashtag: string) {
     }
     const res = await fetch("/api/media/" + id + "/hashtag", requestOptions)
     console.log(res)
+}
+
+export const useCollections = (type: string): Promise<Collection[]> => {
+    switch (process.env.NODE_ENV) {
+        case "production":
+            return getCollectionsByType(type)
+        default:
+            return mockGetCollectionsByType(type)
+    }
+}
+
+export const useCollectionDetail = (collectionID: string): Promise<CollectionDetail> => {
+    switch (process.env.NODE_ENV) {
+        case "production":
+            return getCollectionDetail(collectionID)
+        default:
+            return mockGetCollectionDetail(collectionID)
+    }
 }
 
 export const NewCollectionLister = (env: string): Fetcher<Collection[], string> => {

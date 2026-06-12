@@ -12,6 +12,7 @@ export enum MediaCardDisplayType {
 interface MediaCardProps {
     m: Media
     handleDelete: (id: string) => Promise<void>
+    handleShowCollectionList: (id: string) => Promise<void>
     saveCaption: (id: string, newCaption: string) => Promise<void>
     saveHashtag: (id: string, newHashtag: string) => Promise<void>
     exportMedia: (id: string) => Promise<void>
@@ -25,7 +26,7 @@ interface MediaCardProps {
     showEditButtons: boolean
 }
 
-export const MediaCard = function({ m, displayType, handleDelete, saveCaption, saveHashtag, setCurrent, setNext, setPrev, setBack, showNav, showMeta, showEditButtons, exportMedia }: MediaCardProps) {
+export const MediaCard = function({ m, displayType, handleDelete, handleShowCollectionList, saveCaption, saveHashtag, setCurrent, setNext, setPrev, setBack, showNav, showMeta, showEditButtons, exportMedia }: MediaCardProps) {
 
     const srcPrefix = process.env.NODE_ENV === "production" ? "/thumbnails/" : ""
     const srcUrl = displayType === MediaCardDisplayType.large ? `${srcPrefix}${m.thumbnails.large}`
@@ -106,6 +107,12 @@ export const MediaCard = function({ m, displayType, handleDelete, saveCaption, s
                         <button
                             className="bg-green text-white font-bold py-1 px-2 col-span-1"
                             onClick={() => { handleHashtagSave() }}>Save</button>
+                    </div>
+
+                    <div className="my-4">
+                        <button className="bg-red text-white font-bold py-1 px-2 rounded" onClick={() => { handleShowCollectionList(m.id) }}>
+                            Add to Collection
+                        </button>
                     </div>
 
                     <div className="my-4">
