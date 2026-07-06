@@ -1,3 +1,5 @@
+'use client'
+
 import { useCollectionDetail, useCollections } from "@/app/apiClient";
 import { MediaGallery } from "@/app/components/mediaGallery";
 

@@ -1,5 +1,3 @@
-import { Fetcher } from "swr";
-
 export interface Media {
     id: string
     thumbnails: Thumbnails
@@ -56,6 +54,23 @@ const mockGetCollectionDetail = function(id: string): Promise<CollectionDetail> 
             media: getMockMediaList(12)
         })
     })
+}
+
+export const mockListCollections = function(id: string): Promise<Collection[]> {
+    return new Promise((resolve, reject) => {
+        resolve([
+            getMockCollection("inbox Jan 2023"),
+            getMockCollection("inbox Feb 2023"),
+            getMockCollection("inbox Mar 2023"),
+            getMockCollection("inbox Apr 2023"),
+        ])
+    })
+}
+
+export const listCollections = async function(id: string): Promise<Collection[]> {
+    const url = "/api/timeline/months?type=" + id
+    const res = await fetch(url)
+    return res.json()
 }
 
 const getMockMediaList = (count: number): Media[] => {
@@ -147,11 +162,9 @@ export const updateMediaHashtag = async function(id: string, hashtag: string) {
 }
 
 export const useCollections = async (type: string): Promise<Collection[]> => {
-    const url = "http://localhost/api/timeline/months" + "?type=" + type
-    console.log(url)
-    const res = await fetch(url)
-    console.log(res)
 
+    const url = "/api/timeline/months" + "?type=" + type
+    const res = await fetch(url)
     return res.json()
 }
 

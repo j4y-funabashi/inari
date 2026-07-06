@@ -8,6 +8,10 @@ export const metadata = {
   description: 'Photo management software',
 }
 
+if (process.env.NEXT_PUBLIC_API_MOCKING === "enabled") {
+  require("../../mocks");
+}
+
 export default function RootLayout({
   children,
 }: {

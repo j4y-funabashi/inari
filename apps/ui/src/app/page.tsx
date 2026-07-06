@@ -10,7 +10,7 @@ export default function Home() {
   return (
     <Suspense fallback={<Loading />}>
       <CollectionList data={data} />
-    </Suspense>
+    </Suspense >
   )
 }
 
