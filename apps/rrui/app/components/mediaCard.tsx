@@ -1,5 +1,6 @@
-import Link from "next/link"
-import { Media } from "../apiClient"
+'use client'
+
+import { type Media } from "~/apiClient"
 import { format } from "date-fns"
 import { useState } from "react"
 
@@ -143,7 +144,7 @@ const CollectionList = ({ m }: CollectionListProps) => {
     const collections = m.collections.map(
         (m => {
             const collectionLink = "/collection/" + m.id
-            return <Link key={m.id} className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-indigo-100 bg-indigo-700 rounded mx-1" href={collectionLink}>{m.title}</Link>
+            return <a key={m.id} className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-indigo-100 bg-indigo-700 rounded mx-1" href={collectionLink}>{m.title}</a>
         })
     )
 

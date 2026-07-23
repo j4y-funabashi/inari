@@ -1,3 +1,6 @@
+import MediaGallery from "~/components/mediaGallery";
+import type { Route } from "./+types/collection";
+import { type CollectionDetail, type Collection, mockListCollections, mockGetCollectionDetail, getCollectionDetail, listCollections } from "~/apiClient";
 
 export function meta({ }: Route.MetaArgs) {
   return [
@@ -6,13 +9,24 @@ export function meta({ }: Route.MetaArgs) {
   ];
 }
 
-export async function clientLoader(): Promise<Collection[]> {
-  const url = "/api/timeline/months?type=hashtag"
-  const res = await fetch(url)
-  return res.json()
+interface MediaGalleryResponse {
+  collectionDetail: CollectionDetail
+  collections: Collection[]
 }
 
+export async function clientLoader({ params }: Route.ClientLoaderArgs): Promise<MediaGalleryResponse> {
+  if (process.env.NODE_ENV == "development") {
+    return {
+      collectionDetail: await mockGetCollectionDetail(params.collectionid),
+      collections: await mockListCollections("hashtag")
+    }
+  }
+  return {
+    collectionDetail: await getCollectionDetail(params.collectionid),
+    collections: await listCollections("hashtag")
+  }
+}
 
 export default function CollectionDetailPage({ loaderData }: Route.ComponentProps) {
-  return <CollectionList data={loaderData} />;
+  return <MediaGallery collections={loaderData.collections} collectionDetail={loaderData.collectionDetail} />;
 }

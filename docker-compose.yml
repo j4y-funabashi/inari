@@ -23,7 +23,7 @@ services:
 
         inari-ui:
                 build:
-                        context: ./apps/ui
+                        context: ./apps/rrui
 
         geo2tz:
                 container_name: geo2tz

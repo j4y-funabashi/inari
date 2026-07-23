@@ -1,16 +1,15 @@
 'use client'
 
-import { use } from "react";
-import { Collection, Media, useCollections } from "../apiClient";
+import { type Collection, type Media } from "~/apiClient";
 
 interface AddToCollectionProps {
   m: Media
-  collections: Promise<Collection[]>
+  collections: Collection[]
 }
 
 export const AddToCollection = ({ m, collections }: AddToCollectionProps) => {
 
-  const collectionsList = use(collections).map(
+  const collectionsList = collections.map(
     (c) => {
       return (
         <MediaCollection c={c} m={m} key={c.id} />
@@ -33,7 +32,7 @@ interface MediaCollectionProps {
 const MediaCollection = ({ c, m }: MediaCollectionProps) => {
   return (
     <li key={c.id}>
-      <button onClick={() => { }}>{c.title}</button>
+      <button className='p-2 block hover:bg-slate-900' onClick={() => { }}>{c.title}</button>
     </li>
   );
 }

@@ -1,8 +1,7 @@
 'use client'
 
-import Link from "next/link"
-import { use, useState } from "react"
-import { Media, CollectionDetail, deleteMedia, exportMedia, updateMediaCaption, updateMediaHashtag, Collection } from "../apiClient"
+import { useState } from "react"
+import { type Media, type CollectionDetail, deleteMedia, exportMedia, updateMediaCaption, updateMediaHashtag, type Collection } from "~/apiClient"
 import { AddToCollection } from "./addToCollection"
 import { MediaCard, MediaCardDisplayType } from "./mediaCard"
 
@@ -123,16 +122,14 @@ enum GalleryViewMode {
   showCollections
 }
 
-interface MediaListProps {
-  collectionDetail: Promise<CollectionDetail>
-  collections: Promise<Collection[]>
+interface MediaGalleryProps {
+  collectionDetail: CollectionDetail
+  collections: Collection[]
 }
 
-export const MediaGallery = function({ collectionDetail, collections }: MediaListProps) {
+export default function MediaGallery({ collectionDetail, collections }: MediaGalleryProps) {
 
-  const data = use(collectionDetail)
-
-  const model = createGalleryModel(data)
+  const model = createGalleryModel(collectionDetail)
   const [galleryModel, setGalleryModel] = useState<MediaListModel>(model)
   const [viewMode, setViewMode] = useState<GalleryViewMode>(GalleryViewMode.grid)
 
@@ -240,7 +237,7 @@ export const MediaGallery = function({ collectionDetail, collections }: MediaLis
 
     <div className="">
       <nav>
-        <Link href="/" className="bg-purple text-white font-bold py-1 px-2 block w-full">Collections</Link>
+        <a href="/" className="bg-purple text-white font-bold py-1 px-2 block w-full">Collections</a>
       </nav>
       {viewMode === GalleryViewMode.single && <main className="">
         <MediaCard
@@ -265,7 +262,7 @@ export const MediaGallery = function({ collectionDetail, collections }: MediaLis
 
       {viewMode === GalleryViewMode.grid &&
         <aside className="">
-          <h1 className="text-xl mt-4 mb-1">{data.collection_meta.title}</h1>
+          <h1 className="text-xl mt-4 mb-1">{collectionDetail.collection_meta.title}</h1>
 
           <div className="grid gap-0.5 grid-cols-3">
             {mediaList}

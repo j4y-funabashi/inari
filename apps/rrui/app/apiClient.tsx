@@ -41,13 +41,13 @@ export interface CollectionDetail {
     media: Media[]
 }
 
-const getCollectionDetail = async function(id: string): Promise<CollectionDetail> {
+export const getCollectionDetail = async function(id: string): Promise<CollectionDetail> {
     const res = await fetch("/api/timeline/month/" + id)
     console.log(res)
 
     return res.json()
 }
-const mockGetCollectionDetail = function(id: string): Promise<CollectionDetail> {
+export const mockGetCollectionDetail = function(id: string): Promise<CollectionDetail> {
     return new Promise((resolve, reject) => {
         resolve({
             collection_meta: getMockCollection("inbox Jan 2023"),
