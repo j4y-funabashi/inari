@@ -220,7 +220,7 @@ export default function MediaGallery({ collectionDetail, collections }: MediaGal
           setPrev={setPrevMedia}
           setBack={handleCloseMedia}
           showNav={false}
-          showMeta={true}
+          showMeta={false}
           showEditButtons={false}
         />
       )

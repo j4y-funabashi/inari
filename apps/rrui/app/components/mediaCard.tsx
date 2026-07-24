@@ -69,9 +69,10 @@ export const MediaCard = function({ m, displayType, handleDelete, handleShowColl
                 <img src={srcUrl} className="" alt={caption} />
             </a>
 
+            <ExportedIcon m={m} />
+
             {showMeta &&
                 <div>
-                    <ExportedIcon m={m} />
                     <time dateTime={dat} className="text-blue text-xs">{fdat}</time>
                     {caption !== "" &&
                         <p className="leading-5 text-gray-500 dark:text-gray-400">
