@@ -1,6 +1,7 @@
 import { listCollections, mockListCollections, type Collection } from "~/apiClient";
 import type { Route } from "./+types/home";
 import { CollectionList } from "~/components/collectionList";
+import Loading from "~/components/Loading";
 
 export function meta({ }: Route.MetaArgs) {
   return [
@@ -14,6 +15,10 @@ export async function clientLoader(): Promise<Collection[]> {
     return mockListCollections("inbox")
   }
   return await listCollections("inbox")
+}
+
+export function HydrateFallback() {
+  return <Loading />;
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {

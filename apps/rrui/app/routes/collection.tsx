@@ -1,6 +1,7 @@
 import MediaGallery from "~/components/mediaGallery";
 import type { Route } from "./+types/collection";
 import { type CollectionDetail, type Collection, mockListCollections, mockGetCollectionDetail, getCollectionDetail, listCollections } from "~/apiClient";
+import Loading from "~/components/Loading";
 
 export function meta({ }: Route.MetaArgs) {
   return [
@@ -25,6 +26,10 @@ export async function clientLoader({ params }: Route.ClientLoaderArgs): Promise<
     collectionDetail: await getCollectionDetail(params.collectionid),
     collections: await listCollections("hashtag")
   }
+}
+
+export function HydrateFallback() {
+  return <Loading />;
 }
 
 export default function CollectionDetailPage({ loaderData }: Route.ComponentProps) {
