@@ -278,7 +278,7 @@ export default function MediaGallery({ collectionDetail, collections }: MediaGal
       }
 
       {viewMode === GalleryViewMode.showCollections && <main className="">
-        <AddToCollection collections={collections} m={currentMedia} />
+        <AddToCollection collections={collections} m={currentMedia} saveHashtag={saveHashtag} />
       </main>
       }
 

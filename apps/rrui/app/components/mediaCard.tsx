@@ -56,11 +56,11 @@ export const MediaCard = function({ m, displayType, handleDelete, handleShowColl
                         Back
                     </button>
 
-                    <button className="bg-green text-white font-bold py-1 px-2 block w-full" onClick={() => { setPrev() }}>
+                    <button className="bg-lime-600 text-white font-bold py-1 px-2 block w-full" onClick={() => { setPrev() }}>
                         Prev
                     </button>
 
-                    <button className="bg-green text-white font-bold py-1 px-2 block w-full" onClick={() => { setNext() }}>
+                    <button className="bg-lime-600 text-white font-bold py-1 px-2 block w-full" onClick={() => { setNext() }}>
                         Next
                     </button>
                 </nav>
@@ -111,13 +111,13 @@ export const MediaCard = function({ m, displayType, handleDelete, handleShowColl
                     </div>
 
                     <div className="my-4">
-                        <button className="bg-red text-white font-bold py-1 px-2 rounded" onClick={() => { handleShowCollectionList(m.id) }}>
+                        <button className="bg-red-500 text-white font-bold py-1 px-2 rounded" onClick={() => { handleShowCollectionList(m.id) }}>
                             Add to Collection
                         </button>
                     </div>
 
                     <div className="my-4">
-                        <button className="bg-red text-white font-bold py-1 px-2 rounded" onClick={() => { exportMedia(m.id) }}>
+                        <button className="bg-red-500 text-white font-bold py-1 px-2 rounded" onClick={() => { exportMedia(m.id) }}>
                             Export
                         </button>
                     </div>
@@ -125,7 +125,7 @@ export const MediaCard = function({ m, displayType, handleDelete, handleShowColl
                     {!m.is_exported &&
 
                         <div className="my-4">
-                            <button className="bg-red text-white font-bold py-1 px-2 rounded" onClick={() => { handleDelete(m.id) }}>
+                            <button className="bg-red-500 text-white font-bold py-1 px-2 rounded" onClick={() => { handleDelete(m.id) }}>
                                 Delete
                             </button>
                         </div>
@@ -157,7 +157,7 @@ const CollectionList = ({ m }: CollectionListProps) => {
 
 const ExportedIcon = ({ m }: CollectionListProps) => {
     const isExported = m.is_exported ? "EX" : "NO";
-    const bgColor = m.is_exported ? "bg-green-900" : "bg-red-900"
+    const bgColor = m.is_exported ? "bg-lime-700" : "bg-red-700"
 
     return (
         <div className={bgColor}>
