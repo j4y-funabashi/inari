@@ -90,24 +90,12 @@ export const MediaCard = function({ m, displayType, handleDelete, handleShowColl
                             type="text"
                             value={newCaption}
                             onChange={e => setNewCaption(e.target.value)}
-                            className="col-span-5 text-black"
+                            placeholder="add a caption"
+                            className="col-span-5 text-black bg-white"
                         />
                         <button
-                            className="bg-green text-white font-bold py-1 px-2 col-span-1"
+                            className="bg-lime-600 text-white font-bold py-1 px-2 col-span-1"
                             onClick={() => { handleCaptionSave() }}>Save</button>
-                    </div>
-
-                    <div className="grid grid-cols-6">
-                        <input
-                            type="text"
-                            value={newHashtag}
-                            onChange={e => setNewHashtag(e.target.value)}
-                            placeholder="add a hashtag"
-                            className="col-span-5 text-black"
-                        />
-                        <button
-                            className="bg-green text-white font-bold py-1 px-2 col-span-1"
-                            onClick={() => { handleHashtagSave() }}>Save</button>
                     </div>
 
                     <div className="my-4">

@@ -20,6 +20,18 @@ export const AddToCollection = ({ m, collections, saveHashtag }: AddToCollection
 
   return (
     <div>
+      <div className="grid grid-cols-6">
+        <input
+          type="text"
+          placeholder="add a collection"
+          className="col-span-5 text-black bg-white"
+        />
+        <button
+          className="bg-lime-600 text-white font-bold py-1 px-2 col-span-1"
+          onClick={() => { }}>Save</button>
+      </div>
+
+
       <ul>{collectionsList}</ul>
     </div>
   )

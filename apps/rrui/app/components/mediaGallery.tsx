@@ -271,7 +271,7 @@ export default function MediaGallery({ collectionDetail, collections }: MediaGal
       }
 
       {viewMode === GalleryViewMode.confirmDelete && <main className="">
-        <button className="bg-red text-white font-bold py-1 px-2 rounded" onClick={() => { handleDelete(currentMedia.id) }}>
+        <button className="bg-red-500 text-white font-bold py-1 px-2 rounded" onClick={() => { handleDelete(currentMedia.id) }}>
           Confirm Delete
         </button>
       </main>
