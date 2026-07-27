@@ -38,14 +38,9 @@ export const MediaCard = function({ m, displayType, handleDelete, handleShowColl
     const fdat = format(new Date(m.date), "eee, do LLL y HH:mm:ss")
 
     const [newCaption, setNewCaption] = useState(caption);
-    const [newHashtag, setNewHashtag] = useState("");
 
     const handleCaptionSave = async function() {
         await saveCaption(m.id, newCaption)
-    }
-
-    const handleHashtagSave = async function() {
-        await saveHashtag(m.id, newHashtag)
     }
 
     return (
@@ -145,12 +140,25 @@ const CollectionList = ({ m }: CollectionListProps) => {
 }
 
 const ExportedIcon = ({ m }: CollectionListProps) => {
-    const isExported = m.is_exported ? "EX" : "NO";
-    const bgColor = m.is_exported ? "bg-lime-700" : "bg-red-700"
+    const capStyle = m.caption?.trim() !== "" ? "basis-1/4 bg-lime-700" : "basis-1/4 bg-red-700"
+    const colStyle = m.collections.filter((c) => { return c.type == "hashtag" }).length > 0 ? "basis-1/4 bg-lime-700" : "basis-1/4 bg-red-700"
+    const locStyle = m.location?.country ? "basis-1/4 bg-lime-700" : "basis-1/4 bg-red-700"
+    const expStyle = m.is_exported ? "basis-1/4 bg-lime-700" : "basis-1/4 bg-red-700"
 
     return (
-        <div className={bgColor}>
-            {isExported}
+        <div className="flex flex-row">
+            <div className={capStyle}>
+                CAP
+            </div>
+            <div className={colStyle}>
+                COL
+            </div>
+            <div className={locStyle}>
+                LOC
+            </div>
+            <div className={expStyle}>
+                EXP
+            </div>
         </div>
     )
 }

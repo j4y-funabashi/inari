@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from "react";
 import { type Collection, type Media } from "~/apiClient";
 
 interface AddToCollectionProps {
@@ -9,6 +10,12 @@ interface AddToCollectionProps {
 }
 
 export const AddToCollection = ({ m, collections, saveHashtag }: AddToCollectionProps) => {
+
+  const [newHashtag, setNewHashtag] = useState("");
+  const handleHashtagSave = async function() {
+    await saveHashtag(m.id, newHashtag)
+  }
+
 
   const collectionsList = collections.map(
     (c) => {
@@ -23,12 +30,14 @@ export const AddToCollection = ({ m, collections, saveHashtag }: AddToCollection
       <div className="grid grid-cols-6">
         <input
           type="text"
+          value={newHashtag}
+          onChange={e => setNewHashtag(e.target.value)}
           placeholder="add a collection"
           className="col-span-5 text-black bg-white"
         />
         <button
           className="bg-lime-600 text-white font-bold py-1 px-2 col-span-1"
-          onClick={() => { }}>Save</button>
+          onClick={() => { handleHashtagSave() }}>Save</button>
       </div>
 
 
