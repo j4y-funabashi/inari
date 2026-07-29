@@ -140,9 +140,9 @@ const CollectionList = ({ m }: CollectionListProps) => {
 }
 
 const ExportedIcon = ({ m }: CollectionListProps) => {
-    const capStyle = m.caption?.trim() !== "" ? "basis-1/4 bg-lime-700" : "basis-1/4 bg-red-700"
+    const capStyle = m.caption && m.caption.trim() !== "" ? "basis-1/4 bg-lime-700" : "basis-1/4 bg-red-700"
     const colStyle = m.collections.filter((c) => { return c.type == "hashtag" }).length > 0 ? "basis-1/4 bg-lime-700" : "basis-1/4 bg-red-700"
-    const locStyle = m.location?.country ? "basis-1/4 bg-lime-700" : "basis-1/4 bg-red-700"
+    const locStyle = m.location && m.location.country.long !== "" ? "basis-1/4 bg-lime-700" : "basis-1/4 bg-red-700"
     const expStyle = m.is_exported ? "basis-1/4 bg-lime-700" : "basis-1/4 bg-red-700"
 
     return (
